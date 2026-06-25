@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Dirty Gringo | Welcome to the Patio</title>
+  <meta name="description" content="The Dirty Gringo at the Dobisky — Fresh Mex on the St. Lawrence River in Ogdensburg, NY. View the menu, order online, or call ahead.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Outfit:wght@300;500;800&family=Lilita+One&display=swap" rel="stylesheet">
+
+  <style>
+    /* Brand & Typography — shared with the gated entrance for visual continuity */
+    :root {
+      --gringo-red: #c92a2a;
+      --gringo-orange: #f59f00;
+      --gringo-teal: #087f5b;
+      --sunset-top: #2e0854;
+      --sunset-mid: #c70039;
+      --sunset-bot: #ff5733;
+      --river-dark: #0f172a;
+      --river-light: #1e3a8a;
+    }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(to bottom, var(--sunset-top) 0%, var(--sunset-mid) 45%, var(--sunset-bot) 70%, var(--river-dark) 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+    .font-brand { font-family: 'Rye', serif; }
+    .font-ui { font-family: 'Lilita One', cursive; }
+
+    @keyframes wave-flow {
+      0% { transform: translateX(0) scaleY(1); }
+      50% { transform: translateX(-15%) scaleY(1.1); }
+      100% { transform: translateX(0) scaleY(1); }
+    }
+    .wave-1 { animation: wave-flow 12s ease-in-out infinite; }
+    .wave-2 { animation: wave-flow 18s ease-in-out infinite reverse; }
+
+    @keyframes sun-pulse {
+      0%, 100% { filter: drop-shadow(0 0 40px rgba(255, 170, 0, 0.8)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 60px rgba(255, 170, 0, 1)); transform: scale(1.02); }
+    }
+    .sunset-glow { animation: sun-pulse 6s infinite; }
+
+    .cantina-glass {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid rgba(245, 159, 0, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .text-shadow-gringo {
+      text-shadow: 2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 0 4px 15px rgba(245, 159, 0, 0.6);
+    }
+
+    /* Card entrance animation */
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .nav-card { animation: rise-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  </style>
+</head>
+<body class="text-white relative overflow-x-hidden">
+
+  <!-- Setting sun -->
+  <div class="fixed inset-0 w-full h-full pointer-events-none z-0">
+    <div class="absolute top-[15%] left-[72%] w-28 md:w-44 h-28 md:h-44 bg-gradient-to-t from-yellow-300 to-orange-400 rounded-full sunset-glow blur-[1px]"></div>
+  </div>
+
+  <!-- River at the bottom (fixed backdrop) -->
+  <div class="fixed inset-x-0 bottom-0 h-[28%] pointer-events-none z-0 overflow-hidden bg-gradient-to-b from-[#1e3a8a] to-[#0f172a]">
+    <div class="absolute top-0 left-[66%] w-48 h-full bg-gradient-to-b from-orange-500/40 to-transparent blur-xl"></div>
+    <svg class="absolute top-0 w-[150%] h-full wave-1" viewBox="0 0 1200 100" preserveAspectRatio="none">
+      <path d="M0,20 Q150,40 300,20 T600,20 T900,20 T1200,20 L1200,100 L0,100 Z" fill="#1e40af" opacity="0.4" />
+    </svg>
+    <svg class="absolute top-4 w-[150%] h-full wave-2" viewBox="0 0 1200 100" preserveAspectRatio="none">
+      <path d="M0,30 Q150,10 300,30 T600,30 T900,30 T1200,30 L1200,100 L0,100 Z" fill="#172554" opacity="0.6" />
+    </svg>
+  </div>
+
+  <!-- Content -->
+  <main class="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-12 flex flex-col items-center min-h-screen">
+
+    <!-- Brand header -->
+    <header class="text-center mb-8 md:mb-10">
+      <h1 class="font-brand text-4xl md:text-6xl text-white text-shadow-gringo tracking-wide transform -rotate-2">
+        The Dirty Gringo
+      </h1>
+      <p class="font-ui text-amber-300 text-sm md:text-base tracking-widest mt-2 uppercase drop-shadow-md">
+        📍 At the Dobisky · Ogdensburg, NY
+      </p>
+    </header>
+
+    <!-- Welcome card -->
+    <div class="cantina-glass rounded-3xl p-6 md:p-8 w-full text-center mb-8">
+      <span class="inline-block bg-teal-900/60 text-teal-300 border border-teal-500 px-3 py-1 rounded-full text-xs font-ui tracking-widest mb-4">
+        WELCOME TO THE PATIO
+      </span>
+      <h2 class="text-2xl md:text-4xl font-brand text-amber-400 mb-3 text-shadow-gringo">
+        Where to, Amigo?
+      </h2>
+      <p class="text-slate-200 text-sm md:text-base font-light max-w-xl mx-auto">
+        You made it through the gate. Pick your path — peek at the menu, order ahead, or holler at us across the river.
+      </p>
+    </div>
+
+    <!-- Navigation grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+
+      <!-- The Menu -->
+      <a href="menu.html" class="nav-card group cantina-glass rounded-2xl p-5 flex items-center gap-4 hover:border-amber-400 hover:scale-[1.02] transition-all duration-300" style="animation-delay:0.05s">
+        <div class="text-4xl md:text-5xl flex-shrink-0">📜</div>
+        <div class="text-left flex-grow">
+          <h3 class="font-ui text-xl text-white group-hover:text-amber-300">The Menu</h3>
+          <p class="text-xs text-slate-300 mt-1">Browse our "lost manuscript" — burritos, bowls, nachos & more.</p>
+        </div>
+        <span class="text-amber-500 text-2xl group-hover:translate-x-1 transition-transform">➔</span>
+      </a>
+
+      <!-- Order Online -->
+      <a href="http://www.dirtygringonny.com/wp/" class="nav-card group cantina-glass rounded-2xl p-5 flex items-center gap-4 hover:border-emerald-400 hover:scale-[1.02] transition-all duration-300" style="animation-delay:0.12s">
+        <div class="text-4xl md:text-5xl flex-shrink-0">🛒</div>
+        <div class="text-left flex-grow">
+          <h3 class="font-ui text-xl text-white group-hover:text-emerald-300">Order Online</h3>
+          <p class="text-xs text-slate-300 mt-1">Skip the line — order ahead for pickup.</p>
+        </div>
+        <span class="text-emerald-500 text-2xl group-hover:translate-x-1 transition-transform">➔</span>
+      </a>
+
+      <!-- Call -->
+      <a href="tel:3157138151" class="nav-card group cantina-glass rounded-2xl p-5 flex items-center gap-4 hover:border-red-400 hover:scale-[1.02] transition-all duration-300" style="animation-delay:0.19s">
+        <div class="text-4xl md:text-5xl flex-shrink-0">📞</div>
+        <div class="text-left flex-grow">
+          <h3 class="font-ui text-xl text-white group-hover:text-red-300">Call to Order</h3>
+          <p class="text-xs text-slate-300 mt-1">315.713.8151 — we'll fire up the skillet.</p>
+        </div>
+        <span class="text-red-500 text-2xl group-hover:translate-x-1 transition-transform">➔</span>
+      </a>
+
+      <!-- Directions -->
+      <a href="https://www.google.com/maps/search/?api=1&query=The+Dirty+Gringo+100+Riverside+Ave+Ogdensburg+NY+13669" target="_blank" rel="noopener" class="nav-card group cantina-glass rounded-2xl p-5 flex items-center gap-4 hover:border-teal-400 hover:scale-[1.02] transition-all duration-300" style="animation-delay:0.26s">
+        <div class="text-4xl md:text-5xl flex-shrink-0">📍</div>
+        <div class="text-left flex-grow">
+          <h3 class="font-ui text-xl text-white group-hover:text-teal-300">Find the Patio</h3>
+          <p class="text-xs text-slate-300 mt-1">100 Riverside Ave — on the river, overlooking Canada.</p>
+        </div>
+        <span class="text-teal-500 text-2xl group-hover:translate-x-1 transition-transform">➔</span>
+      </a>
+    </div>
+
+    <!-- Play again -->
+    <a href="index.html" class="nav-card mt-6 group inline-flex items-center gap-2 bg-black/40 hover:bg-black/60 border border-amber-500/40 hover:border-amber-400 px-6 py-3 rounded-full font-ui text-sm uppercase tracking-widest text-amber-300 transition-all" style="animation-delay:0.33s">
+      🎮 <span>Play the Skillet Game</span>
+    </a>
+
+    <!-- Footer -->
+    <footer class="mt-auto pt-10 text-center text-xs text-slate-300/80 font-light">
+      <p class="font-ui tracking-widest text-amber-300/90">THE DIRTY GRINGO AT THE DOBISKY</p>
+      <p class="mt-1">100 Riverside Ave., Ogdensburg, NY 13669 · <a href="tel:3157138151" class="underline hover:text-white">315.713.8151</a></p>
+      <p class="mt-1 tracking-widest opacity-70">DIRTYGRINGONNY.COM</p>
+    </footer>
+
+  </main>
+</body>
+</html>
