@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Dirty Gringo | Dobisky Patio Entrance</title>
   
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=Outfit:wght@300;500;800&family=Lilita+One&display=swap" rel="stylesheet">
@@ -26,8 +26,8 @@
       font-family: 'Outfit', sans-serif;
       background: linear-gradient(to bottom, var(--sunset-top) 0%, var(--sunset-mid) 45%, var(--sunset-bot) 70%, var(--river-dark) 100%);
       background-attachment: fixed;
-      overflow: hidden; /* Prevent scrolling, true app feel */
-      touch-action: none; /* Better mobile game feel */
+      min-height: 100vh;
+      overflow-x: hidden; /* allow vertical scroll if a panel is taller than the viewport (small phones); canvas blocks scroll during play */
     }
     .font-brand { font-family: 'Rye', serif; }
     .font-ui { font-family: 'Lilita One', cursive; }
@@ -199,7 +199,7 @@
   <main class="relative w-full max-w-5xl px-4 z-50 pointer-events-none flex flex-col items-center justify-center h-full">
     
     <!-- STEP 1: WELCOME / MENU BOARD -->
-    <div id="ui-welcome" class="cantina-glass rounded-3xl p-6 md:p-8 w-full max-w-3xl pointer-events-auto text-center transform transition-all duration-500 scale-100 opacity-100">
+    <div id="ui-welcome" class="cantina-glass rounded-3xl p-6 md:p-8 w-full max-w-3xl max-h-[88vh] overflow-y-auto pointer-events-auto text-center transform transition-all duration-500 scale-100 opacity-100">
       <span class="inline-block bg-teal-900/60 text-teal-300 border border-teal-500 px-3 py-1 rounded-full text-xs font-ui tracking-widest mb-4">
         RIVERFRONT FIESTA CRAFT
       </span>
@@ -259,7 +259,7 @@
     </div>
 
     <!-- STEP 3: SUCCESS MODAL -->
-    <div id="ui-success" class="cantina-glass rounded-3xl p-8 w-full max-w-lg pointer-events-auto text-center hidden transform transition-all duration-500">
+    <div id="ui-success" class="cantina-glass rounded-3xl p-8 w-full max-w-lg max-h-[88vh] overflow-y-auto pointer-events-auto text-center hidden transform transition-all duration-500">
       <div class="text-7xl mb-4" id="success-emoji">🌮</div>
       <h2 class="text-4xl font-brand text-amber-400 mb-2 text-shadow-gringo">
         Masterpiece Crafted!
@@ -358,6 +358,23 @@
     // --- STREAMING_CHUNK:Setting up Canvas and State Variables... ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+
+    // Polyfill: CanvasRenderingContext2D.roundRect is missing on Safari/iOS < 16
+    // and older Android WebView. Without it, drawSkillet() throws each frame and
+    // the game loop dies. Adds the subpath manually (single numeric radius is all we use).
+    if (window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        let radius = typeof r === 'number' ? r : (Array.isArray(r) ? (r[0] || 0) : 0);
+        radius = Math.min(radius, Math.abs(w) / 2, Math.abs(h) / 2);
+        this.moveTo(x + radius, y);
+        this.arcTo(x + w, y, x + w, y + h, radius);
+        this.arcTo(x + w, y + h, x, y + h, radius);
+        this.arcTo(x, y + h, x, y, radius);
+        this.arcTo(x, y, x + w, y, radius);
+        this.closePath();
+        return this;
+      };
+    }
     
     let activeRecipe = null;
     let collected = [];

@@ -1,0 +1,13 @@
+{
+  "name": "la-gringa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Dirty Gringo — static site (gate / hub / menu) served by Cloudflare Pages",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}
