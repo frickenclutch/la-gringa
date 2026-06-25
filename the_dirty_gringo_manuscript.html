@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Dirty Gringo - Lost Manuscript</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=IM+Fell+English:ital@0;1&family=Pirata+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --parchment-light: #f4e4c1;
+            --parchment-base: #e8d5a5;
+            --parchment-dark: #d4b881;
+            --ink: #2a1b12;
+            --ink-red: #5a0c0c;
+            --burn-dark: #2a0b00;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            height: 100vh; height: 100dvh;
+            background: radial-gradient(circle at 50% 100%, #1a2a30 0%, #0a1114 60%, #000000 100%);
+            color: var(--ink);
+            font-family: 'IM Fell English', serif;
+            touch-action: none; /* Let JS handle all swipes/pans */
+        }
+
+        /* Ambient Environment */
+        .river-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(ellipse at bottom, rgba(50,70,80,0.4) 0%, transparent 80%),
+                url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.08"/></svg>');
+            z-index: -2; pointer-events: none;
+        }
+
+        .fire-glow {
+            position: absolute; bottom: -20vh; left: 50%; transform: translateX(-50%);
+            width: 100vw; height: 50vh;
+            background: radial-gradient(ellipse, rgba(200, 60, 10, 0.15) 0%, rgba(100, 20, 0, 0.05) 50%, transparent 80%);
+            filter: blur(50px); animation: pulseGlow 5s infinite alternate ease-in-out;
+            z-index: -1; pointer-events: none;
+        }
+        @keyframes pulseGlow { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        #smokeCanvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50;
+        }
+
+        .scene {
+            width: 100vw; height: 100vh; height: 100dvh;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 2500px;
+            overflow: hidden;
+        }
+
+        .book {
+            position: relative;
+            /* Base sizing: Desktop default */
+            width: 90vw; max-width: 1200px;
+            height: 85vh; height: 85dvh; max-height: 800px;
+            transform-style: preserve-3d;
+            transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @media (max-width: 800px) {
+            .book { width: 190vw; max-width: none; }
+            .dialer-container { bottom: 20px !important; right: 20px !important; transform: scale(0.85); transform-origin: bottom right; }
+        }
+
+        .leaf {
+            position: absolute;
+            top: 0; right: 0;
+            width: 50%; height: 100%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+            z-index: 1; /* Managed by JS */
+        }
+
+        .face {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            backface-visibility: hidden;
+            background-color: var(--parchment-base);
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.08) 0%, transparent 5%, transparent 95%, rgba(0,0,0,0.08) 100%),
+                url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.2"/></svg>');
+            box-shadow: 
+                inset 0 0 40px 5px rgba(0,0,0,0.3),
+                inset 0 0 80px 10px rgba(42, 11, 0, 0.4), 
+                0 5px 25px rgba(0,0,0,0.6);
+            border: 1px solid rgba(0,0,0,0.5);
+            /* Crucial for internal scrolling when text overflows on small screens */
+            overflow-y: auto; overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 1.5rem;
+        }
+
+        .face.front { transform: rotateY(0deg); }
+        .face.back { transform: rotateY(180deg); background-color: var(--parchment-dark); }
+
+        /* Binding Shadows */
+        .face.front::before {
+            content: ''; position: absolute; left: 0; top: 0; width: 8%; height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 100%); pointer-events: none; z-index: 10;
+        }
+        .face.back::before {
+            content: ''; position: absolute; right: 0; top: 0; width: 8%; height: 100%;
+            background: linear-gradient(to left, rgba(0,0,0,0.6) 0%, transparent 100%); pointer-events: none; z-index: 10;
+        }
+
+        /* Scrollbar Styling for Faces */
+        .face::-webkit-scrollbar { width: 8px; }
+        .face::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-left: 1px solid rgba(0,0,0,0.1); }
+        .face::-webkit-scrollbar-thumb { background: rgba(58, 21, 5, 0.4); border-radius: 4px; }
+        .face::-webkit-scrollbar-thumb:hover { background: rgba(58, 21, 5, 0.7); }
+
+        .flipped { transform: rotateY(-180deg); }
+
+        .font-title { font-family: 'Pirata One', cursive; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+        .font-header { font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: 0.05em; border-bottom: 1px solid rgba(42,27,18,0.3); margin-bottom: 0.5rem; padding-bottom: 0.2rem;}
+        
+        /* Fluid typography mapped to standard rems for safety, scaled by media queries */
+        html { font-size: 16px; }
+        @media (max-width: 600px) { html { font-size: 14px; } .face { padding: 1rem; } }
+        
+        .text-body { font-size: 1rem; line-height: 1.4; }
+        .text-small { font-size: 0.85rem; line-height: 1.3;}
+        .text-h1 { font-size: 4rem; line-height: 0.9; margin: 0; }
+        .text-h2 { font-size: 2rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .text-h3 { font-size: 1.25rem; margin-top: 1rem; margin-bottom: 0.25rem; color: var(--ink-red); }
+
+        .price { font-weight: bold; float: right; font-family: 'Cinzel', serif; color: var(--ink-red);}
+        
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 800px) { .menu-grid { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+        
+        .menu-item { margin-bottom: 1rem; break-inside: avoid; }
+        .menu-item-title { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; align-items: flex-end; }
+        .dotted-leader { flex-grow: 1; border-bottom: 2px dotted rgba(42, 27, 18, 0.4); margin: 0 8px; position: relative; top: -6px;}
+
+        .dialer-container {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; z-index: 9999;
+        }
+
+        .dial-main {
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, #f7d070 0%, #b8860b 60%, #4a3600 100%);
+            border-radius: 50%;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.9), inset 0 2px 8px rgba(255,255,255,0.7);
+            border: 2px solid #2a1b12;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; position: relative; z-index: 10;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .dial-main:active { transform: scale(0.95); }
+        .dial-icon { width: 30px; height: 30px; fill: #2a1b12; filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.3)); }
+
+        .dial-option {
+            position: absolute; width: 50px; height: 50px;
+            background: radial-gradient(circle, #e8d5a5 0%, #b89962 100%);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            font-family: 'Cinzel', serif; font-size: 0.75rem; font-weight: bold; color: #2a1b12; text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 1px 3px rgba(255,255,255,0.5); 
+            border: 1px solid #4a3600;
+            top: 7px; left: 7px;
+            opacity: 0; transform: scale(0);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; cursor: pointer; text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+        }
+
+        .dialer-container.open .dial-option { opacity: 1; pointer-events: auto; }
+        
+        /* Spread outward */
+        .dialer-container.open .opt-1 { transform: translate(-75px, -15px) scale(1); transition-delay: 0.05s; }
+        .dialer-container.open .opt-2 { transform: translate(-55px, -75px) scale(1); transition-delay: 0.1s; }
+        .dialer-container.open .opt-3 { transform: translate(10px, -90px) scale(1); transition-delay: 0.15s; }
+
+        .dial-option:active { background: #b8860b; color: #fff; transform: scale(0.9) !important; }
+
+        /* UI Navigation Hints */
+        .nav-hint {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            font-size: 2rem; color: rgba(255,255,255,0.3);
+            cursor: pointer; z-index: 100; transition: color 0.3s;
+            padding: 20px; font-family: sans-serif;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+        .nav-hint:hover { color: rgba(255,255,255,0.8); }
+        #nav-left { left: 10px; }
+        #nav-right { right: 10px; }
+        @media (max-width: 800px) { .nav-hint { display: none; } /* Rely on tap/swipe on mobile */ }
+        
+        .page-hint { display: block; text-align: center; margin-top: 2rem; padding-bottom: 1rem; font-size: 0.8rem; opacity: 0.5; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+    <div class="river-bg"></div>
+    <div class="fire-glow"></div>
+    <canvas id="smokeCanvas"></canvas>
+
+    <div class="nav-hint" id="nav-left" onclick="navigateBook(-1)">&#10094;</div>
+    <div class="nav-hint" id="nav-right" onclick="navigateBook(1)">&#10095;</div>
+
+    <div class="dialer-container" id="dialer" onclick="toggleDialer(event)">
+        <div class="dial-main">
+            <svg class="dial-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            </svg>
+        </div>
+        <div class="dial-option opt-1" onclick="jumpToView(0); event.stopPropagation();">Cover</div>
+        <div class="dial-option opt-2" onclick="jumpToView(4); event.stopPropagation();">Mains</div>
+        <a href="tel:3157138151" class="dial-option opt-3" onclick="event.stopPropagation();">Call</a>
+    </div>
+
+    <div class="scene">
+        <div class="book" id="book">
+            
+            <!-- LEAF 1 (Views 0 and 1) -->
+            <div class="leaf" id="leaf1">
+                <!-- Front: View 0 (Cover) -->
+                <div class="face front flex justify-center items-center text-center relative">
+                    <div class="border-[3px] border-[rgba(42,27,18,0.4)] p-4 sm:p-8 w-full min-h-full flex flex-col justify-center shadow-inner relative">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[rgba(42,11,0,0.6)] to-transparent pointer-events-none mix-blend-multiply"></div>
+                        
+                        <h2 class="font-header text-sm tracking-[0.2em] uppercase mb-4 border-none opacity-80">July 2026</h2>
+                        
+                        <div class="bg-[rgba(255,255,255,0.1)] p-4 rounded-full aspect-square w-48 h-48 mx-auto flex items-center justify-center border-4 border-double border-[rgba(42,27,18,0.3)] mb-6 shadow-md">
+                            <div>
+                                <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md">Fresh</h1>
+                                <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md">Mex</h1>
+                            </div>
+                        </div>
+
+                        <h2 class="font-title text-h2 text-red-900 mt-0 mb-6 border-b border-[rgba(0,0,0,0.3)] pb-4">WITH STYLE</h2>
+                        
+                        <div class="text-small italic mb-8 px-4 opacity-80 border-l-2 border-r-2 border-[rgba(42,27,18,0.2)]">
+                            "Unearthed from a weathered glass bottle, caught in the rocky shallows beneath the Ogdensburg-Prescott International Bridge."
+                        </div>
+
+                        <div class="mt-auto">
+                            <h3 class="font-header text-h2 text-red-950 mb-0">the DIRTY GRINGO</h3>
+                            <p class="text-small font-bold tracking-widest border-b border-[rgba(0,0,0,0.2)] inline-block pb-1 mb-2">AT THE DOBISKY</p>
+                            <p class="text-small">100 RIVERSIDE AVE., OGDENSBURG, NY 13669</p>
+                            <p class="text-body font-bold text-xl mt-2 tracking-wide text-red-900">315.713.8151</p>
+                            <p class="text-small font-bold mt-1 tracking-widest opacity-70">DIRTYGRINGONNY.COM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back: View 1 (Sides & Salads) -->
+                <div class="face back">
+                    <h2 class="font-header text-h2 text-center text-red-950">Sides & Salads</h2>
+                    
+                    <div class="menu-grid">
+                        <div>
+                            <h3 class="font-header text-h3">Sides</h3>
+                            <div class="menu-item"><div class="menu-item-title"><span>Dirty Beans</span><span class="dotted-leader"></span><span class="price">3.00</span></div><p class="text-small">Refried or black beans, cheese and salsa.</p></div>
+                            <div class="menu-item"><div class="menu-item-title"><span>Cheesy Beans</span><span class="dotted-leader"></span><span class="price">3.50</span></div><p class="text-small">Choice of refried or black beans topped with queso.</p></div>
+                            
+                            <table class="w-full text-body font-bold mb-4 mt-2">
+                                <tr><td class="pb-1">Beans</td><td class="text-right price pb-1">1.75</td></tr>
+                                <tr><td class="pb-1">Rice</td><td class="text-right price pb-1">1.75</td></tr>
+                                <tr><td>Chips</td><td class="text-right price">1.25</td></tr>
+                            </table>
+                            
+                            <h3 class="font-header text-h3">Salads</h3>
+                            <div class="menu-item">
+                                <div class="menu-item-title"><span>Taco Salad</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                                <p class="text-small">Your choice of seasoned beef or seasoned chicken, lettuce, cheddar jack blend, onion, red bell pepper, black olives, jalapeños, choice of salsa and sour cream, served with chips.<br><span class="italic font-bold">Add black beans for 1.75</span></p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="font-header text-h3">Extra Meat</h3>
+                            <table class="w-full text-small font-bold mb-4">
+                                <tr><td class="pb-1">Seasoned Beef</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1">Seasoned Chicken</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1">Chorizo</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1">Jalapeño Bacon</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1">Grilled Flank Steak</td><td class="text-right price pb-1">4.00</td></tr>
+                                <tr><td>Cajun Shrimp</td><td class="text-right price">4.00</td></tr>
+                            </table>
+
+                            <h3 class="font-header text-h3">Extras</h3>
+                            <table class="w-full text-small font-bold mb-4">
+                                <tr><td class="pb-1">Extra Cheese</td><td class="text-right price pb-1">.75</td></tr>
+                                <tr><td class="pb-1">Extra Veggies</td><td class="text-right price pb-1">.75</td></tr>
+                                <tr><td>Egg</td><td class="text-right price">1.25</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="menu-item mt-2">
+                        <div class="menu-item-title"><span>Mango Cucumber Chicken Salad</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">Mixed greens topped with black beans, seasoned chicken, feta cheese, mango cucumber salsa and drizzled with ancho chipotle and salsa ranch.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Street Corn Salad</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">Mixed greens topped with seasoned chicken, black beans, cheddar jack blend, corn salsa and drizzled with our chipotle trio.</p>
+                    </div>
+
+                    <div class="mt-4 border-2 border-[rgba(42,27,18,0.4)] p-3 bg-[rgba(255,255,255,0.1)] shadow-inner">
+                        <h3 class="font-header text-h3 text-center mb-1 mt-0">House Sauces</h3>
+                        <p class="text-small text-center italic font-bold">Mild, ancho chipotle (medium), hot, ghost, raspberry chipotle, salsa ranch, sweet chili, peach bourbon, buffalo, and chipotle ghost BBQ.</p>
+                    </div>
+                    <span class="page-hint">Swipe or Tap right to continue</span>
+                </div>
+            </div>
+
+            <div class="leaf" id="leaf2">
+                <!-- Front: View 2 (Snacks) -->
+                <div class="face front">
+                    <h2 class="font-header text-h2 text-center text-red-950">Shareable Snacks</h2>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Guacamole & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small">Our fresh homemade guacamole served with tortilla chips.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Queso & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">7.99</span></div>
+                        <p class="text-small">Our homemade queso dip served with tortilla chips. <br>
+                        <span class="italic font-bold">Add Jalapeño bacon for 3.00<br>Add pineapple habanero salsa for 1.75<br>Add ancho chipotle for .75</span></p>
+                    </div>
+                    
+                    <div class="menu-item border-l-4 border-red-900 pl-3 py-1 bg-[rgba(0,0,0,0.03)] my-4">
+                        <div class="menu-item-title"><span>Salsa & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">6.99</span></div>
+                        <p class="text-small">Our homemade salsa served with tortilla chips.</p>
+                        <div class="flex justify-between text-small font-bold mt-2 pt-2 border-t border-[rgba(0,0,0,0.1)]">
+                            <span>MEDIUM & HOT</span> <span class="price">6.99</span>
+                        </div>
+                        <div class="flex justify-between text-small font-bold mt-1">
+                            <span>PINEAPPLE HABANERO, MANGO CUCUMBER & CORN</span> <span class="price">7.99</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item mt-6">
+                        <div class="menu-item-title"><span>Dirty Nachos</span><span class="dotted-leader"></span><span class="price text-sm leading-tight text-right">FULL 10.99<br>HALF 8.99</span></div>
+                        <p class="text-small mt-2">Tortilla chips topped with seasoned beef, chicken or vegetarian (substitute beans for meat). Topped with queso, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Buffalo Nacho</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small">Tortilla chips topped with seasoned buffalo chicken, queso, lettuce, tomato, black olives, jalapeño, cheddar jack blend. Choice of bleu cheese or salsa ranch.</p>
+                    </div>
+                </div>
+
+                <!-- Back: View 3 (Burritos) -->
+                <div class="face back">
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-1 leading-tight">Signature Burritos & Bowls</h2>
+                    <p class="text-small text-center italic font-bold mb-4 bg-[rgba(255,255,255,0.2)] p-2 border-y border-[rgba(0,0,0,0.2)] text-red-900">Smother any burrito with our homemade queso blanco for an additional $2.50</p>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>The Dirty Gringo Burrito</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">A flour tortilla filled with (2) seasoned fried eggs, chorizo sausage, jalapeño bacon, hashbrowns, queso, your choice of refried or black beans and choice of salsa.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>The Marley Burrito <span class="text-[0.75em] font-normal italic text-gray-700">(OR TRY IT AS A NACHO)</span></span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">A flour tortilla filled with Jamaican jerk chicken, rice, black beans, cheddar jack blend, jalapeños, pineapple habanero salsa and sour cream.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Chipotle Chicken Bowl</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small">Rice, black beans, seasoned chicken, cheddar jack blend, lettuce, corn salsa and finished with our chipotle trio.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Citrus Shrimp Bowl</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small">Rice, black beans, grilled cajun shrimp, feta, lettuce, onion, bell pepper, sour cream and finished with our citrus vinaigrette.</p>
+                    </div>
+
+                    <div class="mt-6 border-[3px] border-double border-[rgba(42,27,18,0.5)] p-3">
+                        <h3 class="font-header text-h3 text-center mb-1 mt-0">Build Your Own Burrito or Bowl</h3>
+                        <p class="text-[0.75rem] text-center mb-3 italic leading-tight">Filled with rice, choice of meat, refried or black beans, cheddar jack blend, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
+                        
+                        <table class="w-full text-small font-bold">
+                            <tr><td class="pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Seasoned Ground Beef</td><td class="text-right price pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Chicken</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Chorizo</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Grilled Flank Steak</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">10.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Cajun Shrimp</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">10.99</td></tr>
+                            <tr><td class="pt-1">Vegetarian</td><td class="text-right price pt-1">6.99</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="leaf" id="leaf3">
+                <!-- Front: View 4 (Quesadillas) -->
+                <div class="face front">
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-1">Quesadillas</h2>
+                    <p class="text-small text-center mb-4 italic leading-tight">13" flour tortilla filled with your choice of meat, cheddar jack blend, choice of salsa and sour cream. Make it loaded by adding a medley of onion, bell peppers, jalapeño and black olive.</p>
+                    
+                    <div class="bg-[rgba(255,255,255,0.2)] p-2 border border-[rgba(0,0,0,0.2)] shadow-sm mb-6">
+                        <table class="w-full text-small border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-black">
+                                    <th class="text-left font-header pb-1 text-sm">MEAT</th>
+                                    <th class="text-right font-header pb-1 text-sm px-2">REGULAR</th>
+                                    <th class="text-right font-header pb-1 text-sm">LOADED</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Meatless</td><td class="text-right price px-2">6.99</td><td class="text-right price">8.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Seasoned Ground Beef</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Chicken</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Chorizo</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Grilled Flank Steak</td><td class="text-right price px-2">10.99</td><td class="text-right price">12.99</td></tr>
+                                <tr><td class="pt-1 font-bold">Cajun Shrimp</td><td class="text-right price px-2">10.99</td><td class="text-right price">12.99</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="font-header text-h3 text-center border-none bg-black text-[#e8d5a5] py-1 mb-4">SIGNATURE QUESADILLAS</h3>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Buffalo Chicken Quesadilla</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small">A flour tortilla filled with seasoned chicken, cheddar jack blend, house buffalo and served with sour cream, bleu cheese or ranch.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Balsamic Chicken Quesadilla</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">A flour tortilla filled with seasoned chicken, feta cheese, red onion, cheddar jack blend and drizzled with balsamic glaze, served with sour cream.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Chicken Bacon Ranch Quesadilla</span><span class="dotted-leader"></span><span class="price">11.99</span></div>
+                        <p class="text-small">13" tortilla filled w/ seasoned chicken, red onion, cheddar jack blend, jalapeño bacon and served with salsa ranch.</p>
+                    </div>
+                </div>
+
+                <!-- Back: View 5 (Tacos) -->
+                <div class="face back">
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-2">Tacos</h2>
+                    <p class="text-center text-[0.8rem] font-bold mb-4 bg-red-900 text-[#e8d5a5] p-2 shadow-md uppercase tracking-wide">If you have any food allergies please tell us prior to ordering!</p>
+                    
+                    <div class="menu-item bg-[rgba(255,255,255,0.3)] p-3 border-2 border-red-900 shadow-inner mb-6">
+                        <div class="menu-item-title text-h3 text-red-900 mt-0"><span>TACOS</span><span class="dotted-leader"></span><span class="price">2.75/ΕΑ.</span></div>
+                        <p class="text-small mt-1 font-bold">Choice of hard or soft tortillas filled with seasoned beef, chicken, or chorizo topped with cheddar jack blend, lettuce, and tomato. Served with your choice of sauce.</p>
+                        <p class="text-[0.75rem] italic mt-1">Add salsa and sour cream for an additional charge.</p>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Buffalo Chicken Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">(3) flour tortillas filled w/ seasoned chicken sauteed w/ house buffalo. Topped w/ cheddar jack blend, lettuce, tomato, jalapeno and salsa ranch.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Steak Tacos</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small">(3) flour tortillas with seasoned flank steak, queso, tomato, sautéed onions and peppers, mixed greens and drizzled with balsamic glaze.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Cajun Shrimp Tacos</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small">(3) flour tortillas filled with grilled cajun shrimp, mixed greens, tomato, pickled onions, queso fresco and drizzled with salsa ranch.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Peach Bourbon Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">(3) flour tortillas filled with grilled chorizo, mixed greens, queso, pickled onion, tomato and drizzled with our peach bourbon sauce.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Sweet and Spicy Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">(3) flour tortillas filled with seasoned chicken, queso, lettuce, red onion, drizzled with our sweet and spicy jerk sauce and topped with banana peppers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="leaf" id="leaf4">
+                <!-- Front: View 6 (Enchiladas) -->
+                <div class="face front">
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-1">Enchiladas</h2>
+                    <p class="text-small text-center mb-6 italic border-b border-[rgba(0,0,0,0.2)] pb-2">All enchiladas are served on a bed of rice and choice of beans.<br>If you prefer them on the side there will be an additional charge.</p>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Beef Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">(2) 6" flour tortillas filled with seasoned beef, cheddar jack blend, topped with queso and a mild red enchilada sauce.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Chicken Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">(2) 6" flour tortillas filled with seasoned chicken, cheddar jack blend, topped with queso, pineapple habanero salsa or ancho chipotle sauce.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Vegetarian Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small">(2) 6" flour tortillas filled with your choice of vegetables, cheddar jack blend, topped with queso and your choice of mild red enchilada sauce, pineapple habanero salsa or ancho chipotle sauce.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>The Greasy Marino</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small">(2) 6" flour tortillas filled with chorizo, jalapeño bacon and a cheddar jack blend. Topped with queso, (2) seasoned fried eggs and ancho chipotle sauce.</p>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-title"><span>Buffalo Shrimp Enchiladas</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small">(2) 6" flour tortillas filled with grilled cajun shrimp and cheddar jack blend. Topped with queso, house buffalo, lettuce and tomato.</p>
+                    </div>
+
+                    <div class="mt-8 border-t-4 border-double border-red-900 pt-4 text-center bg-[rgba(0,0,0,0.02)] -mx-6 px-6 pb-4">
+                        <h3 class="font-header text-[2rem] text-red-950 mb-0">DESSERT</h3>
+                        <p class="text-body font-bold tracking-widest mt-2">WEEKLY DESSERT SPECIAL - PRICES VARY</p>
+                    </div>
+                </div>
+
+                <!-- Back: View 7 (Back Cover) -->
+                <div class="face back flex flex-col justify-between items-center py-4">
+                    
+                    <div class="w-full text-center border-4 border-double border-red-900 p-4 bg-[rgba(255,255,255,0.2)] shadow-sm mb-4">
+                        <h2 class="font-title text-h2 text-red-950 mb-1 leading-none uppercase tracking-wide">DO YOU LOVE CILANTRO?</h2>
+                        <h3 class="font-title text-[3rem] mb-1 leading-none text-black">WE DO!</h3>
+                        <p class="text-small italic font-bold">Just ask and we can add more to anything on our menu.</p>
+                    </div>
+
+                    <div class="w-full bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.2)] p-2 mb-4">
+                        <table class="w-full text-[0.7rem] sm:text-[0.8rem] font-bold border-collapse">
+                            <tbody>
+                                <tr class="border-b border-[rgba(0,0,0,0.2)]">
+                                    <td class="py-2 pr-2">MEDIUM, HOT OR PINEAPPLE HABANERO SALSA</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">1.75 2OZ.</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap"></td>
+                                </tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.2)]">
+                                    <td class="py-2 pr-2">MANGO CUCUMBER OR CORN SALSA</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">2.00 2OZ.</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">6.00 8OZ.</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.2)]">
+                                    <td class="py-2 pr-2">SOUR CREAM</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">.75 2OZ.</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">7.00 8OZ.</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.2)]">
+                                    <td class="py-2 pr-2">QUESO</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">$2.00 2OZ.</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">$7.00 8OZ.</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 pr-2">GUACAMOLE</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">$2.00 2OZ.</td>
+                                    <td class="py-2 text-right text-red-900 whitespace-nowrap">$8.00 8OZ.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="w-full text-center mb-4">
+                        <h3 class="font-header text-h3 mb-1">BEVERAGES</h3>
+                        <p class="text-[0.75rem] italic mb-3 opacity-80">We Proudly Serve Pepsi Products</p>
+                        <div class="flex justify-around text-small font-bold border-t border-b border-[rgba(0,0,0,0.2)] py-2">
+                            <div>BOTTLED SODA 20oz.<br><span class="price float-none">2.75</span></div>
+                            <div>BOTTLED WATER 20oz.<br><span class="price float-none">2.75</span></div>
+                            <div>PURE LEAF TEA<br><span class="price float-none">2.75</span></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-auto w-full">
+                        <p class="text-small font-bold tracking-widest bg-black text-[#e8d5a5] py-1 inline-block px-4">BUSINESS HOURS</p>
+                        <p class="text-[0.75rem] font-bold mt-2">TUES. - FRI. 11AM TO 7PM | SATURDAY SEASONAL<br>CLOSED SUN. & MON.</p>
+                        
+                                                
+                        <p class="text-[0.65rem] opacity-70">Please note that menu items and prices are subject to change</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- State Machine ---
+        // Views range from 0 (Cover) to 7 (Back Cover). 
+        // 1 View = 1 Page side. (Total 8 views across 4 leaves).
+        let currentView = 0; 
+        const totalViews = 7;
+        const leaves = [
+            document.getElementById('leaf1'),
+            document.getElementById('leaf2'),
+            document.getElementById('leaf3'),
+            document.getElementById('leaf4')
+        ];
+
+        function getLeafFlippedState(viewIndex) {
+            return [
+                viewIndex > 0, // Leaf 1 flipped if view > 0 (looking at views 1-7)
+                viewIndex > 2, // Leaf 2 flipped if view > 2 (looking at views 3-7)
+                viewIndex > 4, // Leaf 3 flipped if view > 4 (looking at views 5-7)
+                viewIndex > 6  // Leaf 4 flipped if view > 6 (looking at view 7)
+            ];
+        }
+
+        // --- Core Layout & Interaction Engine ---
+        function updateBookState(emitParticles = true) {
+            const isMobile = window.innerWidth <= 800;
+            const book = document.getElementById('book');
+            
+            // 1. Calculate which leaves should be flipped based on current view
+            const flippedStates = getLeafFlippedState(currentView);
+            let stateChanged = false;
+
+            leaves.forEach((leaf, index) => {
+                const wasFlipped = leaf.classList.contains('flipped');
+                const isFlipped = flippedStates[index];
+                
+                if (wasFlipped !== isFlipped) {
+                    stateChanged = true;
+                    if (isFlipped) {
+                        leaf.classList.add('flipped');
+                        leaf.style.zIndex = index + 1; 
+                    } else {
+                        leaf.classList.remove('flipped');
+                        // Delay z-index drop to hide clipping during animation
+                        setTimeout(() => { leaf.style.zIndex = (4 - index); }, 600);
+                    }
+                } else if (!wasFlipped && !isFlipped) {
+                    // Reset correct resting z-index for unflipped pages
+                    leaf.style.zIndex = (4 - index);
+                }
+            });
+
+            // 2. Camera Panning & Dynamic Centering (Desktop & Mobile)
+            let transformStr = '';
+            if (isMobile) {
+                // Mobile: Focus specifically on the Left or Right page via 25% shift of the 190vw container
+                transformStr = (currentView % 2 === 0) ? 'translateX(-25%)' : 'translateX(25%)';
+            } else {
+                // Desktop: Focus on spine, except Cover and Back page
+                if (currentView === 0) transformStr = 'translateX(-25%)';
+                else if (currentView === totalViews) transformStr = 'translateX(25%)';
+                else transformStr = 'translateX(0%)';
+            }
+            book.style.transform = transformStr;
+
+            // 3. Trigger particles ONLY if a physical leaf actually turned
+            if (stateChanged && emitParticles) {
+                // Determine direction: if we moved to an odd view (1,3,5), we opened a leaf (flip left).
+                const flipLeft = currentView % 2 !== 0; 
+                setTimeout(() => fireParticleBurst(flipLeft), 50); // delay ensures moving spine tracking
+            }
+
+            // Update Nav Hints
+            document.getElementById('nav-left').style.opacity = currentView > 0 ? '1' : '0';
+            document.getElementById('nav-left').style.pointerEvents = currentView > 0 ? 'auto' : 'none';
+            document.getElementById('nav-right').style.opacity = currentView < totalViews ? '1' : '0';
+            document.getElementById('nav-right').style.pointerEvents = currentView < totalViews ? 'auto' : 'none';
+        }
+
+        window.addEventListener('resize', () => { updateBookState(false); });
+
+        function navigateBook(direction) {
+            let nextView = currentView + direction;
+            // Desktop fast-forward: if on desktop and looking at an inside spread, 
+            // a single click turns the whole leaf (moves 2 views).
+            if (window.innerWidth > 800) {
+                if (direction > 0 && currentView % 2 !== 0 && currentView < 6) nextView++; // Move from left to right page jump
+                if (direction < 0 && currentView % 2 === 0 && currentView > 0) nextView--; // Move from right to left page jump
+            }
+            
+            if (nextView >= 0 && nextView <= totalViews) {
+                currentView = nextView;
+                updateBookState(true);
+            }
+        }
+
+        function jumpToView(view) {
+            currentView = view;
+            updateBookState(true);
+            document.getElementById('dialer').classList.remove('open');
+        }
+
+        // --- Touch / Swipe Handling ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, {passive: true});
+
+        document.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            
+            // Check if mostly horizontal swipe (ignore if scrolling vertically)
+            if (Math.abs(touchEndX - touchStartX) > Math.abs(touchEndY - touchStartY)) {
+                if (touchEndX < touchStartX - 50) navigateBook(1); // Swipe Left -> Next
+                if (touchEndX > touchStartX + 50) navigateBook(-1); // Swipe Right -> Prev
+            }
+        }, {passive: true});
+
+        // Click on edges to turn (Desktop fallback for no nav buttons)
+        document.addEventListener('click', e => {
+            // Ignore clicks on dialer or interactive elements
+            if (e.target.closest('.dialer-container') || e.target.closest('.nav-hint')) return;
+            
+            const clickX = e.clientX;
+            const width = window.innerWidth;
+            if (clickX < width * 0.2) navigateBook(-1);
+            else if (clickX > width * 0.8) navigateBook(1);
+        });
+
+        // --- Dialer UI ---
+        function toggleDialer(e) {
+            document.getElementById('dialer').classList.toggle('open');
+            e.stopPropagation();
+        }
+
+        // --- Event-Driven Particle Physics ---
+        const canvas = document.getElementById('smokeCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let canvasWidth, canvasHeight;
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, type, flipLeft) {
+                this.type = type;
+                this.x = x;
+                // Emit mostly from the center vertical line (the spine), scattered slightly
+                this.y = y + (Math.random() - 0.5) * (canvasHeight * 0.9); 
+                this.life = 1.0;
+
+                // Velocity logic: Push particles in the direction the page is turning
+                const directionMultiplier = flipLeft ? -1 : 1;
+                
+                if (type === 'smoke') {
+                    this.size = Math.random() * 20 + 20;
+                    this.vx = (Math.random() * 3 + 1) * directionMultiplier; 
+                    this.vy = (Math.random() * -2) - 1; // Drift up
+                    this.decay = Math.random() * 0.01 + 0.005;
+                    const shade = Math.floor(Math.random() * 30 + 10);
+                    this.color = `${shade}, ${shade}, ${shade}`; 
+                } else { // Ember
+                    this.size = Math.random() * 4 + 1;
+                    this.vx = (Math.random() * 8 + 2) * directionMultiplier;
+                    this.vy = (Math.random() * -4) - 2; 
+                    this.decay = Math.random() * 0.02 + 0.01;
+                    this.color = Math.random() > 0.4 ? '255, 100, 0' : '255, 200, 50';
+                }
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                if (this.type === 'smoke') this.size += 0.8;
+                if (this.type === 'ember') {
+                    this.vy += 0.08; // Gravity
+                    this.vx *= 0.92; // Air resistance
+                }
+            }
+            
+            draw(ctx) {
+                if (this.life <= 0) return;
+                ctx.save();
+                ctx.beginPath();
+                
+                if (this.type === 'smoke') {
+                    ctx.globalAlpha = Math.max(0, this.life * 0.5);
+                    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                    gradient.addColorStop(0, `rgba(${this.color}, 0.6)`);
+                    gradient.addColorStop(1, `rgba(${this.color}, 0)`);
+                    ctx.fillStyle = gradient;
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                } else {
+                    ctx.globalAlpha = Math.max(0, this.life);
+                    ctx.fillStyle = `rgba(${this.color}, ${this.life})`;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = `rgba(${this.color}, 1)`;
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                }
+                
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Fire a burst ONLY when a page turns.
+        function fireParticleBurst(flipLeft) {
+            // Track the actual dynamic location of the book spine as it moves
+            const bookRect = document.getElementById('book').getBoundingClientRect();
+            const spineX = bookRect.left + (bookRect.width / 2);
+            const spineY = bookRect.top + (bookRect.height / 2);
+            
+            for(let i=0; i<40; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft));
+            for(let i=0; i<30; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft));
+            
+            // Wake up the animation loop if it's sleeping
+            if (!animationFrameId) renderParticles();
+        }
+
+        function renderParticles() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            let active = false;
+            
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw(ctx);
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    active = true;
+                }
+            }
+            
+            // If particles exist, keep animating. Otherwise, sleep to save CPU.
+            if (active) {
+                animationFrameId = requestAnimationFrame(renderParticles);
+            } else {
+                animationFrameId = null;
+            }
+        }
+
+        // Init
+        updateBookState(false);
+
+    </script>
+</body>
+</html>
