@@ -66,6 +66,20 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--gringo-orange); border-radius: 3px; }
+
+    /* ---- Galaxy Fold nudge (folded cover ~280px) ----
+       Stop the wide Rye title from wrapping under/over the 'Enter Site' button, and keep
+       the game HUD chips clear of the header. Stacks + trims only — no layout rewrite. */
+    @media (max-width: 380px) {
+      header { padding: 0.5rem 0.65rem !important; }
+      header > div { min-width: 0; }                 /* let the title block shrink/wrap instead of overflowing into the button */
+      header h1 { font-size: 0.95rem !important; line-height: 1.1; white-space: nowrap; }
+      header > div p { font-size: 0.6rem !important; margin-top: 0.1rem; }
+      header a { padding: 0.3rem 0.55rem !important; font-size: 0.64rem !important; white-space: nowrap; flex-shrink: 0; } /* button stays one line, never shrinks away */
+      #ui-hud { top: 4.5rem !important; }
+      #hud-checklist { gap: 0.25rem; font-size: 0.7rem; }
+      #hud-checklist span { padding: 0.15rem 0.35rem !important; }
+    }
   </style>
 </head>
 <body class="text-white min-h-screen w-screen flex flex-col items-center justify-center select-none relative">

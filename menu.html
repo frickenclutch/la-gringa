@@ -201,6 +201,25 @@
         
         .page-hint { display: block; text-align: center; margin-top: 2rem; padding-bottom: 1rem; font-size: 0.8rem; opacity: 0.5; font-style: italic; }
 
+        /* ---- Price-table fix ----
+           .price floats right (great for the flex menu-item rows), but on a <td> that
+           float forces display:block, popping the REGULAR/LOADED cells out of the table
+           grid so they bunch up and the LOADED column reads empty. Keep table prices as cells. */
+        td.price { float: none; white-space: nowrap; padding-left: 0.9rem; }
+
+        /* ---- Cover brand seal (stamped emblem) ---- */
+        .cover-seal { position: absolute; top: 6px; right: 6px; width: 74px; height: 74px; pointer-events: none; transform: rotate(-7deg); transform-origin: center; filter: drop-shadow(0 2px 3px rgba(42,11,0,0.45)); opacity: 0.92; }
+        @media (min-width: 640px) { .cover-seal { width: 96px; height: 96px; top: 10px; right: 10px; } }
+
+        /* ---- Galaxy Fold nudges (minor alignment only) ----
+           (Note: the book is a flex item in .scene, so flex-shrink already clamps it to the
+           viewport width on the unfolded ~717px screen — no width override needed there.) */
+        @media (max-width: 380px) {
+            /* folded cover (~280px): pull the 'Call' spoke off the right wall; shrink discs for tap separation */
+            .dialer-container.open .opt-3 { transform: translate(-8px, -88px) scale(1); }
+            .dial-option { width: 46px; height: 46px; font-size: 0.7rem; }
+        }
+
     </style>
 </head>
 <body>
@@ -232,7 +251,37 @@
                 <!-- Front: View 0 (Cover) -->
                 <div class="face front flex justify-center items-center text-center relative">
                     <div class="border-[3px] border-[rgba(42,27,18,0.4)] p-4 sm:p-8 w-full min-h-full flex flex-col justify-center shadow-inner relative">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[rgba(42,11,0,0.6)] to-transparent pointer-events-none mix-blend-multiply"></div>
+                        <!-- faint corner burn -->
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[rgba(42,11,0,0.4)] to-transparent pointer-events-none mix-blend-multiply"></div>
+                        <!-- Brand seal, stamped into the cover corner -->
+                        <div class="cover-seal" role="img" aria-label="The Dirty Gringo — Mexican Restaurant emblem">
+                          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                            <defs>
+                              <path id="seal-top" d="M 50 50 m -37 0 a 37 37 0 0 1 74 0"/>
+                              <path id="seal-bottom" d="M 50 50 m -33 0 a 33 33 0 0 0 66 0"/>
+                            </defs>
+                            <g fill="none" stroke="#5a0c0c">
+                              <circle cx="50" cy="50" r="47.5" stroke-width="2.5"/>
+                              <circle cx="50" cy="50" r="40" stroke-width="1"/>
+                            </g>
+                            <text fill="#5a0c0c" font-family="'Cinzel', serif" font-weight="800" letter-spacing="1.4">
+                              <textPath href="#seal-top" xlink:href="#seal-top" startOffset="50%" text-anchor="middle" style="font-size:9.5px">THE DIRTY GRINGO</textPath>
+                            </text>
+                            <text fill="#5a0c0c" font-family="'Cinzel', serif" font-weight="700" letter-spacing="0.6">
+                              <textPath href="#seal-bottom" xlink:href="#seal-bottom" startOffset="50%" text-anchor="middle" style="font-size:6.6px">MEXICAN RESTAURANT</textPath>
+                            </text>
+                            <g fill="#5a0c0c">
+                              <path d="M 8.5 50 l 2.2 -2.2 2.2 2.2 -2.2 2.2 z"/>
+                              <path d="M 87.1 50 l 2.2 -2.2 2.2 2.2 -2.2 2.2 z"/>
+                            </g>
+                            <!-- sombrero motif -->
+                            <g>
+                              <path d="M 24 57 Q 37 49.5 50 52.5 Q 63 49.5 76 57 Q 63 66 50 66 Q 37 66 24 57 Z" fill="#2a1b12"/>
+                              <path d="M 39.5 56 Q 41 36.5 50 35.5 Q 59 36.5 60.5 56 Z" fill="#2a1b12"/>
+                              <path d="M 41 52.5 Q 50 55.5 59 52.5 L 59 55 Q 50 58 41 55 Z" fill="#e8d5a5"/>
+                            </g>
+                          </svg>
+                        </div>
                         
                         <h2 class="font-header text-sm tracking-[0.2em] uppercase mb-4 border-none opacity-80">July 2026</h2>
                         
