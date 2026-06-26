@@ -5,9 +5,12 @@
   "description": "The Dirty Gringo — static site (gate / hub / menu) served by Cloudflare Pages",
   "scripts": {
     "build:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --minify",
-    "watch:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --watch"
+    "watch:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --watch",
+    "build:fonts": "node tools/build-fonts.mjs",
+    "build:icons": "node tools/build-icons.mjs"
   },
   "devDependencies": {
+    "sharp": "^0.35.2",
     "tailwindcss": "3.4.17"
   }
 }
