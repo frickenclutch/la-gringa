@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "la-gringas",
+  "account_id": "0159ef82c2b48adea5a695c46f2312bb",
   "main": "worker.js",
   "compatibility_date": "2026-06-18",
   "observability": {
