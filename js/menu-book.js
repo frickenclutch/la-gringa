@@ -53,15 +53,19 @@
     }
     book.style.transform = transformStr;
 
+    let didBurst = false;
     if (stateChanged && emitParticles) {
       const flipLeft = currentView % 2 !== 0;
       setTimeout(() => fireParticleBurst(flipLeft), 50);
+      didBurst = true;
     }
 
     document.getElementById('nav-left').style.opacity = currentView > 0 ? '1' : '0';
     document.getElementById('nav-left').style.pointerEvents = currentView > 0 ? 'auto' : 'none';
     document.getElementById('nav-right').style.opacity = currentView < totalViews ? '1' : '0';
     document.getElementById('nav-right').style.pointerEvents = currentView < totalViews ? 'auto' : 'none';
+
+    return didBurst;
   }
 
   window.addEventListener('resize', () => {
@@ -75,15 +79,32 @@
       if (direction < 0 && currentView % 2 === 0 && currentView > 0) nextView--;
     }
 
-    if (nextView >= 0 && nextView <= totalViews) {
+    if (nextView >= 0 && nextView <= totalViews && nextView !== currentView) {
+      const flipLeft = direction > 0;
       currentView = nextView;
-      updateBookState(true);
+      const didBurst = updateBookState(true);
+      // Same-leaf page steps (mobile 1→2, etc.) don't toggle a leaf — still spark.
+      if (!didBurst) {
+        setTimeout(function () {
+          fireParticleBurst(flipLeft);
+        }, 50);
+      }
     }
   }
 
   function jumpToView(view) {
+    if (view === currentView) {
+      document.getElementById('dialer').classList.remove('open');
+      return;
+    }
+    const flipLeft = view > currentView;
     currentView = view;
-    updateBookState(true);
+    const didBurst = updateBookState(true);
+    if (!didBurst) {
+      setTimeout(function () {
+        fireParticleBurst(flipLeft);
+      }, 50);
+    }
     document.getElementById('dialer').classList.remove('open');
   }
 
@@ -233,8 +254,8 @@
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height * 0.35; // rise from the upper half of the logo
 
-    for (let i = 0; i < 22; i++) particles.push(new Particle(cx, cy, 'smoke', flipLeft, true));
-    for (let i = 0; i < 28; i++) particles.push(new Particle(cx, cy, 'ember', flipLeft, true));
+    for (let i = 0; i < 28; i++) particles.push(new Particle(cx, cy, 'smoke', flipLeft, true));
+    for (let i = 0; i < 36; i++) particles.push(new Particle(cx, cy, 'ember', flipLeft, true));
 
     seal.classList.remove('is-singeing');
     // Retrigger CSS animation
@@ -250,8 +271,8 @@
     const spineX = bookRect.left + bookRect.width / 2;
     const spineY = bookRect.top + bookRect.height / 2;
 
-    for (let i = 0; i < 40; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft, false));
-    for (let i = 0; i < 30; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft, false));
+    for (let i = 0; i < 55; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft, false));
+    for (let i = 0; i < 42; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft, false));
 
     fireSealSinge(flipLeft);
 
