@@ -17,6 +17,7 @@ const FILES = [
   'fonts.css',
   'sw.js',
   'manifest.webmanifest',
+  'manifest-menu.webmanifest',
   'robots.txt',
   'sitemap.xml',
 ];

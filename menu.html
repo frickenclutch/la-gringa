@@ -23,8 +23,8 @@
     <!-- Self-hosted fonts (no third-party CDN) -->
     <link rel="stylesheet" href="fonts.css">
 
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.webmanifest">
+    <!-- PWA — menu-scoped so Install opens straight into the manuscript -->
+    <link rel="manifest" href="/manifest-menu.webmanifest">
     <meta name="theme-color" content="#1a2a30">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
@@ -32,7 +32,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Dirty Gringo">
+    <meta name="apple-mobile-web-app-title" content="DG Menu">
     
     <style>
         :root {
@@ -243,7 +243,161 @@
             /* folded cover (~280px): pull the 'Call' spoke off the right wall; shrink discs for tap separation */
             .dialer-container.open .opt-3 { transform: translate(-8px, -88px) scale(1); }
             .dial-option { width: 46px; height: 46px; font-size: 0.7rem; }
+            .menu-install-btn { padding: 0.55rem 0.75rem; font-size: 0.68rem; max-width: calc(100vw - 6.5rem); }
+            .menu-install-btn .menu-install-label-full { display: none; }
+            .menu-install-btn .menu-install-label-short { display: inline; }
         }
+
+        /* ---- Install Menu App (adaptive PWA) ---- */
+        @keyframes install-rise {
+            from { opacity: 0; transform: translateY(18px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes install-ember {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(247, 208, 112, 0.0), 0 8px 28px rgba(0,0,0,0.55); }
+            50%      { box-shadow: 0 0 22px 2px rgba(247, 208, 112, 0.45), 0 8px 28px rgba(0,0,0,0.55); }
+        }
+
+        .menu-install-btn {
+            position: fixed;
+            left: 20px;
+            bottom: 28px;
+            z-index: 9998;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.7rem 1.05rem;
+            border: 1.5px solid #4a3600;
+            border-radius: 999px;
+            background: linear-gradient(160deg, #f7d070 0%, #c9a227 45%, #8a6410 100%);
+            color: #2a1b12;
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: transform 0.2s ease, filter 0.2s ease;
+            animation: install-ember 2.8s ease-in-out infinite;
+            -webkit-tap-highlight-color: transparent;
+            max-width: min(18rem, calc(100vw - 7.5rem));
+        }
+        .menu-install-btn.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: install-rise 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both, install-ember 2.8s ease-in-out 0.55s infinite;
+        }
+        .menu-install-btn:hover { filter: brightness(1.06); transform: translateY(-1px) scale(1.02); }
+        .menu-install-btn:active { transform: scale(0.97); }
+        .menu-install-btn svg { width: 1.15rem; height: 1.15rem; flex-shrink: 0; fill: currentColor; }
+        .menu-install-btn .menu-install-label-short { display: none; }
+
+        @media (max-width: 800px) {
+            .menu-install-btn { bottom: 18px; left: 14px; transform-origin: bottom left; }
+            .dialer-container { /* keep clear of install pill */ }
+        }
+
+        .install-coach {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 1rem;
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            background: rgba(5, 10, 12, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .install-coach[hidden] { display: none !important; }
+        .install-coach-sheet {
+            width: min(420px, 100%);
+            background: linear-gradient(180deg, #f4e4c1 0%, #e8d5a5 55%, #d4b881 100%);
+            color: #2a1b12;
+            border: 2px solid #4a3600;
+            border-radius: 1.25rem 1.25rem 0.75rem 0.75rem;
+            padding: 1.25rem 1.25rem 1.35rem;
+            box-shadow: 0 -12px 40px rgba(0,0,0,0.55);
+            animation: install-rise 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+            font-family: 'IM Fell English', serif;
+        }
+        .install-coach-sheet h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            letter-spacing: 0.04em;
+            margin: 0 0 0.4rem;
+            color: #5a0c0c;
+        }
+        .install-coach-sheet p {
+            margin: 0 0 1rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+        .install-coach-steps {
+            list-style: none;
+            margin: 0 0 1.1rem;
+            padding: 0;
+            display: grid;
+            gap: 0.65rem;
+        }
+        .install-coach-steps li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+        .install-coach-steps .step-num {
+            flex-shrink: 0;
+            width: 1.55rem;
+            height: 1.55rem;
+            border-radius: 999px;
+            background: #2a1b12;
+            color: #e8d5a5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        .install-coach-steps .share-icon {
+            display: inline-block;
+            vertical-align: -0.2em;
+            width: 1.1em;
+            height: 1.1em;
+            margin: 0 0.15em;
+        }
+        .install-coach-actions {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: flex-end;
+        }
+        .install-coach-actions button {
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            font-size: 0.75rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 0.55rem 1rem;
+            cursor: pointer;
+            border: 1.5px solid #4a3600;
+        }
+        .install-coach-actions .coach-primary {
+            background: #2a1b12;
+            color: #e8d5a5;
+        }
+        .install-coach-actions .coach-ghost {
+            background: transparent;
+            color: #2a1b12;
+        }
+        body.install-coach-open { overflow: hidden; }
 
     </style>
 </head>
@@ -266,6 +420,26 @@
         <div class="dial-option opt-2" onclick="jumpToView(4); event.stopPropagation();">Mains</div>
         <a href="tel:3157138151" class="dial-option opt-3" onclick="event.stopPropagation();">Call</a>
         <a href="hub.html" class="dial-option opt-4" onclick="event.stopPropagation();">Home</a>
+    </div>
+
+    <!-- Get the Menu App — adaptive install (Chromium prompt / iOS Add to Home Screen) -->
+    <button type="button" id="menu-install-btn" class="menu-install-btn" hidden aria-hidden="true" aria-haspopup="dialog" aria-controls="install-coach">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l4 4h-3v6h-2V7H8l4-4zm-7 12h14v2H5v-2zm0 4h14v2H5v-2z"/></svg>
+      <span class="menu-install-label-full">Get the Menu App</span>
+      <span class="menu-install-label-short">Get Menu</span>
+    </button>
+
+    <div id="install-coach" class="install-coach" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="install-coach-title">
+      <div class="install-coach-sheet">
+        <h2 id="install-coach-title">Put this menu on your home screen</h2>
+        <div id="install-coach-body">
+          <p>Install the Dirty Gringo manuscript like an app — opens straight to the menu, even on weak patio signal.</p>
+        </div>
+        <div class="install-coach-actions">
+          <button type="button" class="coach-ghost" id="install-coach-dismiss">Not now</button>
+          <button type="button" class="coach-primary" id="install-coach-close">Got it</button>
+        </div>
+      </div>
     </div>
 
     <div class="scene">
@@ -641,6 +815,7 @@
     </div>
 
     <script src="js/menu-book.js"></script>
+    <script src="js/menu-install.js"></script>
     <script src="js/sw-register.js"></script>
 </body>
 </html>

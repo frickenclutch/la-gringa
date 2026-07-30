@@ -114,7 +114,14 @@
   );
 
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.dialer-container') || e.target.closest('.nav-hint')) return;
+    if (
+      e.target.closest('.dialer-container') ||
+      e.target.closest('.nav-hint') ||
+      e.target.closest('#menu-install-btn') ||
+      e.target.closest('#install-coach')
+    ) {
+      return;
+    }
 
     const clickX = e.clientX;
     const width = window.innerWidth;

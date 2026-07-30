@@ -26,8 +26,10 @@ npm run build:fonts
 |------|------|
 | `/` (`index.html`) | Gated entrance + skillet catch game |
 | `/hub` | Crossroads: menu, call, directions, hours |
-| `/menu` | Interactive parchment menu |
+| `/menu` | Interactive parchment menu + **Get the Menu App** install |
 | `POST /api/reward` | Issues patio promo codes (worker only — not in client JS) |
+
+From the menu page, Chromium browsers get the native install prompt; iOS Safari gets an Add to Home Screen coach mark. The menu uses `manifest-menu.webmanifest` (`start_url: /menu`) so the installed app opens straight into the manuscript.
 
 ## Configuration
 

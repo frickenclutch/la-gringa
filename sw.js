@@ -4,13 +4,14 @@
      the cache is only a fallback when the device is offline.
    - Static assets (CSS, fonts, icons, JS, data) use STALE-WHILE-REVALIDATE.
    Bump VERSION to force every client onto a clean cache after a deploy. */
-const VERSION = 'dg-v2';
+const VERSION = 'dg-v3';
 const CACHE = VERSION + '-cache';
 const PRECACHE = [
   '/', '/hub', '/menu',
-  '/styles.css', '/fonts.css', '/manifest.webmanifest',
+  '/styles.css', '/fonts.css',
+  '/manifest.webmanifest', '/manifest-menu.webmanifest',
   '/icons/icon-192.png',
-  '/js/sw-register.js',
+  '/js/sw-register.js', '/js/menu-install.js',
   '/data/site.json',
   '/data/recipes.json'
 ];

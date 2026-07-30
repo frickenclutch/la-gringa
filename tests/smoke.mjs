@@ -34,11 +34,13 @@ console.log('structure');
   'data/recipes.json',
   'js/gate-game.js',
   'js/menu-book.js',
+  'js/menu-install.js',
   'js/sw-register.js',
   'assets/logo-source.png',
   'robots.txt',
   'sitemap.xml',
   'icons/icon-192.png',
+  'manifest-menu.webmanifest',
 ].forEach((f) => ok(existsSync(join(root, f)), f + ' exists'));
 
 console.log('\nsite.json');
@@ -76,6 +78,9 @@ console.log('\nHTML hygiene');
 });
 ok(read('index.html').includes('js/gate-game.js'), 'index loads gate-game.js');
 ok(read('menu.html').includes('js/menu-book.js'), 'menu loads menu-book.js');
+ok(read('menu.html').includes('js/menu-install.js'), 'menu loads menu-install.js');
+ok(read('menu.html').includes('manifest-menu.webmanifest'), 'menu uses menu-scoped manifest');
+ok(read('manifest-menu.webmanifest').includes('"/menu"'), 'menu manifest starts at /menu');
 ok(!/wp-content\/uploads/.test(read('tools/build-icons.mjs')), 'icon build uses local logo');
 
 console.log('\n' + (failed ? failed + ' failed' : 'all passed'));

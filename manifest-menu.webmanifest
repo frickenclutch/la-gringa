@@ -1,0 +1,17 @@
+{
+  "id": "/menu",
+  "name": "Dirty Gringo Menu",
+  "short_name": "DG Menu",
+  "description": "The Dirty Gringo lost manuscript — Fresh Mex menu for the Dobisky patio, Ogdensburg NY.",
+  "start_url": "/menu",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a1114",
+  "theme_color": "#1a2a30",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
