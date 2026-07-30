@@ -53,19 +53,15 @@
     }
     book.style.transform = transformStr;
 
-    let didBurst = false;
     if (stateChanged && emitParticles) {
       const flipLeft = currentView % 2 !== 0;
       setTimeout(() => fireParticleBurst(flipLeft), 50);
-      didBurst = true;
     }
 
     document.getElementById('nav-left').style.opacity = currentView > 0 ? '1' : '0';
     document.getElementById('nav-left').style.pointerEvents = currentView > 0 ? 'auto' : 'none';
     document.getElementById('nav-right').style.opacity = currentView < totalViews ? '1' : '0';
     document.getElementById('nav-right').style.pointerEvents = currentView < totalViews ? 'auto' : 'none';
-
-    return didBurst;
   }
 
   window.addEventListener('resize', () => {
@@ -79,32 +75,15 @@
       if (direction < 0 && currentView % 2 === 0 && currentView > 0) nextView--;
     }
 
-    if (nextView >= 0 && nextView <= totalViews && nextView !== currentView) {
-      const flipLeft = direction > 0;
+    if (nextView >= 0 && nextView <= totalViews) {
       currentView = nextView;
-      const didBurst = updateBookState(true);
-      // Same-leaf page steps (mobile 1→2, etc.) don't toggle a leaf — still spark.
-      if (!didBurst) {
-        setTimeout(function () {
-          fireParticleBurst(flipLeft);
-        }, 50);
-      }
+      updateBookState(true);
     }
   }
 
   function jumpToView(view) {
-    if (view === currentView) {
-      document.getElementById('dialer').classList.remove('open');
-      return;
-    }
-    const flipLeft = view > currentView;
     currentView = view;
-    const didBurst = updateBookState(true);
-    if (!didBurst) {
-      setTimeout(function () {
-        fireParticleBurst(flipLeft);
-      }, 50);
-    }
+    updateBookState(true);
     document.getElementById('dialer').classList.remove('open');
   }
 
@@ -171,36 +150,27 @@
   resizeCanvas();
 
   class Particle {
-    constructor(x, y, type, flipLeft, fromSeal) {
+    constructor(x, y, type, flipLeft) {
       this.type = type;
-      this.x = x + (fromSeal ? (Math.random() - 0.5) * 28 : 0);
-      // Spine burst scatters along the binding; seal burst clusters at the logo.
-      this.y = fromSeal
-        ? y + (Math.random() - 0.5) * 24
-        : y + (Math.random() - 0.5) * (canvasHeight * 0.9);
+      this.x = x;
+      this.y = y + (Math.random() - 0.5) * (canvasHeight * 0.9);
       this.life = 1.0;
-      this.fromSeal = !!fromSeal;
 
       const directionMultiplier = flipLeft ? -1 : 1;
 
       if (type === 'smoke') {
-        this.size = fromSeal ? Math.random() * 14 + 12 : Math.random() * 20 + 20;
-        this.vx = fromSeal
-          ? (Math.random() - 0.5) * 1.8 + directionMultiplier * 0.6
-          : (Math.random() * 3 + 1) * directionMultiplier;
-        this.vy = fromSeal ? Math.random() * -2.8 - 1.6 : Math.random() * -2 - 1;
-        this.decay = fromSeal ? Math.random() * 0.014 + 0.008 : Math.random() * 0.01 + 0.005;
+        this.size = Math.random() * 20 + 20;
+        this.vx = (Math.random() * 3 + 1) * directionMultiplier;
+        this.vy = Math.random() * -2 - 1;
+        this.decay = Math.random() * 0.01 + 0.005;
         const shade = Math.floor(Math.random() * 30 + 10);
         this.color = `${shade}, ${shade}, ${shade}`;
       } else {
-        // ember / singe sparks
-        this.size = fromSeal ? Math.random() * 3.5 + 1.2 : Math.random() * 4 + 1;
-        this.vx = fromSeal
-          ? (Math.random() - 0.5) * 3.5 + directionMultiplier * 0.8
-          : (Math.random() * 8 + 2) * directionMultiplier;
-        this.vy = fromSeal ? Math.random() * -5.5 - 2.5 : Math.random() * -4 - 2;
-        this.decay = fromSeal ? Math.random() * 0.025 + 0.012 : Math.random() * 0.02 + 0.01;
-        this.color = Math.random() > 0.35 ? '255, 90, 10' : '255, 200, 50';
+        this.size = Math.random() * 4 + 1;
+        this.vx = (Math.random() * 8 + 2) * directionMultiplier;
+        this.vy = Math.random() * -4 - 2;
+        this.decay = Math.random() * 0.02 + 0.01;
+        this.color = Math.random() > 0.4 ? '255, 100, 0' : '255, 200, 50';
       }
     }
 
@@ -208,9 +178,9 @@
       this.x += this.vx;
       this.y += this.vy;
       this.life -= this.decay;
-      if (this.type === 'smoke') this.size += this.fromSeal ? 0.55 : 0.8;
+      if (this.type === 'smoke') this.size += 0.8;
       if (this.type === 'ember') {
-        this.vy += this.fromSeal ? 0.05 : 0.08;
+        this.vy += 0.08;
         this.vx *= 0.92;
       }
     }
@@ -240,41 +210,48 @@
     }
   }
 
-  function fireSealSinge(flipLeft) {
-    const seal = document.getElementById('cover-seal');
-    if (!seal) return;
-
-    const rect = seal.getBoundingClientRect();
-    // Skip if the seal is flipped away / off-screen (tiny or out of viewport)
-    if (rect.width < 8 || rect.height < 8) return;
-    if (rect.bottom < 0 || rect.top > windowHeight || rect.right < 0 || rect.left > windowWidth) {
-      return;
-    }
-
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height * 0.35; // rise from the upper half of the logo
-
-    for (let i = 0; i < 28; i++) particles.push(new Particle(cx, cy, 'smoke', flipLeft, true));
-    for (let i = 0; i < 36; i++) particles.push(new Particle(cx, cy, 'ember', flipLeft, true));
-
-    seal.classList.remove('is-singeing');
-    // Retrigger CSS animation
-    void seal.offsetWidth;
-    seal.classList.add('is-singeing');
-    window.setTimeout(function () {
-      seal.classList.remove('is-singeing');
-    }, 800);
-  }
-
   function fireParticleBurst(flipLeft) {
     const bookRect = document.getElementById('book').getBoundingClientRect();
     const spineX = bookRect.left + bookRect.width / 2;
     const spineY = bookRect.top + bookRect.height / 2;
 
-    for (let i = 0; i < 55; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft, false));
-    for (let i = 0; i < 42; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft, false));
+    for (let i = 0; i < 40; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft));
+    for (let i = 0; i < 30; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft));
 
-    fireSealSinge(flipLeft);
+    // Extra sparks from the cover logo when it's on-screen (additive; spine burst unchanged)
+    const seal = document.getElementById('cover-seal');
+    if (seal) {
+      const rect = seal.getBoundingClientRect();
+      const onScreen =
+        rect.width >= 8 &&
+        rect.height >= 8 &&
+        rect.bottom > 0 &&
+        rect.top < window.innerHeight &&
+        rect.right > 0 &&
+        rect.left < window.innerWidth;
+      if (onScreen) {
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        for (let i = 0; i < 16; i++) {
+          const p = new Particle(cx, cy, 'smoke', flipLeft);
+          p.y = cy + (Math.random() - 0.5) * 36;
+          p.vy = Math.random() * -3 - 1.2;
+          particles.push(p);
+        }
+        for (let i = 0; i < 22; i++) {
+          const p = new Particle(cx, cy, 'ember', flipLeft);
+          p.y = cy + (Math.random() - 0.5) * 28;
+          p.vy = Math.random() * -5 - 2;
+          particles.push(p);
+        }
+        seal.classList.remove('is-singeing');
+        void seal.offsetWidth;
+        seal.classList.add('is-singeing');
+        setTimeout(function () {
+          seal.classList.remove('is-singeing');
+        }, 800);
+      }
+    }
 
     if (!animationFrameId) renderParticles();
   }
