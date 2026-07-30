@@ -1,12 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "la-gringas",
+  "main": "worker.js",
   "compatibility_date": "2026-06-18",
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
   },
   "compatibility_flags": [
     "nodejs_compat"

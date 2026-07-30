@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dirty Gringo - Lost Manuscript</title>
+    <meta name="description" content="Browse The Dirty Gringo lost manuscript — burritos, bowls, nachos, and Fresh Mex on the St. Lawrence in Ogdensburg, NY.">
+    <link rel="canonical" href="https://www.dirtygringonny.com/menu">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="The Dirty Gringo">
+    <meta property="og:title" content="The Dirty Gringo — Lost Manuscript Menu">
+    <meta property="og:description" content="An interactive parchment menu of Fresh Mex on the riverfront patio.">
+    <meta property="og:url" content="https://www.dirtygringonny.com/menu">
+    <meta property="og:image" content="https://www.dirtygringonny.com/icons/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="The Dirty Gringo — Lost Manuscript Menu">
+    <meta name="twitter:description" content="Interactive parchment menu — Fresh Mex in Ogdensburg, NY.">
+    <meta name="twitter:image" content="https://www.dirtygringonny.com/icons/icon-512.png">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Menu","name":"The Dirty Gringo Lost Manuscript","url":"https://www.dirtygringonny.com/menu","inLanguage":"en","provider":{"@type":"Restaurant","name":"The Dirty Gringo","telephone":"+13157138151","address":{"@type":"PostalAddress","streetAddress":"100 Riverside Ave.","addressLocality":"Ogdensburg","addressRegion":"NY","postalCode":"13669","addressCountry":"US"}}}
+    </script>
     <link rel="stylesheet" href="styles.css">
     <!-- Self-hosted fonts (no third-party CDN) -->
     <link rel="stylesheet" href="fonts.css">
@@ -625,270 +640,7 @@
         </div>
     </div>
 
-    <script>
-        // --- State Machine ---
-        // Views range from 0 (Cover) to 7 (Back Cover). 
-        // 1 View = 1 Page side. (Total 8 views across 4 leaves).
-        let currentView = 0; 
-        const totalViews = 7;
-        const leaves = [
-            document.getElementById('leaf1'),
-            document.getElementById('leaf2'),
-            document.getElementById('leaf3'),
-            document.getElementById('leaf4')
-        ];
-
-        function getLeafFlippedState(viewIndex) {
-            return [
-                viewIndex > 0, // Leaf 1 flipped if view > 0 (looking at views 1-7)
-                viewIndex > 2, // Leaf 2 flipped if view > 2 (looking at views 3-7)
-                viewIndex > 4, // Leaf 3 flipped if view > 4 (looking at views 5-7)
-                viewIndex > 6  // Leaf 4 flipped if view > 6 (looking at view 7)
-            ];
-        }
-
-        // --- Core Layout & Interaction Engine ---
-        function updateBookState(emitParticles = true) {
-            const isMobile = window.innerWidth <= 800;
-            const book = document.getElementById('book');
-            
-            // 1. Calculate which leaves should be flipped based on current view
-            const flippedStates = getLeafFlippedState(currentView);
-            let stateChanged = false;
-
-            leaves.forEach((leaf, index) => {
-                const wasFlipped = leaf.classList.contains('flipped');
-                const isFlipped = flippedStates[index];
-                
-                if (wasFlipped !== isFlipped) {
-                    stateChanged = true;
-                    if (isFlipped) {
-                        leaf.classList.add('flipped');
-                        leaf.style.zIndex = index + 1; 
-                    } else {
-                        leaf.classList.remove('flipped');
-                        // Delay z-index drop to hide clipping during animation
-                        setTimeout(() => { leaf.style.zIndex = (4 - index); }, 600);
-                    }
-                } else if (!wasFlipped && !isFlipped) {
-                    // Reset correct resting z-index for unflipped pages
-                    leaf.style.zIndex = (4 - index);
-                }
-            });
-
-            // 2. Camera Panning & Dynamic Centering (Desktop & Mobile)
-            let transformStr = '';
-            if (isMobile) {
-                // Mobile: Focus specifically on the Left or Right page via 25% shift of the 190vw container
-                transformStr = (currentView % 2 === 0) ? 'translateX(-25%)' : 'translateX(25%)';
-            } else {
-                // Desktop: Focus on spine, except Cover and Back page
-                if (currentView === 0) transformStr = 'translateX(-25%)';
-                else if (currentView === totalViews) transformStr = 'translateX(25%)';
-                else transformStr = 'translateX(0%)';
-            }
-            book.style.transform = transformStr;
-
-            // 3. Trigger particles ONLY if a physical leaf actually turned
-            if (stateChanged && emitParticles) {
-                // Determine direction: if we moved to an odd view (1,3,5), we opened a leaf (flip left).
-                const flipLeft = currentView % 2 !== 0; 
-                setTimeout(() => fireParticleBurst(flipLeft), 50); // delay ensures moving spine tracking
-            }
-
-            // Update Nav Hints
-            document.getElementById('nav-left').style.opacity = currentView > 0 ? '1' : '0';
-            document.getElementById('nav-left').style.pointerEvents = currentView > 0 ? 'auto' : 'none';
-            document.getElementById('nav-right').style.opacity = currentView < totalViews ? '1' : '0';
-            document.getElementById('nav-right').style.pointerEvents = currentView < totalViews ? 'auto' : 'none';
-        }
-
-        window.addEventListener('resize', () => { updateBookState(false); });
-
-        function navigateBook(direction) {
-            let nextView = currentView + direction;
-            // Desktop fast-forward: if on desktop and looking at an inside spread, 
-            // a single click turns the whole leaf (moves 2 views).
-            if (window.innerWidth > 800) {
-                if (direction > 0 && currentView % 2 !== 0 && currentView < 6) nextView++; // Move from left to right page jump
-                if (direction < 0 && currentView % 2 === 0 && currentView > 0) nextView--; // Move from right to left page jump
-            }
-            
-            if (nextView >= 0 && nextView <= totalViews) {
-                currentView = nextView;
-                updateBookState(true);
-            }
-        }
-
-        function jumpToView(view) {
-            currentView = view;
-            updateBookState(true);
-            document.getElementById('dialer').classList.remove('open');
-        }
-
-        // --- Touch / Swipe Handling ---
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, {passive: true});
-
-        document.addEventListener('touchend', e => {
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-            
-            // Check if mostly horizontal swipe (ignore if scrolling vertically)
-            if (Math.abs(touchEndX - touchStartX) > Math.abs(touchEndY - touchStartY)) {
-                if (touchEndX < touchStartX - 50) navigateBook(1); // Swipe Left -> Next
-                if (touchEndX > touchStartX + 50) navigateBook(-1); // Swipe Right -> Prev
-            }
-        }, {passive: true});
-
-        // Click on edges to turn (Desktop fallback for no nav buttons)
-        document.addEventListener('click', e => {
-            // Ignore clicks on dialer or interactive elements
-            if (e.target.closest('.dialer-container') || e.target.closest('.nav-hint')) return;
-            
-            const clickX = e.clientX;
-            const width = window.innerWidth;
-            if (clickX < width * 0.2) navigateBook(-1);
-            else if (clickX > width * 0.8) navigateBook(1);
-        });
-
-        // --- Dialer UI ---
-        function toggleDialer(e) {
-            document.getElementById('dialer').classList.toggle('open');
-            e.stopPropagation();
-        }
-
-        // --- Event-Driven Particle Physics ---
-        const canvas = document.getElementById('smokeCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let canvasWidth, canvasHeight;
-        let animationFrameId = null;
-
-        function resizeCanvas() {
-            canvasWidth = window.innerWidth;
-            canvasHeight = window.innerHeight;
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor(x, y, type, flipLeft) {
-                this.type = type;
-                this.x = x;
-                // Emit mostly from the center vertical line (the spine), scattered slightly
-                this.y = y + (Math.random() - 0.5) * (canvasHeight * 0.9); 
-                this.life = 1.0;
-
-                // Velocity logic: Push particles in the direction the page is turning
-                const directionMultiplier = flipLeft ? -1 : 1;
-                
-                if (type === 'smoke') {
-                    this.size = Math.random() * 20 + 20;
-                    this.vx = (Math.random() * 3 + 1) * directionMultiplier; 
-                    this.vy = (Math.random() * -2) - 1; // Drift up
-                    this.decay = Math.random() * 0.01 + 0.005;
-                    const shade = Math.floor(Math.random() * 30 + 10);
-                    this.color = `${shade}, ${shade}, ${shade}`; 
-                } else { // Ember
-                    this.size = Math.random() * 4 + 1;
-                    this.vx = (Math.random() * 8 + 2) * directionMultiplier;
-                    this.vy = (Math.random() * -4) - 2; 
-                    this.decay = Math.random() * 0.02 + 0.01;
-                    this.color = Math.random() > 0.4 ? '255, 100, 0' : '255, 200, 50';
-                }
-            }
-            
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.life -= this.decay;
-                if (this.type === 'smoke') this.size += 0.8;
-                if (this.type === 'ember') {
-                    this.vy += 0.08; // Gravity
-                    this.vx *= 0.92; // Air resistance
-                }
-            }
-            
-            draw(ctx) {
-                if (this.life <= 0) return;
-                ctx.save();
-                ctx.beginPath();
-                
-                if (this.type === 'smoke') {
-                    ctx.globalAlpha = Math.max(0, this.life * 0.5);
-                    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-                    gradient.addColorStop(0, `rgba(${this.color}, 0.6)`);
-                    gradient.addColorStop(1, `rgba(${this.color}, 0)`);
-                    ctx.fillStyle = gradient;
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                } else {
-                    ctx.globalAlpha = Math.max(0, this.life);
-                    ctx.fillStyle = `rgba(${this.color}, ${this.life})`;
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = `rgba(${this.color}, 1)`;
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                }
-                
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        // Fire a burst ONLY when a page turns.
-        function fireParticleBurst(flipLeft) {
-            // Track the actual dynamic location of the book spine as it moves
-            const bookRect = document.getElementById('book').getBoundingClientRect();
-            const spineX = bookRect.left + (bookRect.width / 2);
-            const spineY = bookRect.top + (bookRect.height / 2);
-            
-            for(let i=0; i<40; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft));
-            for(let i=0; i<30; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft));
-            
-            // Wake up the animation loop if it's sleeping
-            if (!animationFrameId) renderParticles();
-        }
-
-        function renderParticles() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            let active = false;
-            
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.update();
-                p.draw(ctx);
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                } else {
-                    active = true;
-                }
-            }
-            
-            // If particles exist, keep animating. Otherwise, sleep to save CPU.
-            if (active) {
-                animationFrameId = requestAnimationFrame(renderParticles);
-            } else {
-                animationFrameId = null;
-            }
-        }
-
-        // Init
-        updateBookState(false);
-
-    </script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/sw.js').catch(function () {});
-        });
-      }
-    </script>
+    <script src="js/menu-book.js"></script>
+    <script src="js/sw-register.js"></script>
 </body>
 </html>

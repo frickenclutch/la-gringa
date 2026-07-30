@@ -1,13 +1,19 @@
 {
   "name": "la-gringa",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "The Dirty Gringo — static site (gate / hub / menu) served by Cloudflare Pages",
+  "description": "The Dirty Gringo — static site (gate / hub / menu) served by Cloudflare Workers + Assets",
+  "type": "module",
   "scripts": {
     "build:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --minify",
     "watch:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --watch",
     "build:fonts": "node tools/build-fonts.mjs",
-    "build:icons": "node tools/build-icons.mjs"
+    "build:icons": "node tools/build-icons.mjs",
+    "stage": "node tools/stage-assets.mjs",
+    "build": "npm run build:css && npm run stage",
+    "test": "node tests/smoke.mjs",
+    "dev": "npm run stage && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
     "sharp": "^0.35.2",

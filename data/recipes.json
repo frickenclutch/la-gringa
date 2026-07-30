@@ -1,0 +1,20 @@
+{
+  "queso": {
+    "id": "queso",
+    "title": "Queso & Chips",
+    "emoji": "🧀",
+    "reqs": ["Tortilla Chips", "Queso Blanco", "Jalapeño Bacon"]
+  },
+  "marino": {
+    "id": "marino",
+    "title": "Greasy Marino",
+    "emoji": "🍳",
+    "reqs": ["Chorizo", "Jalapeño Bacon", "Cheddar Jack", "Queso Blanco", "Fried Eggs", "Ancho Chipotle"]
+  },
+  "marley": {
+    "id": "marley",
+    "title": "The Marley",
+    "emoji": "🍍",
+    "reqs": ["Jerk Chicken", "Rice", "Black Beans", "Cheddar Jack", "Jalapeños", "Pineapple Salsa"]
+  }
+}

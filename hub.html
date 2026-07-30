@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Dirty Gringo | Welcome to the Patio</title>
   <meta name="description" content="The Dirty Gringo at the Dobisky — Fresh Mex on the St. Lawrence River in Ogdensburg, NY. View the menu, call ahead, or find the patio.">
+  <link rel="canonical" href="https://www.dirtygringonny.com/hub">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Dirty Gringo">
+  <meta property="og:title" content="The Dirty Gringo | Welcome to the Patio">
+  <meta property="og:description" content="Menu, call-ahead, directions, and patio hours — Fresh Mex on the river in Ogdensburg, NY.">
+  <meta property="og:url" content="https://www.dirtygringonny.com/hub">
+  <meta property="og:image" content="https://www.dirtygringonny.com/icons/icon-512.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="The Dirty Gringo | Welcome to the Patio">
+  <meta name="twitter:description" content="Menu, call-ahead, directions, and patio hours on the St. Lawrence.">
+  <meta name="twitter:image" content="https://www.dirtygringonny.com/icons/icon-512.png">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Restaurant","name":"The Dirty Gringo","url":"https://www.dirtygringonny.com/hub","telephone":"+13157138151","address":{"@type":"PostalAddress","streetAddress":"100 Riverside Ave.","addressLocality":"Ogdensburg","addressRegion":"NY","postalCode":"13669","addressCountry":"US"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Tuesday","Wednesday","Thursday","Friday"],"opens":"11:00","closes":"19:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"11:00","closes":"15:00"}]}
+  </script>
 
   <link rel="stylesheet" href="styles.css">
   <!-- Self-hosted fonts (no third-party CDN) -->
@@ -192,12 +206,6 @@
     </div>
 
   </main>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js').catch(function () {});
-      });
-    }
-  </script>
+  <script src="js/sw-register.js"></script>
 </body>
 </html>

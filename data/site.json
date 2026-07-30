@@ -1,0 +1,32 @@
+{
+  "brand": "The Dirty Gringo",
+  "shortName": "Dirty Gringo",
+  "tagline": "At the Dobisky",
+  "description": "Fresh Mex on the St. Lawrence River in Ogdensburg, NY — patio game, lost-manuscript menu, and riverfront vibes.",
+  "phone": "3157138151",
+  "phoneDisplay": "315.713.8151",
+  "email": null,
+  "domain": "dirtygringonny.com",
+  "canonicalBase": "https://www.dirtygringonny.com",
+  "address": {
+    "street": "100 Riverside Ave.",
+    "city": "Ogdensburg",
+    "region": "NY",
+    "postalCode": "13669",
+    "country": "US"
+  },
+  "geo": {
+    "latitude": 44.6942,
+    "longitude": -75.4863
+  },
+  "hours": [
+    { "days": "Tuesday–Friday", "opens": "11:00", "closes": "19:00", "label": "Tue – Fri · 11am – 7pm" },
+    { "days": "Saturday", "opens": "11:00", "closes": "15:00", "label": "Saturday · 11am – 3pm" },
+    { "days": "Sunday–Monday", "opens": null, "closes": null, "label": "Sun & Mon · Closed" }
+  ],
+  "mapsQuery": "The Dirty Gringo 100 Riverside Ave Ogdensburg NY 13669",
+  "themeColor": "#2e0854",
+  "sameAs": [
+    "https://www.dirtygringonny.com"
+  ]
+}

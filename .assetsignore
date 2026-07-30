@@ -1,0 +1,22 @@
+**/node_modules
+**/.git
+**/.claude
+**/tools
+**/tests
+**/src
+**/functions
+package.json
+package-lock.json
+tailwind.config.js
+wrangler.jsonc
+worker.js
+LICENSE
+README.md
+.gitignore
+.assetsignore
+.env
+.env.*
+valuation.png
+valuation - Copy.png
+upgrades to add value now..png
+*.md

@@ -2,15 +2,17 @@
    Menu-safe by design:
    - HTML pages use NETWORK-FIRST, so an online visitor always gets fresh prices;
      the cache is only a fallback when the device is offline.
-   - Static assets (CSS, fonts, icons) use STALE-WHILE-REVALIDATE: served instantly
-     from cache, then refreshed in the background for next time.
+   - Static assets (CSS, fonts, icons, JS, data) use STALE-WHILE-REVALIDATE.
    Bump VERSION to force every client onto a clean cache after a deploy. */
-const VERSION = 'dg-v1';
+const VERSION = 'dg-v2';
 const CACHE = VERSION + '-cache';
 const PRECACHE = [
   '/', '/hub', '/menu',
   '/styles.css', '/fonts.css', '/manifest.webmanifest',
-  '/icons/icon-192.png'
+  '/icons/icon-192.png',
+  '/js/sw-register.js',
+  '/data/site.json',
+  '/data/recipes.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -32,13 +34,15 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return; // same-origin only (no third-party deps anyway)
+  if (url.origin !== self.location.origin) return;
+
+  // Never cache the reward API
+  if (url.pathname.startsWith('/api/')) return;
 
   const isHTML = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
 
   if (isHTML) {
-    // NETWORK-FIRST — fresh prices online, cached copy only when offline.
     event.respondWith((async () => {
       try {
         const fresh = await fetch(req);
@@ -52,7 +56,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // STALE-WHILE-REVALIDATE for assets.
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(req);
