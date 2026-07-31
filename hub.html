@@ -52,6 +52,7 @@
       background: linear-gradient(to bottom, var(--sunset-top) 0%, var(--sunset-mid) 45%, var(--sunset-bot) 70%, var(--river-dark) 100%);
       background-attachment: fixed;
       min-height: 100vh;
+      min-height: 100dvh;
     }
     .font-brand { font-family: 'Rye', serif; }
     .font-ui { font-family: 'Lilita One', cursive; }
@@ -97,6 +98,34 @@
       .nav-card { gap: 0.6rem; padding: 0.85rem; }
       .nav-card .text-4xl { font-size: 1.875rem; }
       .nav-card h3 { font-size: 1.05rem; }
+    }
+
+    body > main {
+      min-height: 100dvh;
+      padding-top: max(2rem, env(safe-area-inset-top));
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+
+    @media (max-height: 560px) and (orientation: landscape) {
+      body > main { padding-top: 0.65rem; padding-bottom: 0.4rem; }
+      main > header { margin-bottom: 0.65rem !important; }
+      main > header h1 { font-size: 2rem !important; }
+      .cantina-glass { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+      main > .cantina-glass { margin-bottom: 0.65rem; padding: 0.75rem; }
+      main > .cantina-glass > span { margin-bottom: 0.35rem; }
+      main > .cantina-glass h2 { font-size: 1.5rem !important; margin-bottom: 0.3rem; }
+      .nav-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+      .nav-card { padding: 0.7rem; gap: 0.5rem; }
+      .nav-card .text-4xl { font-size: 1.7rem; }
+      .nav-card h3 { font-size: 1rem; }
+      .nav-card p { font-size: 0.65rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wave-1, .wave-2, .sunset-glow, .nav-card { animation: none !important; }
+      * { scroll-behavior: auto !important; }
     }
   </style>
 </head>
@@ -145,7 +174,7 @@
     </div>
 
     <!-- Navigation grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+    <div class="nav-grid grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
 
       <!-- The Menu -->
       <a href="menu.html" class="nav-card group cantina-glass rounded-2xl p-5 flex items-center gap-4 hover:border-amber-400 hover:scale-[1.02] transition-all duration-300" style="animation-delay:0.05s">

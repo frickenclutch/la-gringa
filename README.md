@@ -10,6 +10,7 @@ Live brand domain: [dirtygringonny.com](https://www.dirtygringonny.com)
 npm install
 npm run build        # Tailwind + stage dist/ for Workers Assets
 npm test             # repo smoke tests
+npm run test:mobile  # Playwright: iPhone/WebKit, Galaxy, Fold, desktop
 npm run dev          # local preview with /api/reward worker
 ```
 
@@ -49,6 +50,9 @@ npm run deploy
 
 - Production Tailwind build (not Play CDN)
 - Self-hosted fonts + PWA (manifest, icons, menu-safe service worker)
+- Adaptive single-page/spread menu layouts for phones, tablets, foldables, and rotation
+- Pointer gestures with vertical-scroll protection and one-turn transition locking
+- Best-effort Android haptics; visual/audio fallback on iOS (no Web Vibration API)
 - Zero third-party runtime on the client
 - Logo source and generated icons are in-repo (no WordPress hotlink at build/runtime)
 

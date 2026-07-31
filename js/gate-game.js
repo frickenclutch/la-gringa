@@ -95,29 +95,32 @@
   let animId = null;
   let lastSpawn = 0;
   let player = { x: 0, y: 0, width: 140, height: 30 };
+  let viewportWidth = window.innerWidth;
+  let viewportHeight = window.innerHeight;
 
   function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    player.x = canvas.width / 2;
-    player.y = canvas.height - window.innerHeight * 0.15 - 10;
+    const viewport = window.visualViewport;
+    viewportWidth = Math.round(viewport ? viewport.width : window.innerWidth);
+    viewportHeight = Math.round(viewport ? viewport.height : window.innerHeight);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(viewportWidth * dpr);
+    canvas.height = Math.round(viewportHeight * dpr);
+    canvas.style.width = viewportWidth + 'px';
+    canvas.style.height = viewportHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    player.x = Math.min(Math.max(player.x || viewportWidth / 2, 70), viewportWidth - 70);
+    player.y = viewportHeight - viewportHeight * 0.15 - 10;
   }
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
   resize();
 
-  canvas.addEventListener('mousemove', (e) => {
-    if (isPlaying) player.x = e.clientX;
+  canvas.addEventListener('pointermove', (event) => {
+    if (!isPlaying) return;
+    player.x = Math.min(Math.max(event.clientX, player.width / 2), viewportWidth - player.width / 2);
+    if (event.pointerType === 'touch' && event.cancelable) event.preventDefault();
   });
-  canvas.addEventListener(
-    'touchmove',
-    (e) => {
-      if (isPlaying) {
-        player.x = e.touches[0].clientX;
-        e.preventDefault();
-      }
-    },
-    { passive: false }
-  );
 
   async function loadRecipes() {
     if (RECIPES) return RECIPES;
@@ -145,7 +148,7 @@
     }
   }
 
-  window startGame(recipeKey) {
+  function startGame(recipeKey) {
     initAudio();
     loadRecipes()
       .then((recipes) => {
@@ -188,6 +191,7 @@
   function winGame() {
     isPlaying = false;
     playSfx('win');
+    if (window.DGHaptics) window.DGHaptics.trigger('win');
     document.getElementById('ui-hud').classList.add('hidden');
     document.getElementById('game-container').classList.add('hidden');
 
@@ -219,7 +223,7 @@
   function loop(timestamp) {
     if (!isPlaying) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, viewportWidth, viewportHeight);
 
     if (timestamp - lastSpawn > 900) {
       spawnItem();
@@ -239,7 +243,7 @@
         }
       }
 
-      if (it.y > canvas.height) {
+      if (it.y > viewportHeight) {
         items.splice(i, 1);
         continue;
       }
@@ -300,7 +304,7 @@
       name = JUNK[Math.floor(Math.random() * JUNK.length)];
     }
 
-    const spawnX = canvas.width * 0.2 + Math.random() * (canvas.width * 0.6);
+    const spawnX = viewportWidth * 0.2 + Math.random() * (viewportWidth * 0.6);
 
     items.push({
       x: spawnX,
@@ -318,11 +322,14 @@
     if (it.needed && !collected.includes(it.name)) {
       collected.push(it.name);
       playSfx('catch');
+      if (window.DGHaptics) window.DGHaptics.trigger('success');
       updateHud();
     } else if (!it.needed && !activeRecipe.reqs.includes(it.name)) {
       playSfx('bad');
+      if (window.DGHaptics) window.DGHaptics.trigger('warning');
     } else {
       playSfx('catch');
+      if (window.DGHaptics) window.DGHaptics.trigger('light');
     }
   }
 

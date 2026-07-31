@@ -52,7 +52,18 @@
       background: linear-gradient(to bottom, var(--sunset-top) 0%, var(--sunset-mid) 45%, var(--sunset-bot) 70%, var(--river-dark) 100%);
       background-attachment: fixed;
       min-height: 100vh;
+      min-height: 100dvh;
       overflow-x: hidden; /* allow vertical scroll if a panel is taller than the viewport (small phones); canvas blocks scroll during play */
+    }
+    body > header {
+      padding-top: max(1rem, env(safe-area-inset-top)) !important;
+      padding-left: max(1rem, env(safe-area-inset-left)) !important;
+      padding-right: max(1rem, env(safe-area-inset-right)) !important;
+    }
+    body > main {
+      min-height: 100dvh;
+      padding-top: max(5.5rem, calc(4.5rem + env(safe-area-inset-top)));
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
     .font-brand { font-family: 'Rye', serif; }
     .font-ui { font-family: 'Lilita One', cursive; }
@@ -104,6 +115,30 @@
       #ui-hud { top: 4.5rem !important; }
       #hud-checklist { gap: 0.25rem; font-size: 0.7rem; }
       #hud-checklist span { padding: 0.15rem 0.35rem !important; }
+    }
+
+    @media (max-height: 560px) and (orientation: landscape) {
+      body > header { padding-top: max(0.45rem, env(safe-area-inset-top)) !important; }
+      header h1 { font-size: 1.25rem !important; }
+      header > div p { font-size: 0.62rem !important; }
+      header a { padding: 0.4rem 0.7rem !important; font-size: 0.7rem !important; }
+      body > main { padding-top: 3.25rem; padding-bottom: 0.4rem; }
+      #ui-welcome { max-height: calc(100dvh - 3.75rem); padding: 0.8rem; }
+      #ui-welcome > span { margin-bottom: 0.35rem; }
+      #ui-welcome h2 { font-size: 1.65rem !important; margin-bottom: 0.45rem; }
+      #ui-welcome > p { margin-bottom: 0.65rem; padding: 0.45rem; font-size: 0.72rem; }
+      #ui-welcome .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
+      #ui-welcome button { padding: 0.65rem; }
+      #ui-welcome button p { margin-top: 0.25rem; }
+      #ui-welcome button span { margin-top: 0.35rem; }
+      #ui-hud { top: max(3.25rem, calc(2.75rem + env(safe-area-inset-top))) !important; }
+      #ui-hud > div { padding: 0.4rem 0.75rem; gap: 0.4rem; }
+      #ui-success { max-height: calc(100dvh - 1rem); padding: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .wave-1, .wave-2, .sunset-glow, .animate-pulse { animation: none !important; }
+      * { scroll-behavior: auto !important; }
     }
   </style>
 </head>
@@ -321,6 +356,7 @@
 
   </main>
 
+  <script src="js/haptics.js"></script>
   <script src="js/gate-game.js"></script>
   <script src="js/sw-register.js"></script>
 </body>

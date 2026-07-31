@@ -1,5 +1,7 @@
 .claude/
 node_modules/
 dist/
+test-results/
+playwright-report/
 .env
 .env.*

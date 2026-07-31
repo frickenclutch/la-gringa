@@ -3,7 +3,15 @@
   'use strict';
 
   let currentView = 0;
+  let layoutMode = 'spread';
+  let navigationLockedUntil = 0;
+  let suppressClickUntil = 0;
+  let layoutFrame = 0;
   const totalViews = 7;
+  const root = document.documentElement;
+  const scene = document.querySelector('.scene');
+  const book = document.getElementById('book');
+  const faces = Array.from(document.querySelectorAll('.face'));
   const leaves = [
     document.getElementById('leaf1'),
     document.getElementById('leaf2'),
@@ -11,127 +19,256 @@
     document.getElementById('leaf4'),
   ];
 
+  function prefersReducedMotion() {
+    return Boolean(window.DGHaptics && window.DGHaptics.isReducedMotion());
+  }
+
+  function getViewportSize() {
+    const viewport = window.visualViewport;
+    return {
+      width: Math.round(viewport ? viewport.width : window.innerWidth),
+      height: Math.round(viewport ? viewport.height : window.innerHeight),
+    };
+  }
+
+  function getLayoutMode() {
+    const viewport = getViewportSize();
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const portrait = viewport.height >= viewport.width;
+    const shortLandscape = !portrait && viewport.height <= 560;
+    const compactFoldable = coarsePointer && viewport.width <= 900;
+    const portraitTablet = coarsePointer && portrait && viewport.width <= 1100;
+    return viewport.width <= 800 || shortLandscape || compactFoldable || portraitTablet
+      ? 'single'
+      : 'spread';
+  }
+
   function getLeafFlippedState(viewIndex) {
     return [viewIndex > 0, viewIndex > 2, viewIndex > 4, viewIndex > 6];
   }
 
-  function updateBookState(emitParticles) {
-    if (emitParticles === undefined) emitParticles = true;
-    const isMobile = window.innerWidth <= 800;
-    const book = document.getElementById('book');
+  function normalizeViewForSpread(viewIndex) {
+    if (viewIndex <= 0) return 0;
+    if (viewIndex >= totalViews) return totalViews;
+    return viewIndex % 2 === 0 ? viewIndex - 1 : viewIndex;
+  }
 
+  function updateLayoutMode() {
+    const nextMode = getLayoutMode();
+    if (nextMode !== layoutMode) {
+      if (nextMode === 'spread') currentView = normalizeViewForSpread(currentView);
+      layoutMode = nextMode;
+    }
+    root.dataset.menuLayout = layoutMode;
+    root.dataset.menuView = String(currentView);
+  }
+
+  function updateBookState() {
+    updateLayoutMode();
     const flippedStates = getLeafFlippedState(currentView);
-    let stateChanged = false;
 
     leaves.forEach((leaf, index) => {
       const wasFlipped = leaf.classList.contains('flipped');
       const isFlipped = flippedStates[index];
 
       if (wasFlipped !== isFlipped) {
-        stateChanged = true;
+        leaf.classList.add('turning');
         if (isFlipped) {
           leaf.classList.add('flipped');
           leaf.style.zIndex = index + 1;
         } else {
           leaf.classList.remove('flipped');
-          setTimeout(() => {
-            leaf.style.zIndex = 4 - index;
-          }, 600);
+          window.setTimeout(() => {
+            if (!leaf.classList.contains('flipped')) leaf.style.zIndex = 4 - index;
+          }, prefersReducedMotion() ? 80 : 600);
         }
-      } else if (!wasFlipped && !isFlipped) {
+        window.setTimeout(() => {
+          leaf.classList.remove('turning');
+        }, prefersReducedMotion() ? 140 : 1220);
+      } else if (!wasFlipped) {
         leaf.style.zIndex = 4 - index;
       }
     });
 
-    let transformStr = '';
-    if (isMobile) {
-      transformStr = currentView % 2 === 0 ? 'translateX(-25%)' : 'translateX(25%)';
+    if (layoutMode === 'single') {
+      book.style.transform = currentView % 2 === 0 ? 'translateX(-25%)' : 'translateX(25%)';
+    } else if (currentView === 0) {
+      book.style.transform = 'translateX(-25%)';
+    } else if (currentView === totalViews) {
+      book.style.transform = 'translateX(25%)';
     } else {
-      if (currentView === 0) transformStr = 'translateX(-25%)';
-      else if (currentView === totalViews) transformStr = 'translateX(25%)';
-      else transformStr = 'translateX(0%)';
-    }
-    book.style.transform = transformStr;
-
-    if (stateChanged && emitParticles) {
-      const flipLeft = currentView % 2 !== 0;
-      setTimeout(() => fireParticleBurst(flipLeft), 50);
+      book.style.transform = 'translateX(0%)';
     }
 
-    document.getElementById('nav-left').style.opacity = currentView > 0 ? '1' : '0';
-    document.getElementById('nav-left').style.pointerEvents = currentView > 0 ? 'auto' : 'none';
-    document.getElementById('nav-right').style.opacity = currentView < totalViews ? '1' : '0';
-    document.getElementById('nav-right').style.pointerEvents = currentView < totalViews ? 'auto' : 'none';
+    root.dataset.menuView = String(currentView);
+    document.getElementById('nav-left').disabled = currentView <= 0;
+    document.getElementById('nav-right').disabled = currentView >= totalViews;
+    requestAnimationFrame(updateOverflowCues);
   }
 
-  window.addEventListener('resize', () => {
-    updateBookState(false);
-  });
+  function updateOverflowCue(face) {
+    const scrollable = face.scrollHeight > face.clientHeight + 2;
+    const atEnd = !scrollable || face.scrollTop + face.clientHeight >= face.scrollHeight - 3;
+    face.dataset.scrollable = String(scrollable);
+    face.dataset.scrollEnd = String(atEnd);
+  }
+
+  function updateOverflowCues() {
+    faces.forEach(updateOverflowCue);
+  }
+
+  function scheduleLayoutUpdate() {
+    if (layoutFrame) cancelAnimationFrame(layoutFrame);
+    layoutFrame = requestAnimationFrame(() => {
+      layoutFrame = 0;
+      resizeCanvas();
+      updateBookState();
+    });
+  }
+
+  function nextViewForDirection(direction) {
+    if (layoutMode === 'single') return currentView + direction;
+    if (direction > 0) {
+      if (currentView === 0) return 1;
+      return currentView + 2;
+    }
+    if (currentView === totalViews) return totalViews - 2;
+    if (currentView === 1) return 0;
+    return currentView - 2;
+  }
+
+  function provideTurnFeedback(direction) {
+    if (window.DGHaptics) window.DGHaptics.trigger('page');
+    if (!prefersReducedMotion()) {
+      window.setTimeout(() => fireParticleBurst(direction > 0), 50);
+    }
+  }
 
   function navigateBook(direction) {
-    let nextView = currentView + direction;
-    if (window.innerWidth > 800) {
-      if (direction > 0 && currentView % 2 !== 0 && currentView < 6) nextView++;
-      if (direction < 0 && currentView % 2 === 0 && currentView > 0) nextView--;
-    }
+    const now = performance.now();
+    if (now < navigationLockedUntil) return false;
 
-    if (nextView >= 0 && nextView <= totalViews) {
-      currentView = nextView;
-      updateBookState(true);
-    }
+    updateLayoutMode();
+    const nextView = nextViewForDirection(direction);
+    if (nextView < 0 || nextView > totalViews || nextView === currentView) return false;
+
+    currentView = nextView;
+    navigationLockedUntil = now + (prefersReducedMotion() ? 120 : 1100);
+    updateBookState();
+    provideTurnFeedback(direction);
+    return true;
   }
 
   function jumpToView(view) {
-    currentView = view;
-    updateBookState(true);
+    const target = Math.max(0, Math.min(totalViews, Number(view)));
+    const nextView = layoutMode === 'spread' ? normalizeViewForSpread(target) : target;
+    if (nextView !== currentView) {
+      const direction = nextView > currentView ? 1 : -1;
+      currentView = nextView;
+      navigationLockedUntil = performance.now() + (prefersReducedMotion() ? 120 : 1100);
+      updateBookState();
+      provideTurnFeedback(direction);
+    }
     document.getElementById('dialer').classList.remove('open');
   }
 
-  let touchStartX = 0;
-  let touchStartY = 0;
+  function isControlTarget(target) {
+    return Boolean(
+      target.closest(
+        '.dialer-container, .nav-hint, #menu-install-btn, #install-coach, a, button'
+      )
+    );
+  }
 
-  document.addEventListener(
-    'touchstart',
-    (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
-    },
-    { passive: true }
-  );
+  let gesture = null;
 
-  document.addEventListener(
-    'touchend',
-    (e) => {
-      const touchEndX = e.changedTouches[0].screenX;
-      const touchEndY = e.changedTouches[0].screenY;
+  scene.addEventListener('pointerdown', (event) => {
+    if (!event.isPrimary || event.button !== 0 || isControlTarget(event.target)) return;
+    const face = event.target.closest('.face');
+    gesture = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      axis: null,
+      face,
+      startScrollTop: face ? face.scrollTop : 0,
+    };
+    if (scene.setPointerCapture) scene.setPointerCapture(event.pointerId);
+  });
 
-      if (Math.abs(touchEndX - touchStartX) > Math.abs(touchEndY - touchStartY)) {
-        if (touchEndX < touchStartX - 50) navigateBook(1);
-        if (touchEndX > touchStartX + 50) navigateBook(-1);
+  scene.addEventListener(
+    'pointermove',
+    (event) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+      gesture.lastX = event.clientX;
+      gesture.lastY = event.clientY;
+      const dx = gesture.lastX - gesture.startX;
+      const dy = gesture.lastY - gesture.startY;
+
+      if (!gesture.axis && Math.hypot(dx, dy) >= 10) {
+        gesture.axis = Math.abs(dx) > Math.abs(dy) * 1.35 ? 'x' : 'y';
       }
+      if (gesture.axis === 'x' && event.cancelable) event.preventDefault();
     },
-    { passive: true }
+    { passive: false }
   );
 
-  document.addEventListener('click', (e) => {
-    if (
-      e.target.closest('.dialer-container') ||
-      e.target.closest('.nav-hint') ||
-      e.target.closest('#menu-install-btn') ||
-      e.target.closest('#install-coach')
-    ) {
+  function finishGesture(event, cancelled) {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+    const activeGesture = gesture;
+    gesture = null;
+
+    if (scene.releasePointerCapture && scene.hasPointerCapture(event.pointerId)) {
+      scene.releasePointerCapture(event.pointerId);
+    }
+    if (cancelled || activeGesture.axis !== 'x') return;
+
+    const dx = activeGesture.lastX - activeGesture.startX;
+    const dy = activeGesture.lastY - activeGesture.startY;
+    const viewport = getViewportSize();
+    const threshold = Math.max(36, Math.min(72, viewport.width * 0.08));
+    const faceScrolled =
+      activeGesture.face &&
+      Math.abs(activeGesture.face.scrollTop - activeGesture.startScrollTop) > 3;
+
+    suppressClickUntil = performance.now() + 450;
+    if (faceScrolled || Math.abs(dx) < threshold || Math.abs(dx) <= Math.abs(dy) * 1.35) {
       return;
     }
+    navigateBook(dx < 0 ? 1 : -1);
+  }
 
-    const clickX = e.clientX;
-    const width = window.innerWidth;
-    if (clickX < width * 0.2) navigateBook(-1);
-    else if (clickX > width * 0.8) navigateBook(1);
+  scene.addEventListener('pointerup', (event) => finishGesture(event, false));
+  scene.addEventListener('pointercancel', (event) => finishGesture(event, true));
+
+  faces.forEach((face) => {
+    face.addEventListener('scroll', () => updateOverflowCue(face), { passive: true });
+  });
+
+  scene.addEventListener('click', (event) => {
+    if (performance.now() < suppressClickUntil || isControlTarget(event.target)) return;
+    const viewport = getViewportSize();
+    const edge = viewport.width * 0.18;
+    if (event.clientX <= edge) navigateBook(-1);
+    else if (event.clientX >= viewport.width - edge) navigateBook(1);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') navigateBook(-1);
+    if (event.key === 'ArrowRight') navigateBook(1);
   });
 
   function toggleDialer(e) {
     document.getElementById('dialer').classList.toggle('open');
     e.stopPropagation();
+  }
+
+  window.addEventListener('resize', scheduleLayoutUpdate);
+  window.addEventListener('orientationchange', scheduleLayoutUpdate);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', scheduleLayoutUpdate);
   }
 
   const canvas = document.getElementById('smokeCanvas');
@@ -281,6 +418,13 @@
   window.navigateBook = navigateBook;
   window.jumpToView = jumpToView;
   window.toggleDialer = toggleDialer;
+  window.DGMenu = {
+    getCurrentView: () => currentView,
+    getLayoutMode: () => layoutMode,
+    navigate: navigateBook,
+    refreshLayout: scheduleLayoutUpdate,
+  };
 
-  updateBookState(false);
+  updateBookState();
+  requestAnimationFrame(() => book.classList.add('is-ready'));
 })();

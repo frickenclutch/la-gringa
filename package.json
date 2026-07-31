@@ -12,10 +12,13 @@
     "stage": "node tools/stage-assets.mjs",
     "build": "npm run build:css && npm run stage",
     "test": "node tests/smoke.mjs",
+    "test:mobile": "playwright test",
+    "test:all": "npm test && npm run test:mobile",
     "dev": "npm run stage && wrangler dev",
     "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "sharp": "^0.35.2",
     "tailwindcss": "3.4.17"
   }

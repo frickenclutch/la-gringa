@@ -49,10 +49,12 @@
         body {
             margin: 0; padding: 0; overflow: hidden;
             height: 100vh; height: 100dvh;
+            min-height: 100svh;
             background: radial-gradient(circle at 50% 100%, #1a2a30 0%, #0a1114 60%, #000000 100%);
             color: var(--ink);
             font-family: 'IM Fell English', serif;
-            touch-action: manipulation; /* allow pinch-zoom (a11y) + page-turn taps; swipes handled in JS */
+            touch-action: manipulation;
+            overscroll-behavior: none;
         }
 
         /* Ambient Environment */
@@ -79,24 +81,49 @@
         }
 
         .scene {
+            position: relative;
             width: 100vw; height: 100vh; height: 100dvh;
             display: flex; justify-content: center; align-items: center;
             perspective: 2500px;
             overflow: hidden;
+            padding-top: max(0.5rem, env(safe-area-inset-top));
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+            touch-action: pan-y pinch-zoom;
         }
 
         .book {
             position: relative;
-            /* Base sizing: Desktop default */
             width: 90vw; max-width: 1200px;
-            height: 85vh; height: 85dvh; max-height: 800px;
+            height: min(88dvh, 820px);
             transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+        }
+        .book.is-ready {
             transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
+        html[data-menu-layout="single"] .book {
+            position: absolute;
+            left: 50%;
+            margin-left: -98vw;
+            width: 196vw;
+            max-width: none;
+            flex-shrink: 0;
+            height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
+            max-height: 920px;
+        }
+
         @media (max-width: 800px) {
-            .book { width: 190vw; max-width: none; }
-            .dialer-container { bottom: 20px !important; right: 20px !important; transform: scale(0.85); transform-origin: bottom right; }
+            .book {
+                position: absolute;
+                left: 50%;
+                margin-left: -98vw;
+                width: 196vw;
+                max-width: none;
+                flex-shrink: 0;
+                height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
+                max-height: 920px;
+            }
         }
 
         .leaf {
@@ -105,6 +132,7 @@
             width: 50%; height: 100%;
             transform-origin: left center;
             transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
             transition: transform 1.2s cubic-bezier(0.2, 0.9, 0.3, 1);
             z-index: 1; /* Managed by JS */
         }
@@ -112,6 +140,7 @@
         .face {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             background-color: var(--parchment-base);
             background-image: 
                 linear-gradient(to right, rgba(0,0,0,0.08) 0%, transparent 5%, transparent 95%, rgba(0,0,0,0.08) 100%),
@@ -124,11 +153,34 @@
             /* Crucial for internal scrolling when text overflows on small screens */
             overflow-y: auto; overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y pinch-zoom;
+            scrollbar-gutter: stable;
             padding: 1.5rem;
         }
+        .face[data-scrollable="true"]:not([data-scroll-end="true"]) {
+            box-shadow:
+                inset 0 -18px 18px -18px rgba(42,11,0,0.8),
+                inset 0 0 40px 5px rgba(0,0,0,0.3),
+                inset 0 0 80px 10px rgba(42,11,0,0.4),
+                0 5px 25px rgba(0,0,0,0.6);
+        }
 
-        .face.front { transform: rotateY(0deg); }
-        .face.back { transform: rotateY(180deg); background-color: var(--parchment-dark); }
+        .face.front {
+            transform: rotateY(0deg) translateZ(1px);
+            -webkit-transform: rotateY(0deg) translateZ(1px);
+        }
+        .face.back {
+            transform: rotateY(180deg) translateZ(0);
+            -webkit-transform: rotateY(180deg) translateZ(0);
+            background-color: var(--parchment-dark);
+        }
+        /* Safari/WebKit may ignore backface-visibility on overflow panels at rest. */
+        .leaf:not(.flipped):not(.turning) .face.back,
+        .leaf.flipped:not(.turning) .face.front {
+            visibility: hidden;
+            pointer-events: none;
+        }
 
         /* Binding Shadows */
         .face.front::before {
@@ -151,27 +203,33 @@
         .font-title { font-family: 'Pirata One', cursive; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
         .font-header { font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: 0.05em; border-bottom: 1px solid rgba(42,27,18,0.3); margin-bottom: 0.5rem; padding-bottom: 0.2rem;}
         
-        /* Fluid typography mapped to standard rems for safety, scaled by media queries */
-        html { font-size: 16px; }
-        @media (max-width: 600px) { html { font-size: 14px; } .face { padding: 1rem; } }
+        /* Readable fluid density; dense pages may still scroll rather than becoming tiny. */
+        html { font-size: clamp(14px, 1.35vw, 16px); }
+        html[data-menu-layout="single"] .face {
+            padding: clamp(0.8rem, 2.6vw, 1.25rem);
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
         
         .text-body { font-size: 1rem; line-height: 1.4; }
-        .text-small { font-size: 0.85rem; line-height: 1.3;}
-        .text-h1 { font-size: 4rem; line-height: 0.9; margin: 0; }
-        .text-h2 { font-size: 2rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
-        .text-h3 { font-size: 1.25rem; margin-top: 1rem; margin-bottom: 0.25rem; color: var(--ink-red); }
+        .text-small { font-size: clamp(0.78rem, 1.8vmin, 0.85rem); line-height: 1.3;}
+        .text-h1 { font-size: clamp(2.6rem, 7vmin, 4rem); line-height: 0.9; margin: 0; }
+        .text-h2 { font-size: clamp(1.55rem, 4.6vmin, 2rem); margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .text-h3 { font-size: clamp(1.05rem, 3vmin, 1.25rem); margin-top: 1rem; margin-bottom: 0.25rem; color: var(--ink-red); }
 
         .price { font-weight: bold; float: right; font-family: 'Cinzel', serif; color: var(--ink-red);}
         
         .menu-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-        @media (min-width: 800px) { .menu-grid { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+        html[data-menu-layout="spread"] .menu-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
         
-        .menu-item { margin-bottom: 1rem; break-inside: avoid; }
+        .menu-item { margin-bottom: clamp(0.65rem, 1.8vmin, 1rem); break-inside: avoid; }
         .menu-item-title { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; align-items: flex-end; }
         .dotted-leader { flex-grow: 1; border-bottom: 2px dotted rgba(42, 27, 18, 0.4); margin: 0 8px; position: relative; top: -6px;}
 
         .dialer-container {
-            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; z-index: 9999;
+            position: fixed;
+            bottom: max(20px, calc(10px + env(safe-area-inset-bottom)));
+            right: max(20px, calc(10px + env(safe-area-inset-right)));
+            width: 65px; height: 65px; z-index: 9999;
         }
 
         .dial-main {
@@ -213,16 +271,22 @@
 
         /* UI Navigation Hints */
         .nav-hint {
+            appearance: none; background: transparent; border: 0;
             position: absolute; top: 50%; transform: translateY(-50%);
             font-size: 2rem; color: rgba(255,255,255,0.3);
             cursor: pointer; z-index: 100; transition: color 0.3s;
-            padding: 20px; font-family: sans-serif;
+            min-width: 44px; min-height: 52px; padding: 12px; font-family: sans-serif;
             text-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
         .nav-hint:hover { color: rgba(255,255,255,0.8); }
-        #nav-left { left: 10px; }
-        #nav-right { right: 10px; }
-        @media (max-width: 800px) { .nav-hint { display: none; } /* Rely on tap/swipe on mobile */ }
+        .nav-hint:disabled { opacity: 0 !important; pointer-events: none; }
+        #nav-left { left: max(2px, env(safe-area-inset-left)); }
+        #nav-right { right: max(2px, env(safe-area-inset-right)); }
+        html[data-menu-layout="single"] .nav-hint {
+            display: block;
+            font-size: 1.45rem;
+            color: rgba(255,255,255,0.46);
+        }
         
         .page-hint { display: block; text-align: center; margin-top: 2rem; padding-bottom: 1rem; font-size: 0.8rem; opacity: 0.5; font-style: italic; }
 
@@ -262,6 +326,8 @@
             .menu-install-btn { padding: 0.55rem 0.75rem; font-size: 0.68rem; max-width: calc(100vw - 6.5rem); }
             .menu-install-btn .menu-install-label-full { display: none; }
             .menu-install-btn .menu-install-label-short { display: inline; }
+            .cover-face { justify-content: flex-start !important; align-items: stretch !important; }
+            .cover-page-content { justify-content: flex-start !important; }
         }
 
         /* ---- Install Menu App (adaptive PWA) ---- */
@@ -311,9 +377,10 @@
         .menu-install-btn svg { width: 1.15rem; height: 1.15rem; flex-shrink: 0; fill: currentColor; }
         .menu-install-btn .menu-install-label-short { display: none; }
 
-        @media (max-width: 800px) {
-            .menu-install-btn { bottom: 18px; left: 14px; transform-origin: bottom left; }
-            .dialer-container { /* keep clear of install pill */ }
+        html[data-menu-layout="single"] .menu-install-btn {
+            bottom: max(18px, calc(8px + env(safe-area-inset-bottom)));
+            left: max(14px, env(safe-area-inset-left));
+            transform-origin: bottom left;
         }
 
         .install-coach {
@@ -415,6 +482,39 @@
         }
         body.install-coach-open { overflow: hidden; }
 
+        /* Wide phones and foldables in landscape: use width to reduce vertical travel. */
+        @media (max-height: 560px) and (orientation: landscape) {
+            html { font-size: 13px; }
+            html[data-menu-layout="single"] .book { height: 96dvh; }
+            html[data-menu-layout="single"] .face { padding: 0.65rem 0.85rem; }
+            html[data-menu-layout="single"] .menu-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+            .menu-item { margin-bottom: 0.48rem; }
+            .text-h2 { font-size: 1.4rem; }
+            .text-h3 { margin-top: 0.45rem; font-size: 1rem; }
+            .cover-hero {
+                width: 7.5rem !important;
+                height: 7.5rem !important;
+                margin-bottom: 0.65rem !important;
+            }
+            .cover-hero h1 { font-size: 2.3rem !important; }
+            .cover-face { justify-content: flex-start !important; align-items: stretch !important; }
+            .cover-page-content { justify-content: flex-start !important; }
+            .page-hint { margin-top: 0.7rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+            .leaf, .book { transition-duration: 0.12s !important; }
+            .fire-glow, #smokeCanvas { display: none; }
+        }
+
     </style>
 </head>
 <body>
@@ -423,8 +523,8 @@
     <div class="fire-glow"></div>
     <canvas id="smokeCanvas"></canvas>
 
-    <div class="nav-hint" id="nav-left" onclick="navigateBook(-1)">&#10094;</div>
-    <div class="nav-hint" id="nav-right" onclick="navigateBook(1)">&#10095;</div>
+    <button type="button" class="nav-hint" id="nav-left" onclick="navigateBook(-1)" aria-label="Previous menu page">&#10094;</button>
+    <button type="button" class="nav-hint" id="nav-right" onclick="navigateBook(1)" aria-label="Next menu page">&#10095;</button>
 
     <div class="dialer-container" id="dialer" onclick="toggleDialer(event)">
         <div class="dial-main">
@@ -464,8 +564,8 @@
             <!-- LEAF 1 (Views 0 and 1) -->
             <div class="leaf" id="leaf1">
                 <!-- Front: View 0 (Cover) -->
-                <div class="face front flex justify-center items-center text-center relative">
-                    <div class="border-[3px] border-[rgba(42,27,18,0.4)] p-4 sm:p-8 w-full min-h-full flex flex-col justify-center shadow-inner relative">
+                <div class="cover-face face front flex justify-center items-center text-center relative">
+                    <div class="cover-page-content border-[3px] border-[rgba(42,27,18,0.4)] p-4 sm:p-8 w-full min-h-full flex flex-col justify-center shadow-inner relative">
                         <!-- faint corner burn -->
                         <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[rgba(42,11,0,0.4)] to-transparent pointer-events-none mix-blend-multiply"></div>
                         <!-- Brand seal: real Dirty Gringo logo, stamped into the cover corner -->
@@ -475,7 +575,7 @@
                         
                         <h2 class="font-header text-sm tracking-[0.2em] uppercase mb-4 border-none opacity-80">July 2026</h2>
                         
-                        <div class="bg-[rgba(255,255,255,0.1)] p-4 rounded-full aspect-square w-48 h-48 mx-auto flex items-center justify-center border-4 border-double border-[rgba(42,27,18,0.3)] mb-6 shadow-md">
+                        <div class="cover-hero bg-[rgba(255,255,255,0.1)] p-4 rounded-full aspect-square w-48 h-48 mx-auto flex items-center justify-center border-4 border-double border-[rgba(42,27,18,0.3)] mb-6 shadow-md">
                             <div>
                                 <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md">Fresh</h1>
                                 <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md">Mex</h1>
@@ -805,6 +905,7 @@
         </div>
     </div>
 
+    <script src="js/haptics.js"></script>
     <script src="js/menu-book.js"></script>
     <script src="js/menu-install.js"></script>
     <script src="js/sw-register.js"></script>
