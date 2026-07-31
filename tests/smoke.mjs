@@ -84,6 +84,11 @@ ok(read('menu.html').includes('js/haptics.js'), 'menu loads haptics before book'
 ok(read('menu.html').includes('js/menu-install.js'), 'menu loads menu-install.js');
 ok(read('menu.html').includes('manifest-menu.webmanifest'), 'menu uses menu-scoped manifest');
 ok(read('manifest-menu.webmanifest').includes('"/menu"'), 'menu manifest starts at /menu');
+ok(read('menu.html').includes('href="tel:+13157138151"'), 'menu phone opens the preferred dialer');
+ok(
+  read('menu.html').includes('href="https://www.dirtygringonny.com/"'),
+  'menu domain links to the restaurant website'
+);
 ok(!/wp-content\/uploads/.test(read('tools/build-icons.mjs')), 'icon build uses local logo');
 
 console.log('\nJavaScript syntax');

@@ -217,6 +217,22 @@
         .text-h3 { font-size: clamp(1.05rem, 3vmin, 1.25rem); margin-top: 1rem; margin-bottom: 0.25rem; color: var(--ink-red); }
 
         .price { font-weight: bold; float: right; font-family: 'Cinzel', serif; color: var(--ink-red);}
+        .menu-contact-link {
+            display: inline-block;
+            color: inherit;
+            text-decoration: underline;
+            text-decoration-color: rgba(90,12,12,0.35);
+            text-underline-offset: 0.18em;
+            border-radius: 0.2rem;
+            padding: 0.12rem 0.22rem;
+        }
+        .menu-contact-link:hover,
+        .menu-contact-link:focus-visible {
+            color: var(--ink-red);
+            text-decoration-color: currentColor;
+            outline: 2px solid rgba(90,12,12,0.35);
+            outline-offset: 2px;
+        }
         
         .menu-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
         html[data-menu-layout="spread"] .menu-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
@@ -592,8 +608,12 @@
                             <h3 class="font-header text-h2 text-red-950 mb-0">the DIRTY GRINGO</h3>
                             <p class="text-small font-bold tracking-widest border-b border-[rgba(0,0,0,0.2)] inline-block pb-1 mb-2">AT THE DOBISKY</p>
                             <p class="text-small">100 RIVERSIDE AVE., OGDENSBURG, NY 13669</p>
-                            <p class="text-body font-bold text-xl mt-2 tracking-wide text-red-900">315.713.8151</p>
-                            <p class="text-small font-bold mt-1 tracking-widest opacity-70">DIRTYGRINGONNY.COM</p>
+                            <p class="text-body font-bold text-xl mt-2 tracking-wide text-red-900">
+                              <a class="menu-contact-link" href="tel:+13157138151" aria-label="Call The Dirty Gringo at 315 713 8151">315.713.8151</a>
+                            </p>
+                            <p class="text-small font-bold mt-1 tracking-widest opacity-70">
+                              <a class="menu-contact-link" href="https://www.dirtygringonny.com/" target="_blank" rel="noopener noreferrer" aria-label="Open dirtygringonny.com">DIRTYGRINGONNY.COM</a>
+                            </p>
                         </div>
                     </div>
                 </div>
