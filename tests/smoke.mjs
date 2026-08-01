@@ -112,7 +112,10 @@ ok(
 ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');
 ok(read('owner.html').includes('noindex'), 'owner page is noindex');
 ok(read('wrangler.jsonc').includes('MENU_BOARD'), 'wrangler binds MENU_BOARD KV');
-ok(read('sw.js').includes('dg-v9'), 'service worker bumped for board assets');
+ok(read('sw.js').includes('dg-v10'), 'service worker bumped for board assets');
+ok(read('menu.html').includes('data-perf'), 'menu sets early perf gate');
+ok(read('menu.html').includes('icon-192.png'), 'cover seal uses lighter icon');
+ok(/defer/.test(read('menu.html')) && read('menu.html').includes('js/menu-book.js'), 'menu scripts deferred');
 ok(read('sw.js').includes('/js/menu-board-ui.js'), 'SW precaches menu-board UI');
 ok(read('tools/stage-assets.mjs').includes('owner.html'), 'stage includes owner.html');
 ok(!/wp-content\/uploads/.test(read('tools/build-icons.mjs')), 'icon build uses local logo');

@@ -118,17 +118,30 @@
     renderSpecials(board.specials);
   }
 
-  async function fetchJson(url) {
-    const res = await fetch(url, { credentials: 'same-origin' });
-    if (!res.ok) throw new Error('bad status ' + res.status);
-    return res.json();
+  async function fetchJson(url, timeoutMs) {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller
+      ? window.setTimeout(function () {
+          controller.abort();
+        }, timeoutMs || 3500)
+      : null;
+    try {
+      const res = await fetch(url, {
+        credentials: 'same-origin',
+        signal: controller ? controller.signal : undefined,
+      });
+      if (!res.ok) throw new Error('bad status ' + res.status);
+      return res.json();
+    } finally {
+      if (timer) window.clearTimeout(timer);
+    }
   }
 
   async function loadBoard() {
     try {
-      return await fetchJson(API_URL);
+      return await fetchJson(API_URL, 3500);
     } catch {
-      return fetchJson(FALLBACK_URL);
+      return fetchJson(FALLBACK_URL, 2500);
     }
   }
 

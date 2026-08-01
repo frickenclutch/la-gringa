@@ -33,6 +33,25 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DG Menu">
+    <script>
+      /* Early perf gate — runs before paint so mobile skips heavy effects */
+      (function () {
+        try {
+          var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+          var saveData = !!(c && c.saveData);
+          var slowNet = !!(c && /2g|slow-2g/i.test(c.effectiveType || ''));
+          var coarse = window.matchMedia('(pointer: coarse)').matches;
+          var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var narrow = Math.min(screen.width || 0, window.width || 0) <= 900;
+          var lowCpu = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4;
+          var lite = reduce || saveData || slowNet || (coarse && narrow) || (coarse && lowCpu);
+          document.documentElement.dataset.perf = lite ? 'lite' : 'full';
+          if (reduce) document.documentElement.dataset.reducedMotion = 'true';
+        } catch (e) {
+          document.documentElement.dataset.perf = 'lite';
+        }
+      })();
+    </script>
     
     <style>
         :root {
@@ -68,9 +87,7 @@
                 url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.08"/></svg>');
             z-index: -2;
             pointer-events: none;
-            will-change: transform;
             transform: translate3d(calc(var(--parallax-x, 0) * -18px), calc(var(--parallax-y, 0) * -12px), 0);
-            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .fire-glow {
@@ -84,9 +101,7 @@
             animation: pulseGlow 5s infinite alternate ease-in-out;
             z-index: -1;
             pointer-events: none;
-            will-change: transform;
             transform: translate3d(calc(-50% + var(--parallax-x, 0) * 28px), calc(var(--parallax-y, 0) * 16px), 0);
-            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         @keyframes pulseGlow { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
@@ -95,9 +110,7 @@
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             z-index: 50;
-            will-change: transform;
             transform: translate3d(calc(var(--parallax-x, 0) * 10px), calc(var(--parallax-y, 0) * 8px), 0);
-            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .scene {
@@ -118,7 +131,6 @@
             height: min(88dvh, 820px);
             transform-style: preserve-3d;
             -webkit-transform-style: preserve-3d;
-            will-change: transform;
         }
         .book.is-ready {
             transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
@@ -929,6 +941,58 @@
             .street-board-embers { display: none !important; }
         }
 
+        /* Mobile / constrained devices: keep chalk look, drop continuous GPU work */
+        html[data-perf="lite"] .river-bg,
+        html[data-perf="lite"] .fire-glow,
+        html[data-perf="lite"] #smokeCanvas {
+            transform: none !important;
+            transition: none !important;
+        }
+        html[data-perf="lite"] .fire-glow {
+            filter: none;
+            animation: none;
+            opacity: 0.55;
+            background: radial-gradient(ellipse, rgba(200, 60, 10, 0.12) 0%, transparent 70%);
+        }
+        html[data-perf="lite"] .specials-board-btn.is-visible {
+            animation: install-rise 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+            box-shadow: 0 0 16px 2px rgba(255, 120, 40, 0.45), 0 8px 22px rgba(0, 0, 0, 0.45);
+        }
+        html[data-perf="lite"] .specials-board-btn::before { animation: none; }
+        html[data-perf="lite"] .menu-install-btn.is-visible {
+            animation: install-rise 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+        }
+        html[data-perf="lite"] .street-board {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            background: rgba(0, 0, 0, 0.92);
+        }
+        html[data-perf="lite"] .install-coach {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            background: rgba(5, 10, 12, 0.88);
+        }
+        html[data-perf="lite"] .street-board-embers,
+        html[data-perf="lite"] .street-board-panel::before { display: none !important; }
+        html[data-perf="lite"] .street-board-head h2,
+        html[data-perf="lite"] .street-board-item,
+        html[data-perf="lite"] .street-board-item-title,
+        html[data-perf="lite"] .month-cycle-strip h3 {
+            animation: none !important;
+            opacity: 1;
+            filter: none;
+            transform: none;
+            text-shadow:
+                0.5px 0.5px 0 rgba(255, 255, 255, 0.35),
+                0 0 8px rgba(255, 255, 255, 0.15);
+        }
+        html[data-perf="lite"] .book.is-ready {
+            transition-duration: 0.55s;
+        }
+        html[data-perf="lite"] .leaf {
+            transition-duration: 0.7s;
+        }
+
     </style>
 </head>
 <body>
@@ -1024,7 +1088,7 @@
                         <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[rgba(42,11,0,0.4)] to-transparent pointer-events-none mix-blend-multiply"></div>
                         <!-- Brand seal: real Dirty Gringo logo, stamped into the cover corner -->
                         <div class="cover-seal" id="cover-seal" role="img" aria-label="The Dirty Gringo — Mexican Restaurant emblem">
-                          <img src="/icons/icon-512.png" alt="" width="96" height="96" decoding="async" />
+                          <img src="/icons/icon-192.png" alt="" width="96" height="96" decoding="async" fetchpriority="low" />
                         </div>
                         
                         <h2 id="cover-month" class="font-header text-sm tracking-[0.2em] uppercase mb-4 border-none opacity-80">July 2026</h2>
@@ -1363,10 +1427,10 @@
         </div>
     </div>
 
-    <script src="js/haptics.js"></script>
-    <script src="js/menu-book.js"></script>
-    <script src="js/menu-install.js"></script>
-    <script src="js/menu-board-ui.js"></script>
-    <script src="js/sw-register.js"></script>
+    <script src="js/haptics.js" defer></script>
+    <script src="js/menu-book.js" defer></script>
+    <script src="js/menu-install.js" defer></script>
+    <script src="js/menu-board-ui.js" defer></script>
+    <script src="js/sw-register.js" defer></script>
 </body>
 </html>

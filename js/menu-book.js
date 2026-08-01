@@ -73,16 +73,26 @@
   let parallaxX = 0;
   let parallaxY = 0;
   let parallaxViewBias = 0;
+  let parallaxFrame = 0;
+  let pendingParallax = null;
+
+  function isLitePerf() {
+    return root.dataset.perf === 'lite' || prefersReducedMotion();
+  }
 
   function applyBookTransform() {
-    const px = prefersReducedMotion() ? 0 : parallaxX * 10;
-    const py = prefersReducedMotion() ? 0 : parallaxY * 7;
+    if (isLitePerf()) {
+      book.style.transform = 'translateX(' + bookShiftX() + ')';
+      return;
+    }
+    const px = parallaxX * 10;
+    const py = parallaxY * 7;
     book.style.transform =
       'translateX(' + bookShiftX() + ') translate3d(' + px.toFixed(2) + 'px, ' + py.toFixed(2) + 'px, 0)';
   }
 
   function setParallax(nx, ny) {
-    if (prefersReducedMotion()) {
+    if (isLitePerf()) {
       root.style.setProperty('--parallax-x', '0');
       root.style.setProperty('--parallax-y', '0');
       return;
@@ -92,6 +102,17 @@
     root.style.setProperty('--parallax-x', parallaxX.toFixed(3));
     root.style.setProperty('--parallax-y', parallaxY.toFixed(3));
     applyBookTransform();
+  }
+
+  function scheduleParallax(nx, ny) {
+    pendingParallax = { nx, ny };
+    if (parallaxFrame) return;
+    parallaxFrame = requestAnimationFrame(() => {
+      parallaxFrame = 0;
+      if (!pendingParallax) return;
+      setParallax(pendingParallax.nx, pendingParallax.ny);
+      pendingParallax = null;
+    });
   }
 
   function updateBookState() {
@@ -293,22 +314,28 @@
   }
 
   function syncParallaxFromPointer(event) {
-    if (document.body.classList.contains('street-board-open')) return;
+    if (isLitePerf() || document.body.classList.contains('street-board-open')) return;
+    if (event.pointerType === 'touch') return;
     const viewport = getViewportSize();
     const nx = (event.clientX / Math.max(1, viewport.width)) * 2 - 1;
     const ny = (event.clientY / Math.max(1, viewport.height)) * 2 - 1;
-    setParallax(nx * 0.55, ny * 0.45);
+    scheduleParallax(nx * 0.55, ny * 0.45);
   }
 
-  window.addEventListener('pointermove', syncParallaxFromPointer, { passive: true });
-  window.addEventListener(
-    'deviceorientation',
-    (event) => {
-      if (event.gamma == null || event.beta == null) return;
-      setParallax((event.gamma || 0) / 45, ((event.beta || 0) - 45) / 45);
-    },
-    { passive: true }
-  );
+  if (!isLitePerf()) {
+    window.addEventListener('pointermove', syncParallaxFromPointer, { passive: true });
+    window.addEventListener(
+      'deviceorientation',
+      (event) => {
+        if (isLitePerf() || event.gamma == null || event.beta == null) return;
+        scheduleParallax((event.gamma || 0) / 45, ((event.beta || 0) - 45) / 45);
+      },
+      { passive: true }
+    );
+  } else {
+    root.style.setProperty('--parallax-x', '0');
+    root.style.setProperty('--parallax-y', '0');
+  }
 
   window.addEventListener('resize', scheduleLayoutUpdate);
   window.addEventListener('orientationchange', scheduleLayoutUpdate);
@@ -323,10 +350,14 @@
   let animationFrameId = null;
 
   function resizeCanvas() {
+    const dpr = isLitePerf() ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
     canvasWidth = window.innerWidth;
     canvasHeight = window.innerHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    canvas.width = Math.max(1, Math.floor(canvasWidth * dpr));
+    canvas.height = Math.max(1, Math.floor(canvasHeight * dpr));
+    canvas.style.width = canvasWidth + 'px';
+    canvas.style.height = canvasHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
@@ -396,13 +427,16 @@
     const bookRect = document.getElementById('book').getBoundingClientRect();
     const spineX = bookRect.left + bookRect.width / 2;
     const spineY = bookRect.top + bookRect.height / 2;
+    const lite = isLitePerf();
+    const smokeCount = lite ? 12 : 40;
+    const emberCount = lite ? 10 : 30;
 
-    for (let i = 0; i < 40; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft));
-    for (let i = 0; i < 30; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft));
+    for (let i = 0; i < smokeCount; i++) particles.push(new Particle(spineX, spineY, 'smoke', flipLeft));
+    for (let i = 0; i < emberCount; i++) particles.push(new Particle(spineX, spineY, 'ember', flipLeft));
 
     // Extra sparks from the cover logo when it's on-screen (additive; spine burst unchanged)
     const seal = document.getElementById('cover-seal');
-    if (seal) {
+    if (seal && !lite) {
       const rect = seal.getBoundingClientRect();
       const onScreen =
         rect.width >= 8 &&
