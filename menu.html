@@ -1001,8 +1001,8 @@
     <div class="fire-glow"></div>
     <canvas id="smokeCanvas"></canvas>
 
-    <button type="button" class="nav-hint" id="nav-left" onclick="navigateBook(-1)" aria-label="Previous menu page">&#10094;</button>
-    <button type="button" class="nav-hint" id="nav-right" onclick="navigateBook(1)" aria-label="Next menu page">&#10095;</button>
+    <button type="button" class="nav-hint" id="nav-left" onclick="navigateBook(-1)" aria-label="Previous menu page" data-i18n-aria="menu.prev">&#10094;</button>
+    <button type="button" class="nav-hint" id="nav-right" onclick="navigateBook(1)" aria-label="Next menu page" data-i18n-aria="menu.next">&#10095;</button>
 
     <div class="dialer-container" id="dialer" onclick="toggleDialer(event)">
         <div class="dial-main">
@@ -1010,20 +1010,20 @@
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
             </svg>
         </div>
-        <div class="dial-option opt-1" onclick="jumpToView(0); event.stopPropagation();">Cover</div>
-        <div class="dial-option opt-2" onclick="jumpToView(4); event.stopPropagation();">Mains</div>
-        <a href="tel:3157138151" class="dial-option opt-3" onclick="event.stopPropagation();">Call</a>
-        <a href="hub.html" class="dial-option opt-4" onclick="event.stopPropagation();">Home</a>
+        <div class="dial-option opt-1" onclick="jumpToView(0); event.stopPropagation();" data-i18n="menu.dialCover">Cover</div>
+        <div class="dial-option opt-2" onclick="jumpToView(4); event.stopPropagation();" data-i18n="menu.dialMains">Mains</div>
+        <a href="tel:3157138151" class="dial-option opt-3" onclick="event.stopPropagation();" data-i18n="menu.dialCall">Call</a>
+        <a href="hub.html" class="dial-option opt-4" onclick="event.stopPropagation();" data-i18n="menu.dialHome">Home</a>
     </div>
 
     <!-- Get the Menu App — adaptive install (Chromium prompt / iOS Add to Home Screen) -->
     <button type="button" id="menu-install-btn" class="menu-install-btn" hidden aria-hidden="true" aria-haspopup="dialog" aria-controls="install-coach">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l4 4h-3v6h-2V7H8l4-4zm-7 12h14v2H5v-2zm0 4h14v2H5v-2z"/></svg>
-      <span class="menu-install-label-full">Get the Menu App</span>
-      <span class="menu-install-label-short">Get Menu</span>
+      <span class="menu-install-label-full" data-i18n="menu.installFull">Get the Menu App</span>
+      <span class="menu-install-label-short" data-i18n="menu.installShort">Get Menu</span>
     </button>
 
-    <button type="button" id="specials-board-btn" class="specials-board-btn" hidden aria-hidden="true" aria-haspopup="dialog" aria-controls="street-board" aria-expanded="false">
+    <button type="button" id="specials-board-btn" class="specials-board-btn" hidden aria-hidden="true" aria-haspopup="dialog" aria-controls="street-board" aria-expanded="false" data-i18n="menu.specials">
       Specials
     </button>
 
@@ -1039,22 +1039,22 @@
         </div>
         <div class="street-board-head">
           <div>
-            <h2 id="street-board-title">Street Board</h2>
-            <p>Chalk on black — skillet still singing.</p>
+            <h2 id="street-board-title" data-i18n="menu.boardTitle">Street Board</h2>
+            <p data-i18n="menu.boardSub">Chalk on black — skillet still singing.</p>
           </div>
-          <button type="button" class="street-board-close" id="street-board-close" aria-label="Close specials board">&times;</button>
+          <button type="button" class="street-board-close" id="street-board-close" aria-label="Close specials board" data-i18n-aria="menu.closeBoard">&times;</button>
         </div>
         <ul id="street-board-list" class="street-board-list"></ul>
-        <p id="street-board-empty" class="street-board-empty" hidden>No specials posted right now — ask the patio.</p>
+        <p id="street-board-empty" class="street-board-empty" hidden data-i18n="menu.boardEmpty">No specials posted right now — ask the patio.</p>
         <div id="month-cycle-strip" class="month-cycle-strip" hidden>
-          <h3>This month</h3>
+          <h3 data-i18n="menu.thisMonth">This month</h3>
           <div class="month-cycle-cols">
             <div>
-              <h4>Additions</h4>
+              <h4 data-i18n="menu.additions">Additions</h4>
               <ul id="month-adds"></ul>
             </div>
             <div>
-              <h4>Takeaways</h4>
+              <h4 data-i18n="menu.takeaways">Takeaways</h4>
               <ul id="month-takes"></ul>
             </div>
           </div>
@@ -1065,13 +1065,13 @@
 
     <div id="install-coach" class="install-coach" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="install-coach-title">
       <div class="install-coach-sheet">
-        <h2 id="install-coach-title">Put this menu on your home screen</h2>
+        <h2 id="install-coach-title" data-i18n="menu.installTitle">Put this menu on your home screen</h2>
         <div id="install-coach-body">
-          <p>Install the Dirty Gringo manuscript like an app — opens straight to the menu, even on weak patio signal.</p>
+          <p data-i18n="menu.installBody">Install the Dirty Gringo manuscript like an app — opens straight to the menu, even on weak patio signal.</p>
         </div>
         <div class="install-coach-actions">
-          <button type="button" class="coach-ghost" id="install-coach-dismiss">Not now</button>
-          <button type="button" class="coach-primary" id="install-coach-close">Got it</button>
+          <button type="button" class="coach-ghost" id="install-coach-dismiss" data-i18n="menu.installDismiss">Not now</button>
+          <button type="button" class="coach-primary" id="install-coach-close" data-i18n="menu.installClose">Got it</button>
         </div>
       </div>
     </div>
@@ -1087,7 +1087,7 @@
                         <!-- faint corner burn -->
                         <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[rgba(42,11,0,0.4)] to-transparent pointer-events-none mix-blend-multiply"></div>
                         <!-- Brand seal: real Dirty Gringo logo, stamped into the cover corner -->
-                        <div class="cover-seal" id="cover-seal" role="img" aria-label="The Dirty Gringo — Mexican Restaurant emblem">
+                        <div class="cover-seal" id="cover-seal" role="img" aria-label="The Dirty Gringo — Mexican Restaurant emblem" data-i18n-aria="menu.cover.sealAria">
                           <img src="/icons/icon-192.png" alt="" width="96" height="96" decoding="async" fetchpriority="low" />
                         </div>
                         
@@ -1095,26 +1095,26 @@
                         
                         <div class="cover-hero bg-[rgba(255,255,255,0.1)] p-4 rounded-full aspect-square w-48 h-48 mx-auto flex items-center justify-center border-4 border-double border-[rgba(42,27,18,0.3)] mb-6 shadow-md">
                             <div>
-                                <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md">Fresh</h1>
-                                <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md">Mex</h1>
+                                <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md" data-i18n="menu.cover.fresh">Fresh</h1>
+                                <h1 class="font-title text-[3.5rem] leading-[0.8] text-[#1c361d] drop-shadow-md" data-i18n="menu.cover.mex">Mex</h1>
                             </div>
                         </div>
 
-                        <h2 class="font-title text-h2 text-red-900 mt-0 mb-6 border-b border-[rgba(0,0,0,0.3)] pb-4">WITH STYLE</h2>
+                        <h2 class="font-title text-h2 text-red-900 mt-0 mb-6 border-b border-[rgba(0,0,0,0.3)] pb-4" data-i18n="menu.cover.withStyle">WITH STYLE</h2>
                         
-                        <div class="text-small italic mb-8 px-4 opacity-80 border-l-2 border-r-2 border-[rgba(42,27,18,0.2)]">
+                        <div class="text-small italic mb-8 px-4 opacity-80 border-l-2 border-r-2 border-[rgba(42,27,18,0.2)]" data-i18n="menu.cover.quote">
                             "Unearthed from a weathered glass bottle, caught in the rocky shallows beneath the Ogdensburg-Prescott International Bridge."
                         </div>
 
                         <div class="mt-auto">
-                            <h3 class="font-header text-h2 text-red-950 mb-0">the DIRTY GRINGO</h3>
-                            <p class="text-small font-bold tracking-widest border-b border-[rgba(0,0,0,0.2)] inline-block pb-1 mb-2">AT THE DOBISKY</p>
+                            <h3 class="font-header text-h2 text-red-950 mb-0" data-i18n="menu.cover.brand">the DIRTY GRINGO</h3>
+                            <p class="text-small font-bold tracking-widest border-b border-[rgba(0,0,0,0.2)] inline-block pb-1 mb-2" data-i18n="menu.cover.atDobisky">AT THE DOBISKY</p>
                             <p class="text-small">100 RIVERSIDE AVE., OGDENSBURG, NY 13669</p>
                             <p class="text-body font-bold text-xl mt-2 tracking-wide text-red-900">
-                              <a class="menu-contact-link" href="tel:+13157138151" aria-label="Call The Dirty Gringo at 315 713 8151">315.713.8151</a>
+                              <a class="menu-contact-link" href="tel:+13157138151" aria-label="Call The Dirty Gringo at 315 713 8151" data-i18n-aria="menu.cover.callAria">315.713.8151</a>
                             </p>
                             <p class="text-small font-bold mt-1 tracking-widest opacity-70">
-                              <a class="menu-contact-link" href="https://www.dirtygringonny.com/" target="_blank" rel="noopener noreferrer" aria-label="Open dirtygringonny.com">DIRTYGRINGONNY.COM</a>
+                              <a class="menu-contact-link" href="https://www.dirtygringonny.com/" target="_blank" rel="noopener noreferrer" aria-label="Open dirtygringonny.com" data-i18n-aria="menu.cover.webAria">DIRTYGRINGONNY.COM</a>
                             </p>
                         </div>
                     </div>
@@ -1122,133 +1122,133 @@
 
                 <!-- Back: View 1 (Sides & Salads) -->
                 <div class="face back">
-                    <h2 class="font-header text-h2 text-center text-red-950">Sides & Salads</h2>
+                    <h2 class="font-header text-h2 text-center text-red-950" data-i18n="menu.sec.sidesSalads">Sides & Salads</h2>
                     
                     <div class="menu-grid">
                         <div>
-                            <h3 class="font-header text-h3">Sides</h3>
-                            <div class="menu-item"><div class="menu-item-title"><span>Dirty Beans</span><span class="dotted-leader"></span><span class="price">3.00</span></div><p class="text-small">Refried or black beans, cheese and salsa.</p></div>
-                            <div class="menu-item"><div class="menu-item-title"><span>Cheesy Beans</span><span class="dotted-leader"></span><span class="price">3.50</span></div><p class="text-small">Choice of refried or black beans topped with queso.</p></div>
+                            <h3 class="font-header text-h3" data-i18n="menu.sec.sides">Sides</h3>
+                            <div class="menu-item"><div class="menu-item-title"><span data-i18n="menu.item.dirtyBeans.name">Dirty Beans</span><span class="dotted-leader"></span><span class="price">3.00</span></div><p class="text-small" data-i18n="menu.item.dirtyBeans.desc">Refried or black beans, cheese and salsa.</p></div>
+                            <div class="menu-item"><div class="menu-item-title"><span data-i18n="menu.item.cheesyBeans.name">Cheesy Beans</span><span class="dotted-leader"></span><span class="price">3.50</span></div><p class="text-small" data-i18n="menu.item.cheesyBeans.desc">Choice of refried or black beans topped with queso.</p></div>
                             
                             <table class="w-full text-body font-bold mb-4 mt-2">
-                                <tr><td class="pb-1">Beans</td><td class="text-right price pb-1">1.75</td></tr>
-                                <tr><td class="pb-1">Rice</td><td class="text-right price pb-1">1.75</td></tr>
-                                <tr><td>Chips</td><td class="text-right price">1.25</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.beans">Beans</td><td class="text-right price pb-1">1.75</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.rice">Rice</td><td class="text-right price pb-1">1.75</td></tr>
+                                <tr><td data-i18n="menu.label.chips">Chips</td><td class="text-right price">1.25</td></tr>
                             </table>
                             
-                            <h3 class="font-header text-h3">Salads</h3>
+                            <h3 class="font-header text-h3" data-i18n="menu.sec.salads">Salads</h3>
                             <div class="menu-item">
-                                <div class="menu-item-title"><span>Taco Salad</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
-                                <p class="text-small">Your choice of seasoned beef or seasoned chicken, lettuce, cheddar jack blend, onion, red bell pepper, black olives, jalapeños, choice of salsa and sour cream, served with chips.<br><span class="italic font-bold">Add black beans for 1.75</span></p>
+                                <div class="menu-item-title"><span data-i18n="menu.item.tacoSalad.name">Taco Salad</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                                <p class="text-small"><span data-i18n="menu.item.tacoSalad.desc">Your choice of seasoned beef or seasoned chicken, lettuce, cheddar jack blend, onion, red bell pepper, black olives, jalapeños, choice of salsa and sour cream, served with chips.</span><br><span class="italic font-bold" data-i18n="menu.item.tacoSalad.addBeans">Add black beans for 1.75</span></p>
                             </div>
                         </div>
 
                         <div>
-                            <h3 class="font-header text-h3">Extra Meat</h3>
+                            <h3 class="font-header text-h3" data-i18n="menu.sec.extraMeat">Extra Meat</h3>
                             <table class="w-full text-small font-bold mb-4">
-                                <tr><td class="pb-1">Seasoned Beef</td><td class="text-right price pb-1">3.00</td></tr>
-                                <tr><td class="pb-1">Seasoned Chicken</td><td class="text-right price pb-1">3.00</td></tr>
-                                <tr><td class="pb-1">Chorizo</td><td class="text-right price pb-1">3.00</td></tr>
-                                <tr><td class="pb-1">Jalapeño Bacon</td><td class="text-right price pb-1">3.00</td></tr>
-                                <tr><td class="pb-1">Grilled Flank Steak</td><td class="text-right price pb-1">4.00</td></tr>
-                                <tr><td>Cajun Shrimp</td><td class="text-right price">4.00</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.seasonedBeef">Seasoned Beef</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.seasonedChicken">Seasoned Chicken</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.chorizo">Chorizo</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.jalapenoBacon">Jalapeño Bacon</td><td class="text-right price pb-1">3.00</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.grilledFlankSteak">Grilled Flank Steak</td><td class="text-right price pb-1">4.00</td></tr>
+                                <tr><td data-i18n="menu.label.cajunShrimp">Cajun Shrimp</td><td class="text-right price">4.00</td></tr>
                             </table>
 
-                            <h3 class="font-header text-h3">Extras</h3>
+                            <h3 class="font-header text-h3" data-i18n="menu.sec.extras">Extras</h3>
                             <table class="w-full text-small font-bold mb-4">
-                                <tr><td class="pb-1">Extra Cheese</td><td class="text-right price pb-1">.75</td></tr>
-                                <tr><td class="pb-1">Extra Veggies</td><td class="text-right price pb-1">.75</td></tr>
-                                <tr><td>Egg</td><td class="text-right price">1.25</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.extraCheese">Extra Cheese</td><td class="text-right price pb-1">.75</td></tr>
+                                <tr><td class="pb-1" data-i18n="menu.label.extraVeggies">Extra Veggies</td><td class="text-right price pb-1">.75</td></tr>
+                                <tr><td data-i18n="menu.label.egg">Egg</td><td class="text-right price">1.25</td></tr>
                             </table>
                         </div>
                     </div>
 
                     <div class="menu-item mt-2">
-                        <div class="menu-item-title"><span>Mango Cucumber Chicken Salad</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">Mixed greens topped with black beans, seasoned chicken, feta cheese, mango cucumber salsa and drizzled with ancho chipotle and salsa ranch.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.mangoCucumberChickenSalad.name">Mango Cucumber Chicken Salad</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.mangoCucumberChickenSalad.desc">Mixed greens topped with black beans, seasoned chicken, feta cheese, mango cucumber salsa and drizzled with ancho chipotle and salsa ranch.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Street Corn Salad</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">Mixed greens topped with seasoned chicken, black beans, cheddar jack blend, corn salsa and drizzled with our chipotle trio.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.streetCornSalad.name">Street Corn Salad</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.streetCornSalad.desc">Mixed greens topped with seasoned chicken, black beans, cheddar jack blend, corn salsa and drizzled with our chipotle trio.</p>
                     </div>
 
                     <div class="mt-4 border-2 border-[rgba(42,27,18,0.4)] p-3 bg-[rgba(255,255,255,0.1)] shadow-inner">
-                        <h3 class="font-header text-h3 text-center mb-1 mt-0">House Sauces</h3>
-                        <p class="text-small text-center italic font-bold">Mild, ancho chipotle (medium), hot, ghost, raspberry chipotle, salsa ranch, sweet chili, peach bourbon, buffalo, and chipotle ghost BBQ.</p>
+                        <h3 class="font-header text-h3 text-center mb-1 mt-0" data-i18n="menu.sec.houseSauces">House Sauces</h3>
+                        <p class="text-small text-center italic font-bold" data-i18n="menu.note.houseSauces">Mild, ancho chipotle (medium), hot, ghost, raspberry chipotle, salsa ranch, sweet chili, peach bourbon, buffalo, and chipotle ghost BBQ.</p>
                     </div>
-                    <span class="page-hint">Swipe or Tap right to continue</span>
+                    <span class="page-hint" data-i18n="menu.note.pageContinue">Swipe or Tap right to continue</span>
                 </div>
             </div>
 
             <div class="leaf" id="leaf2">
                 <!-- Front: View 2 (Snacks) -->
                 <div class="face front">
-                    <h2 class="font-header text-h2 text-center text-red-950">Shareable Snacks</h2>
+                    <h2 class="font-header text-h2 text-center text-red-950" data-i18n="menu.sec.snacks">Shareable Snacks</h2>
                     
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Guacamole & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
-                        <p class="text-small">Our fresh homemade guacamole served with tortilla chips.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.guacamoleChips.name">Guacamole & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.guacamoleChips.desc">Our fresh homemade guacamole served with tortilla chips.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Queso & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">7.99</span></div>
-                        <p class="text-small">Our homemade queso dip served with tortilla chips. <br>
-                        <span class="italic font-bold">Add Jalapeño bacon for 3.00<br>Add pineapple habanero salsa for 1.75<br>Add ancho chipotle for .75</span></p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.quesoChips.name">Queso & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">7.99</span></div>
+                        <p class="text-small"><span data-i18n="menu.item.quesoChips.desc">Our homemade queso dip served with tortilla chips.</span> <br>
+                        <span class="italic font-bold"><span data-i18n="menu.item.quesoChips.addBacon">Add Jalapeño bacon for 3.00</span><br><span data-i18n="menu.item.quesoChips.addPineapple">Add pineapple habanero salsa for 1.75</span><br><span data-i18n="menu.item.quesoChips.addAncho">Add ancho chipotle for .75</span></span></p>
                     </div>
                     
                     <div class="menu-item border-l-4 border-red-900 pl-3 py-1 bg-[rgba(0,0,0,0.03)] my-4">
-                        <div class="menu-item-title"><span>Salsa & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">6.99</span></div>
-                        <p class="text-small">Our homemade salsa served with tortilla chips.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.salsaChips.name">Salsa & Tortilla Chips</span><span class="dotted-leader"></span><span class="price">6.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.salsaChips.desc">Our homemade salsa served with tortilla chips.</p>
                         <div class="flex justify-between text-small font-bold mt-2 pt-2 border-t border-[rgba(0,0,0,0.1)]">
-                            <span>MEDIUM & HOT</span> <span class="price">6.99</span>
+                            <span data-i18n="menu.label.mediumHot">MEDIUM & HOT</span> <span class="price">6.99</span>
                         </div>
                         <div class="flex justify-between text-small font-bold mt-1">
-                            <span>PINEAPPLE HABANERO, MANGO CUCUMBER & CORN</span> <span class="price">7.99</span>
+                            <span data-i18n="menu.label.specialtySalsas">PINEAPPLE HABANERO, MANGO CUCUMBER & CORN</span> <span class="price">7.99</span>
                         </div>
                     </div>
 
                     <div class="menu-item mt-6">
-                        <div class="menu-item-title"><span>Dirty Nachos</span><span class="dotted-leader"></span><span class="price text-sm leading-tight text-right">FULL 10.99<br>HALF 8.99</span></div>
-                        <p class="text-small mt-2">Tortilla chips topped with seasoned beef, chicken or vegetarian (substitute beans for meat). Topped with queso, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.dirtyNachos.name">Dirty Nachos</span><span class="dotted-leader"></span><span class="price text-sm leading-tight text-right"><span data-i18n="menu.label.full">FULL</span> 10.99<br><span data-i18n="menu.label.half">HALF</span> 8.99</span></div>
+                        <p class="text-small mt-2" data-i18n="menu.item.dirtyNachos.desc">Tortilla chips topped with seasoned beef, chicken or vegetarian (substitute beans for meat). Topped with queso, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Buffalo Nacho</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
-                        <p class="text-small">Tortilla chips topped with seasoned buffalo chicken, queso, lettuce, tomato, black olives, jalapeño, cheddar jack blend. Choice of bleu cheese or salsa ranch.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.buffaloNacho.name">Buffalo Nacho</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.buffaloNacho.desc">Tortilla chips topped with seasoned buffalo chicken, queso, lettuce, tomato, black olives, jalapeño, cheddar jack blend. Choice of bleu cheese or salsa ranch.</p>
                     </div>
                 </div>
 
                 <!-- Back: View 3 (Burritos) -->
                 <div class="face back">
-                    <h2 class="font-header text-h2 text-center text-red-950 mb-1 leading-tight">Signature Burritos & Bowls</h2>
-                    <p class="text-small text-center italic font-bold mb-4 bg-[rgba(255,255,255,0.2)] p-2 border-y border-[rgba(0,0,0,0.2)] text-red-900">Smother any burrito with our homemade queso blanco for an additional $2.50</p>
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-1 leading-tight" data-i18n="menu.sec.burritosBowls">Signature Burritos & Bowls</h2>
+                    <p class="text-small text-center italic font-bold mb-4 bg-[rgba(255,255,255,0.2)] p-2 border-y border-[rgba(0,0,0,0.2)] text-red-900" data-i18n="menu.note.smotherQueso">Smother any burrito with our homemade queso blanco for an additional .50</p>
                     
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>The Dirty Gringo Burrito</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">A flour tortilla filled with (2) seasoned fried eggs, chorizo sausage, jalapeño bacon, hashbrowns, queso, your choice of refried or black beans and choice of salsa.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.dirtyGringoBurrito.name">The Dirty Gringo Burrito</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.dirtyGringoBurrito.desc">A flour tortilla filled with (2) seasoned fried eggs, chorizo sausage, jalapeño bacon, hashbrowns, queso, your choice of refried or black beans and choice of salsa.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>The Marley Burrito <span class="text-[0.75em] font-normal italic text-gray-700">(OR TRY IT AS A NACHO)</span></span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">A flour tortilla filled with Jamaican jerk chicken, rice, black beans, cheddar jack blend, jalapeños, pineapple habanero salsa and sour cream.</p>
+                        <div class="menu-item-title"><span><span data-i18n="menu.item.marleyBurrito.name">The Marley Burrito</span> <span class="text-[0.75em] font-normal italic text-gray-700" data-i18n="menu.item.marleyBurrito.asNacho">(OR TRY IT AS A NACHO)</span></span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.marleyBurrito.desc">A flour tortilla filled with Jamaican jerk chicken, rice, black beans, cheddar jack blend, jalapeños, pineapple habanero salsa and sour cream.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Chipotle Chicken Bowl</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
-                        <p class="text-small">Rice, black beans, seasoned chicken, cheddar jack blend, lettuce, corn salsa and finished with our chipotle trio.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.chipotleChickenBowl.name">Chipotle Chicken Bowl</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.chipotleChickenBowl.desc">Rice, black beans, seasoned chicken, cheddar jack blend, lettuce, corn salsa and finished with our chipotle trio.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Citrus Shrimp Bowl</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
-                        <p class="text-small">Rice, black beans, grilled cajun shrimp, feta, lettuce, onion, bell pepper, sour cream and finished with our citrus vinaigrette.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.citrusShrimpBowl.name">Citrus Shrimp Bowl</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.citrusShrimpBowl.desc">Rice, black beans, grilled cajun shrimp, feta, lettuce, onion, bell pepper, sour cream and finished with our citrus vinaigrette.</p>
                     </div>
 
                     <div class="mt-6 border-[3px] border-double border-[rgba(42,27,18,0.5)] p-3">
-                        <h3 class="font-header text-h3 text-center mb-1 mt-0">Build Your Own Burrito or Bowl</h3>
-                        <p class="text-[0.75rem] text-center mb-3 italic leading-tight">Filled with rice, choice of meat, refried or black beans, cheddar jack blend, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
+                        <h3 class="font-header text-h3 text-center mb-1 mt-0" data-i18n="menu.sec.buildYourOwn">Build Your Own Burrito or Bowl</h3>
+                        <p class="text-[0.75rem] text-center mb-3 italic leading-tight" data-i18n="menu.note.buildYourOwn">Filled with rice, choice of meat, refried or black beans, cheddar jack blend, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
                         
                         <table class="w-full text-small font-bold">
-                            <tr><td class="pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Seasoned Ground Beef</td><td class="text-right price pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
-                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Chicken</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
-                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Chorizo</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
-                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Grilled Flank Steak</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">10.99</td></tr>
-                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">Cajun Shrimp</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">10.99</td></tr>
-                            <tr><td class="pt-1">Vegetarian</td><td class="text-right price pt-1">6.99</td></tr>
+                            <tr><td class="pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.seasonedGroundBeef">Seasoned Ground Beef</td><td class="text-right price pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.chicken">Chicken</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.chorizo">Chorizo</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.grilledFlankSteak">Grilled Flank Steak</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">10.99</td></tr>
+                            <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.cajunShrimp">Cajun Shrimp</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">10.99</td></tr>
+                            <tr><td class="pt-1" data-i18n="menu.label.vegetarian">Vegetarian</td><td class="text-right price pt-1">6.99</td></tr>
                         </table>
                     </div>
                 </div>
@@ -1257,75 +1257,75 @@
             <div class="leaf" id="leaf3">
                 <!-- Front: View 4 (Quesadillas) -->
                 <div class="face front">
-                    <h2 class="font-header text-h2 text-center text-red-950 mb-1">Quesadillas</h2>
-                    <p class="text-small text-center mb-4 italic leading-tight">13" flour tortilla filled with your choice of meat, cheddar jack blend, choice of salsa and sour cream. Make it loaded by adding a medley of onion, bell peppers, jalapeño and black olive.</p>
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-1" data-i18n="menu.sec.quesadillas">Quesadillas</h2>
+                    <p class="text-small text-center mb-4 italic leading-tight" data-i18n="menu.note.quesadillaIntro">13" flour tortilla filled with your choice of meat, cheddar jack blend, choice of salsa and sour cream. Make it loaded by adding a medley of onion, bell peppers, jalapeño and black olive.</p>
                     
                     <div class="bg-[rgba(255,255,255,0.2)] p-2 border border-[rgba(0,0,0,0.2)] shadow-sm mb-6">
                         <table class="w-full text-small border-collapse">
                             <thead>
                                 <tr class="border-b-2 border-black">
-                                    <th class="text-left font-header pb-1 text-sm">MEAT</th>
-                                    <th class="text-right font-header pb-1 text-sm px-2">REGULAR</th>
-                                    <th class="text-right font-header pb-1 text-sm">LOADED</th>
+                                    <th class="text-left font-header pb-1 text-sm" data-i18n="menu.label.meat">MEAT</th>
+                                    <th class="text-right font-header pb-1 text-sm px-2" data-i18n="menu.label.regular">REGULAR</th>
+                                    <th class="text-right font-header pb-1 text-sm" data-i18n="menu.label.loaded">LOADED</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Meatless</td><td class="text-right price px-2">6.99</td><td class="text-right price">8.99</td></tr>
-                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Seasoned Ground Beef</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
-                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Chicken</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
-                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Chorizo</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
-                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold">Grilled Flank Steak</td><td class="text-right price px-2">10.99</td><td class="text-right price">12.99</td></tr>
-                                <tr><td class="pt-1 font-bold">Cajun Shrimp</td><td class="text-right price px-2">10.99</td><td class="text-right price">12.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold" data-i18n="menu.label.meatless">Meatless</td><td class="text-right price px-2">6.99</td><td class="text-right price">8.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold" data-i18n="menu.label.seasonedGroundBeef">Seasoned Ground Beef</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold" data-i18n="menu.label.chicken">Chicken</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold" data-i18n="menu.label.chorizo">Chorizo</td><td class="text-right price px-2">8.99</td><td class="text-right price">10.99</td></tr>
+                                <tr class="border-b border-[rgba(0,0,0,0.1)]"><td class="py-1 font-bold" data-i18n="menu.label.grilledFlankSteak">Grilled Flank Steak</td><td class="text-right price px-2">10.99</td><td class="text-right price">12.99</td></tr>
+                                <tr><td class="pt-1 font-bold" data-i18n="menu.label.cajunShrimp">Cajun Shrimp</td><td class="text-right price px-2">10.99</td><td class="text-right price">12.99</td></tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <h3 class="font-header text-h3 text-center border-none bg-black text-[#e8d5a5] py-1 mb-4">SIGNATURE QUESADILLAS</h3>
+                    <h3 class="font-header text-h3 text-center border-none bg-black text-[#e8d5a5] py-1 mb-4" data-i18n="menu.sec.signatureQuesadillas">SIGNATURE QUESADILLAS</h3>
                     
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Buffalo Chicken Quesadilla</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
-                        <p class="text-small">A flour tortilla filled with seasoned chicken, cheddar jack blend, house buffalo and served with sour cream, bleu cheese or ranch.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.buffaloChickenQuesadilla.name">Buffalo Chicken Quesadilla</span><span class="dotted-leader"></span><span class="price">8.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.buffaloChickenQuesadilla.desc">A flour tortilla filled with seasoned chicken, cheddar jack blend, house buffalo and served with sour cream, bleu cheese or ranch.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Balsamic Chicken Quesadilla</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">A flour tortilla filled with seasoned chicken, feta cheese, red onion, cheddar jack blend and drizzled with balsamic glaze, served with sour cream.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.balsamicChickenQuesadilla.name">Balsamic Chicken Quesadilla</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.balsamicChickenQuesadilla.desc">A flour tortilla filled with seasoned chicken, feta cheese, red onion, cheddar jack blend and drizzled with balsamic glaze, served with sour cream.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Chicken Bacon Ranch Quesadilla</span><span class="dotted-leader"></span><span class="price">11.99</span></div>
-                        <p class="text-small">13" tortilla filled w/ seasoned chicken, red onion, cheddar jack blend, jalapeño bacon and served with salsa ranch.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.chickenBaconRanchQuesadilla.name">Chicken Bacon Ranch Quesadilla</span><span class="dotted-leader"></span><span class="price">11.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.chickenBaconRanchQuesadilla.desc">13" tortilla filled w/ seasoned chicken, red onion, cheddar jack blend, jalapeño bacon and served with salsa ranch.</p>
                     </div>
                 </div>
 
                 <!-- Back: View 5 (Tacos) -->
                 <div class="face back">
-                    <h2 class="font-header text-h2 text-center text-red-950 mb-2">Tacos</h2>
-                    <p class="text-center text-[0.8rem] font-bold mb-4 bg-red-900 text-[#e8d5a5] p-2 shadow-md uppercase tracking-wide">If you have any food allergies please tell us prior to ordering!</p>
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-2" data-i18n="menu.sec.tacos">Tacos</h2>
+                    <p class="text-center text-[0.8rem] font-bold mb-4 bg-red-900 text-[#e8d5a5] p-2 shadow-md uppercase tracking-wide" data-i18n="menu.note.allergy">If you have any food allergies please tell us prior to ordering!</p>
                     
                     <div class="menu-item bg-[rgba(255,255,255,0.3)] p-3 border-2 border-red-900 shadow-inner mb-6">
-                        <div class="menu-item-title text-h3 text-red-900 mt-0"><span>TACOS</span><span class="dotted-leader"></span><span class="price">2.75/ΕΑ.</span></div>
-                        <p class="text-small mt-1 font-bold">Choice of hard or soft tortillas filled with seasoned beef, chicken, or chorizo topped with cheddar jack blend, lettuce, and tomato. Served with your choice of sauce.</p>
-                        <p class="text-[0.75rem] italic mt-1">Add salsa and sour cream for an additional charge.</p>
+                        <div class="menu-item-title text-h3 text-red-900 mt-0"><span data-i18n="menu.label.tacosBase">TACOS</span><span class="dotted-leader"></span><span class="price">2.75/<span data-i18n="menu.label.each">EA.</span></span></div>
+                        <p class="text-small mt-1 font-bold" data-i18n="menu.item.tacosBase.desc">Choice of hard or soft tortillas filled with seasoned beef, chicken, or chorizo topped with cheddar jack blend, lettuce, and tomato. Served with your choice of sauce.</p>
+                        <p class="text-[0.75rem] italic mt-1" data-i18n="menu.item.tacosBase.addSalsa">Add salsa and sour cream for an additional charge.</p>
                     </div>
                     
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Buffalo Chicken Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">(3) flour tortillas filled w/ seasoned chicken sauteed w/ house buffalo. Topped w/ cheddar jack blend, lettuce, tomato, jalapeno and salsa ranch.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.buffaloChickenTacos.name">Buffalo Chicken Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.buffaloChickenTacos.desc">(3) flour tortillas filled w/ seasoned chicken sauteed w/ house buffalo. Topped w/ cheddar jack blend, lettuce, tomato, jalapeno and salsa ranch.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Steak Tacos</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
-                        <p class="text-small">(3) flour tortillas with seasoned flank steak, queso, tomato, sautéed onions and peppers, mixed greens and drizzled with balsamic glaze.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.steakTacos.name">Steak Tacos</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.steakTacos.desc">(3) flour tortillas with seasoned flank steak, queso, tomato, sautéed onions and peppers, mixed greens and drizzled with balsamic glaze.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Cajun Shrimp Tacos</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
-                        <p class="text-small">(3) flour tortillas filled with grilled cajun shrimp, mixed greens, tomato, pickled onions, queso fresco and drizzled with salsa ranch.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.cajunShrimpTacos.name">Cajun Shrimp Tacos</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.cajunShrimpTacos.desc">(3) flour tortillas filled with grilled cajun shrimp, mixed greens, tomato, pickled onions, queso fresco and drizzled with salsa ranch.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Peach Bourbon Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">(3) flour tortillas filled with grilled chorizo, mixed greens, queso, pickled onion, tomato and drizzled with our peach bourbon sauce.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.peachBourbonTacos.name">Peach Bourbon Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.peachBourbonTacos.desc">(3) flour tortillas filled with grilled chorizo, mixed greens, queso, pickled onion, tomato and drizzled with our peach bourbon sauce.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Sweet and Spicy Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">(3) flour tortillas filled with seasoned chicken, queso, lettuce, red onion, drizzled with our sweet and spicy jerk sauce and topped with banana peppers.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.sweetAndSpicyTacos.name">Sweet and Spicy Tacos</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.sweetAndSpicyTacos.desc">(3) flour tortillas filled with seasoned chicken, queso, lettuce, red onion, drizzled with our sweet and spicy jerk sauce and topped with banana peppers.</p>
                     </div>
                 </div>
             </div>
@@ -1333,33 +1333,33 @@
             <div class="leaf" id="leaf4">
                 <!-- Front: View 6 (Enchiladas) -->
                 <div class="face front">
-                    <h2 class="font-header text-h2 text-center text-red-950 mb-1">Enchiladas</h2>
-                    <p class="text-small text-center mb-6 italic border-b border-[rgba(0,0,0,0.2)] pb-2">All enchiladas are served on a bed of rice and choice of beans.<br>If you prefer them on the side there will be an additional charge.</p>
+                    <h2 class="font-header text-h2 text-center text-red-950 mb-1" data-i18n="menu.sec.enchiladas">Enchiladas</h2>
+                    <p class="text-small text-center mb-6 italic border-b border-[rgba(0,0,0,0.2)] pb-2" data-i18n="menu.note.enchiladaIntro" data-i18n-html>All enchiladas are served on a bed of rice and choice of beans.<br>If you prefer them on the side there will be an additional charge.</p>
                     
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Beef Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">(2) 6" flour tortillas filled with seasoned beef, cheddar jack blend, topped with queso and a mild red enchilada sauce.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.beefEnchiladas.name">Beef Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.beefEnchiladas.desc">(2) 6" flour tortillas filled with seasoned beef, cheddar jack blend, topped with queso and a mild red enchilada sauce.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Chicken Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">(2) 6" flour tortillas filled with seasoned chicken, cheddar jack blend, topped with queso, pineapple habanero salsa or ancho chipotle sauce.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.chickenEnchiladas.name">Chicken Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.chickenEnchiladas.desc">(2) 6" flour tortillas filled with seasoned chicken, cheddar jack blend, topped with queso, pineapple habanero salsa or ancho chipotle sauce.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Vegetarian Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
-                        <p class="text-small">(2) 6" flour tortillas filled with your choice of vegetables, cheddar jack blend, topped with queso and your choice of mild red enchilada sauce, pineapple habanero salsa or ancho chipotle sauce.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.vegetarianEnchiladas.name">Vegetarian Enchiladas</span><span class="dotted-leader"></span><span class="price">9.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.vegetarianEnchiladas.desc">(2) 6" flour tortillas filled with your choice of vegetables, cheddar jack blend, topped with queso and your choice of mild red enchilada sauce, pineapple habanero salsa or ancho chipotle sauce.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>The Greasy Marino</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
-                        <p class="text-small">(2) 6" flour tortillas filled with chorizo, jalapeño bacon and a cheddar jack blend. Topped with queso, (2) seasoned fried eggs and ancho chipotle sauce.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.greasyMarino.name">The Greasy Marino</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.greasyMarino.desc">(2) 6" flour tortillas filled with chorizo, jalapeño bacon and a cheddar jack blend. Topped with queso, (2) seasoned fried eggs and ancho chipotle sauce.</p>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-title"><span>Buffalo Shrimp Enchiladas</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
-                        <p class="text-small">(2) 6" flour tortillas filled with grilled cajun shrimp and cheddar jack blend. Topped with queso, house buffalo, lettuce and tomato.</p>
+                        <div class="menu-item-title"><span data-i18n="menu.item.buffaloShrimpEnchiladas.name">Buffalo Shrimp Enchiladas</span><span class="dotted-leader"></span><span class="price">10.99</span></div>
+                        <p class="text-small" data-i18n="menu.item.buffaloShrimpEnchiladas.desc">(2) 6" flour tortillas filled with grilled cajun shrimp and cheddar jack blend. Topped with queso, house buffalo, lettuce and tomato.</p>
                     </div>
 
                     <div class="mt-8 border-t-4 border-double border-red-900 pt-4 text-center bg-[rgba(0,0,0,0.02)] -mx-6 px-6 pb-4">
-                        <h3 class="font-header text-[2rem] text-red-950 mb-0">DESSERT</h3>
-                        <p class="text-body font-bold tracking-widest mt-2">WEEKLY DESSERT SPECIAL - PRICES VARY</p>
+                        <h3 class="font-header text-[2rem] text-red-950 mb-0" data-i18n="menu.sec.dessert">DESSERT</h3>
+                        <p class="text-body font-bold tracking-widest mt-2" data-i18n="menu.note.dessertWeekly">WEEKLY DESSERT SPECIAL - PRICES VARY</p>
                     </div>
                 </div>
 
@@ -1367,36 +1367,36 @@
                 <div class="face back flex flex-col justify-between items-center py-4">
                     
                     <div class="w-full text-center border-4 border-double border-red-900 p-4 bg-[rgba(255,255,255,0.2)] shadow-sm mb-4">
-                        <h2 class="font-title text-h2 text-red-950 mb-1 leading-none uppercase tracking-wide">DO YOU LOVE CILANTRO?</h2>
-                        <h3 class="font-title text-[3rem] mb-1 leading-none text-black">WE DO!</h3>
-                        <p class="text-small italic font-bold">Just ask and we can add more to anything on our menu.</p>
+                        <h2 class="font-title text-h2 text-red-950 mb-1 leading-none uppercase tracking-wide" data-i18n="menu.sec.cilantroTitle">DO YOU LOVE CILANTRO?</h2>
+                        <h3 class="font-title text-[3rem] mb-1 leading-none text-black" data-i18n="menu.sec.cilantroWeDo">WE DO!</h3>
+                        <p class="text-small italic font-bold" data-i18n="menu.note.cilantroAsk">Just ask and we can add more to anything on our menu.</p>
                     </div>
 
                     <div class="w-full bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.2)] p-2 mb-4">
                         <table class="w-full text-[0.7rem] sm:text-[0.8rem] font-bold border-collapse">
                             <tbody>
                                 <tr class="border-b border-[rgba(0,0,0,0.2)]">
-                                    <td class="py-2 pr-2">MEDIUM, HOT OR PINEAPPLE HABANERO SALSA</td>
+                                    <td class="py-2 pr-2" data-i18n="menu.label.salsaMediumHotPineapple">MEDIUM, HOT OR PINEAPPLE HABANERO SALSA</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">1.75 2OZ.</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap"></td>
                                 </tr>
                                 <tr class="border-b border-[rgba(0,0,0,0.2)]">
-                                    <td class="py-2 pr-2">MANGO CUCUMBER OR CORN SALSA</td>
+                                    <td class="py-2 pr-2" data-i18n="menu.label.salsaMangoOrCorn">MANGO CUCUMBER OR CORN SALSA</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">2.00 2OZ.</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">6.00 8OZ.</td>
                                 </tr>
                                 <tr class="border-b border-[rgba(0,0,0,0.2)]">
-                                    <td class="py-2 pr-2">SOUR CREAM</td>
+                                    <td class="py-2 pr-2" data-i18n="menu.label.sourCream">SOUR CREAM</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">.75 2OZ.</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">7.00 8OZ.</td>
                                 </tr>
                                 <tr class="border-b border-[rgba(0,0,0,0.2)]">
-                                    <td class="py-2 pr-2">QUESO</td>
+                                    <td class="py-2 pr-2" data-i18n="menu.label.queso">QUESO</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">$2.00 2OZ.</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">$7.00 8OZ.</td>
                                 </tr>
                                 <tr>
-                                    <td class="py-2 pr-2">GUACAMOLE</td>
+                                    <td class="py-2 pr-2" data-i18n="menu.label.guacamole">GUACAMOLE</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">$2.00 2OZ.</td>
                                     <td class="py-2 text-right text-red-900 whitespace-nowrap">$8.00 8OZ.</td>
                                 </tr>
@@ -1405,21 +1405,21 @@
                     </div>
 
                     <div class="w-full text-center mb-4">
-                        <h3 class="font-header text-h3 mb-1">BEVERAGES</h3>
-                        <p class="text-[0.75rem] italic mb-3 opacity-80">We Proudly Serve Pepsi Products</p>
+                        <h3 class="font-header text-h3 mb-1" data-i18n="menu.sec.beverages">BEVERAGES</h3>
+                        <p class="text-[0.75rem] italic mb-3 opacity-80" data-i18n="menu.note.pepsiProudly">We Proudly Serve Pepsi Products</p>
                         <div class="flex justify-around text-small font-bold border-t border-b border-[rgba(0,0,0,0.2)] py-2">
-                            <div>BOTTLED SODA 20oz.<br><span class="price float-none">2.75</span></div>
-                            <div>BOTTLED WATER 20oz.<br><span class="price float-none">2.75</span></div>
-                            <div>PURE LEAF TEA<br><span class="price float-none">2.75</span></div>
+                            <div><span data-i18n="menu.label.bottledSoda">BOTTLED SODA 20oz.</span><br><span class="price float-none">2.75</span></div>
+                            <div><span data-i18n="menu.label.bottledWater">BOTTLED WATER 20oz.</span><br><span class="price float-none">2.75</span></div>
+                            <div><span data-i18n="menu.label.pureLeafTea">PURE LEAF TEA</span><br><span class="price float-none">2.75</span></div>
                         </div>
                     </div>
 
                     <div class="text-center mt-auto w-full">
-                        <p class="text-small font-bold tracking-widest bg-black text-[#e8d5a5] py-1 inline-block px-4">BUSINESS HOURS</p>
-                        <p class="text-[0.75rem] font-bold mt-2">TUES. - FRI. 11AM TO 7PM | SATURDAY SEASONAL<br>CLOSED SUN. & MON.</p>
+                        <p class="text-small font-bold tracking-widest bg-black text-[#e8d5a5] py-1 inline-block px-4" data-i18n="menu.sec.hours">BUSINESS HOURS</p>
+                        <p class="text-[0.75rem] font-bold mt-2" data-i18n="menu.note.hours" data-i18n-html>TUES. - FRI. 11AM TO 7PM | SATURDAY SEASONAL<br>CLOSED SUN. & MON.</p>
                         
                                                 
-                        <p class="text-[0.65rem] opacity-70">Please note that menu items and prices are subject to change</p>
+                        <p class="text-[0.65rem] opacity-70" data-i18n="menu.note.pricesSubjectToChange">Please note that menu items and prices are subject to change</p>
                     </div>
                 </div>
             </div>
@@ -1427,6 +1427,7 @@
         </div>
     </div>
 
+    <script src="js/i18n.js" defer></script>
     <script src="js/haptics.js" defer></script>
     <script src="js/menu-book.js" defer></script>
     <script src="js/menu-install.js" defer></script>

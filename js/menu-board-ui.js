@@ -174,6 +174,11 @@
     if (event.key === 'Escape' && !overlay.hidden) setOpen(false);
   });
 
+  // Refresh chrome strings if language flips after board render.
+  document.addEventListener('dg:lang', function () {
+    if (window.DGLang && typeof window.DGLang.apply === 'function') window.DGLang.apply();
+  });
+
   loadBoard()
     .then(applyBoard)
     .catch(() => {

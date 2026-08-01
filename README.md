@@ -39,9 +39,9 @@ npm run build:fonts
 
 | Path | Role |
 |------|------|
-| `/` (`index.html`) | Gated entrance + skillet catch game |
+| `/` (`index.html`) | Language passport (first visit) → gated entrance + skillet catch game |
 | `/hub` | Crossroads: menu, call, directions, hours |
-| `/menu` | Interactive parchment menu + **Get the Menu App** install + street specials board |
+| `/menu` | Interactive parchment menu + street specials + **Get the Menu App** install |
 | `/owner` | Private PIN editor for monthly swaps + daily specials (not linked from guest nav) |
 | `POST /api/reward` | Issues patio promo codes (worker only — not in client JS) |
 | `GET /api/menu-board` | Public month cycle + currently active specials |
@@ -51,7 +51,9 @@ From the menu page, Chromium browsers get the native install prompt; iOS Safari 
 
 ## Configuration
 
-Venue copy and SEO facts live in [`data/site.json`](data/site.json). Game recipes (no codes) live in [`data/recipes.json`](data/recipes.json). Reward codes are mapped only in [`worker.js`](worker.js). Monthly swaps + specials seed data live in [`data/menu-board.json`](data/menu-board.json) and are served/edited via the worker + `MENU_BOARD` KV.
+Venue copy and SEO facts live in [`data/site.json`](data/site.json). Game recipes (no codes) live in [`data/recipes.json`](data/recipes.json). UI strings for English/Español live in [`data/i18n.json`](data/i18n.json). Reward codes are mapped only in [`worker.js`](worker.js). Monthly swaps + specials seed data live in [`data/menu-board.json`](data/menu-board.json) and are served/edited via the worker + `MENU_BOARD` KV.
+
+First visit shows a passport-stamp language gate (emblem + two skillets). Choice is saved in `localStorage` (`dg-lang`) and can be flipped anytime with the EN | ES chip. Gate, hub, and the parchment menu manuscript (section titles, dish names, descriptions) all follow that choice; prices and contact details stay as printed.
 
 To re-skin for another venue: update `data/site.json`, recipes, menu HTML, and brand colors in the page `<style>` / Tailwind theme — keep the gate → hub → menu flow.
 

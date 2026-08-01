@@ -34,6 +34,8 @@ console.log('structure');
   'data/site.json',
   'data/recipes.json',
   'data/menu-board.json',
+  'data/i18n.json',
+  'js/i18n.js',
   'js/gate-game.js',
   'js/haptics.js',
   'js/menu-book.js',
@@ -112,11 +114,21 @@ ok(
 ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');
 ok(read('owner.html').includes('noindex'), 'owner page is noindex');
 ok(read('wrangler.jsonc').includes('MENU_BOARD'), 'wrangler binds MENU_BOARD KV');
-ok(read('sw.js').includes('dg-v10'), 'service worker bumped for board assets');
+ok(read('sw.js').includes('dg-v12'), 'service worker bumped for board assets');
 ok(read('menu.html').includes('data-perf'), 'menu sets early perf gate');
 ok(read('menu.html').includes('icon-192.png'), 'cover seal uses lighter icon');
 ok(/defer/.test(read('menu.html')) && read('menu.html').includes('js/menu-book.js'), 'menu scripts deferred');
 ok(read('sw.js').includes('/js/menu-board-ui.js'), 'SW precaches menu-board UI');
+ok(read('sw.js').includes('/js/i18n.js'), 'SW precaches i18n');
+ok(read('index.html').includes('js/i18n.js'), 'index loads i18n');
+ok(read('hub.html').includes('js/i18n.js'), 'hub loads i18n');
+ok(read('menu.html').includes('js/i18n.js'), 'menu loads i18n');
+ok(read('index.html').includes('data-i18n='), 'index has i18n hooks');
+ok(read('js/i18n.js').includes('lang-passport'), 'passport language gate present');
+const i18n = JSON.parse(read('data/i18n.json'));
+ok(i18n.en && i18n.es && i18n.es['gate.welcomeTitle'], 'i18n en/es packs');
+ok(i18n.es['menu.item.dirtyNachos.name'], 'menu manuscript Spanish present');
+ok(read('menu.html').includes('data-i18n="menu.item.dirtyNachos.name"'), 'menu hooks dish names');
 ok(read('tools/stage-assets.mjs').includes('owner.html'), 'stage includes owner.html');
 ok(!/wp-content\/uploads/.test(read('tools/build-icons.mjs')), 'icon build uses local logo');
 
@@ -124,6 +136,7 @@ console.log('\nJavaScript syntax');
 [
   'js/gate-game.js',
   'js/haptics.js',
+  'js/i18n.js',
   'js/menu-book.js',
   'js/menu-install.js',
   'js/menu-board-ui.js',

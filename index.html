@@ -253,11 +253,11 @@
       <h1 class="font-brand text-3xl md:text-5xl text-white text-shadow-gringo tracking-wide transform -rotate-2">
         The Dirty Gringo
       </h1>
-      <p class="font-ui text-amber-300 text-sm md:text-base tracking-widest mt-1 uppercase shadow-black drop-shadow-md">
+      <p class="font-ui text-amber-300 text-sm md:text-base tracking-widest mt-1 uppercase shadow-black drop-shadow-md" data-i18n="gate.brandSub">
         📍 Dobisky Patio Entrance
       </p>
     </div>
-    <a href="hub.html" class="pointer-events-auto bg-gradient-to-b from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-ui px-4 py-2 md:px-6 md:py-3 rounded-xl border-2 border-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all flex items-center gap-2 transform hover:scale-105 uppercase tracking-widest text-sm md:text-base">
+    <a href="hub.html" class="pointer-events-auto bg-gradient-to-b from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-ui px-4 py-2 md:px-6 md:py-3 rounded-xl border-2 border-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all flex items-center gap-2 transform hover:scale-105 uppercase tracking-widest text-sm md:text-base" data-i18n="gate.enter">
       Enter Site ➔
     </a>
   </header>
@@ -267,13 +267,13 @@
     
     <!-- STEP 1: WELCOME / MENU BOARD -->
     <div id="ui-welcome" class="cantina-glass rounded-3xl p-6 md:p-8 w-full max-w-3xl max-h-[88vh] overflow-y-auto pointer-events-auto text-center transform transition-all duration-500 scale-100 opacity-100">
-      <span class="inline-block bg-teal-900/60 text-teal-300 border border-teal-500 px-3 py-1 rounded-full text-xs font-ui tracking-widest mb-4">
+      <span class="inline-block bg-teal-900/60 text-teal-300 border border-teal-500 px-3 py-1 rounded-full text-xs font-ui tracking-widest mb-4" data-i18n="gate.badge">
         RIVERFRONT FIESTA CRAFT
       </span>
-      <h2 class="text-3xl md:text-5xl font-brand text-amber-400 mb-4 text-shadow-gringo">
+      <h2 class="text-3xl md:text-5xl font-brand text-amber-400 mb-4 text-shadow-gringo" data-i18n="gate.welcomeTitle">
         Grab A Skillet, Amigo!
       </h2>
-      <p class="text-slate-200 text-sm md:text-base mb-6 font-light max-w-xl mx-auto bg-black/30 p-3 rounded-lg border border-white/10">
+      <p class="text-slate-200 text-sm md:text-base mb-6 font-light max-w-xl mx-auto bg-black/30 p-3 rounded-lg border border-white/10" data-i18n="gate.welcomeBody">
         We're cooking up Fresh Mex on the Dobisky patio overlooking Canada! Help us catch the exact ingredients for our signature dishes to unlock an exclusive online reward.
       </p>
 
@@ -281,30 +281,30 @@
         <!-- Queso & Chips -->
         <button onclick="startGame('queso')" class="group relative bg-slate-800/80 hover:bg-amber-900/80 border border-slate-600 hover:border-amber-400 rounded-xl p-4 text-left transition-all duration-300 overflow-hidden flex flex-col h-full">
           <div class="absolute -right-6 -top-6 text-6xl opacity-20 group-hover:opacity-40 transition-opacity">🧀</div>
-          <h3 class="font-ui text-xl text-white group-hover:text-amber-300">Queso & Chips</h3>
-          <p class="text-xs text-slate-300 mt-2 flex-grow">Homemade queso dip, tortilla chips, and sizzling jalapeño bacon.</p>
+          <h3 class="font-ui text-xl text-white group-hover:text-amber-300" data-i18n="gate.quesoTitle">Queso & Chips</h3>
+          <p class="text-xs text-slate-300 mt-2 flex-grow" data-i18n="gate.quesoBody">Homemade queso dip, tortilla chips, and sizzling jalapeño bacon.</p>
           <span class="mt-4 text-xs font-bold text-amber-500 group-hover:text-amber-300 uppercase tracking-widest flex items-center justify-between">
-            Craft It <span class="text-lg">➔</span>
+            <span data-i18n="gate.craft">Craft It</span> <span class="text-lg">➔</span>
           </span>
         </button>
 
         <!-- Greasy Marino -->
         <button onclick="startGame('marino')" class="group relative bg-slate-800/80 hover:bg-red-900/80 border border-slate-600 hover:border-red-400 rounded-xl p-4 text-left transition-all duration-300 overflow-hidden flex flex-col h-full">
           <div class="absolute -right-6 -top-6 text-6xl opacity-20 group-hover:opacity-40 transition-opacity">🍳</div>
-          <h3 class="font-ui text-xl text-white group-hover:text-red-300">Greasy Marino</h3>
-          <p class="text-xs text-slate-300 mt-2 flex-grow">Chorizo, jalapeño bacon, cheddar jack, queso, fried eggs, and ancho chipotle.</p>
+          <h3 class="font-ui text-xl text-white group-hover:text-red-300" data-i18n="gate.marinoTitle">Greasy Marino</h3>
+          <p class="text-xs text-slate-300 mt-2 flex-grow" data-i18n="gate.marinoBody">Chorizo, jalapeño bacon, cheddar jack, queso, fried eggs, and ancho chipotle.</p>
           <span class="mt-4 text-xs font-bold text-red-500 group-hover:text-red-300 uppercase tracking-widest flex items-center justify-between">
-            Craft It <span class="text-lg">➔</span>
+            <span data-i18n="gate.craft">Craft It</span> <span class="text-lg">➔</span>
           </span>
         </button>
 
         <!-- The Marley -->
         <button onclick="startGame('marley')" class="group relative bg-slate-800/80 hover:bg-teal-900/80 border border-slate-600 hover:border-teal-400 rounded-xl p-4 text-left transition-all duration-300 overflow-hidden flex flex-col h-full">
           <div class="absolute -right-6 -top-6 text-6xl opacity-20 group-hover:opacity-40 transition-opacity">🍍</div>
-          <h3 class="font-ui text-xl text-white group-hover:text-teal-300">The Marley</h3>
-          <p class="text-xs text-slate-300 mt-2 flex-grow">Jerk chicken, rice, black beans, cheddar jack, jalapeños, pineapple habanero salsa.</p>
+          <h3 class="font-ui text-xl text-white group-hover:text-teal-300" data-i18n="gate.marleyTitle">The Marley</h3>
+          <p class="text-xs text-slate-300 mt-2 flex-grow" data-i18n="gate.marleyBody">Jerk chicken, rice, black beans, cheddar jack, jalapeños, pineapple habanero salsa.</p>
           <span class="mt-4 text-xs font-bold text-teal-500 group-hover:text-teal-300 uppercase tracking-widest flex items-center justify-between">
-            Craft It <span class="text-lg">➔</span>
+            <span data-i18n="gate.craft">Craft It</span> <span class="text-lg">➔</span>
           </span>
         </button>
       </div>
@@ -318,9 +318,9 @@
         <div id="hud-checklist" class="flex gap-2 text-sm font-bold text-slate-300">
           <!-- Populated dynamically -->
         </div>
-        <button onclick="quitGame()" class="ml-4 bg-red-950/80 text-red-300 hover:text-white border border-red-500/50 px-3 py-1 rounded-md text-xs font-ui uppercase">Abort</button>
+        <button onclick="quitGame()" class="ml-4 bg-red-950/80 text-red-300 hover:text-white border border-red-500/50 px-3 py-1 rounded-md text-xs font-ui uppercase" data-i18n="gate.abort">Abort</button>
       </div>
-      <div class="mt-4 bg-black/60 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-ui tracking-widest border border-white/20 animate-pulse pointer-events-auto md:hidden">
+      <div class="mt-4 bg-black/60 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-ui tracking-widest border border-white/20 animate-pulse pointer-events-auto md:hidden" data-i18n="gate.dragHint">
         ◀ DRAG SKILLET TO CATCH ▶
       </div>
     </div>
@@ -328,15 +328,17 @@
     <!-- STEP 3: SUCCESS MODAL -->
     <div id="ui-success" class="cantina-glass rounded-3xl p-8 w-full max-w-lg max-h-[88vh] overflow-y-auto pointer-events-auto text-center hidden transform transition-all duration-500">
       <div class="text-7xl mb-4" id="success-emoji">🌮</div>
-      <h2 class="text-4xl font-brand text-amber-400 mb-2 text-shadow-gringo">
+      <h2 class="text-4xl font-brand text-amber-400 mb-2 text-shadow-gringo" data-i18n="gate.successTitle">
         Masterpiece Crafted!
       </h2>
       <p class="text-slate-200 mb-6 font-light">
-        You successfully assembled <strong id="success-dish" class="text-white">---</strong> right here on the river! Here is your reward code for your next online order.
+        <span data-i18n="gate.successBodyBefore">You successfully assembled</span>
+        <strong id="success-dish" class="text-white">---</strong>
+        <span data-i18n="gate.successBodyAfter">right here on the river! Here is your reward code for your next online order.</span>
       </p>
       
       <div class="bg-black/50 border-2 border-dashed border-emerald-500 p-4 rounded-xl mb-6 relative">
-        <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-900 text-emerald-300 text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-emerald-500">
+        <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-900 text-emerald-300 text-[10px] uppercase tracking-widest px-2 py-0.5 rounded border border-emerald-500" data-i18n="gate.promoLabel">
           Secret Promo Code
         </span>
         <div id="success-promo" class="font-ui text-3xl text-white tracking-widest drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]">
@@ -345,10 +347,10 @@
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="hub.html" class="bg-gradient-to-r from-orange-500 to-amber-500 text-black font-ui text-lg tracking-wide px-6 py-3 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(245,159,0,0.5)] border border-amber-200">
+        <a href="hub.html" class="bg-gradient-to-r from-orange-500 to-amber-500 text-black font-ui text-lg tracking-wide px-6 py-3 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(245,159,0,0.5)] border border-amber-200" data-i18n="gate.enterRestaurant">
           Enter Restaurant ➔
         </a>
-        <button onclick="showWelcome()" class="bg-slate-700/80 hover:bg-slate-600 text-white font-ui tracking-widest text-sm px-6 py-3 rounded-xl border border-slate-500 transition-colors">
+        <button onclick="showWelcome()" class="bg-slate-700/80 hover:bg-slate-600 text-white font-ui tracking-widest text-sm px-6 py-3 rounded-xl border border-slate-500 transition-colors" data-i18n="gate.playAgain">
           Play Again
         </button>
       </div>
@@ -356,8 +358,9 @@
 
   </main>
 
-  <script src="js/haptics.js"></script>
-  <script src="js/gate-game.js"></script>
-  <script src="js/sw-register.js"></script>
+  <script src="js/i18n.js" defer></script>
+  <script src="js/haptics.js" defer></script>
+  <script src="js/gate-game.js" defer></script>
+  <script src="js/sw-register.js" defer></script>
 </body>
 </html>
