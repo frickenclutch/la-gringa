@@ -11,7 +11,21 @@ npm install
 npm run build        # Tailwind + stage dist/ for Workers Assets
 npm test             # repo smoke tests
 npm run test:mobile  # Playwright: iPhone/WebKit, Galaxy, Fold, desktop
-npm run dev          # local preview with /api/reward worker
+npm run dev          # local preview with worker APIs
+```
+
+For the owner board locally:
+
+```bash
+npx wrangler secret put OWNER_PIN   # production
+# or for local:
+echo OWNER_PIN=1234 >> .dev.vars
+```
+
+Create the KV namespace once (requires Cloudflare auth for the Dirty Gringo account), then paste the id into `wrangler.jsonc`:
+
+```bash
+npx wrangler kv namespace create MENU_BOARD
 ```
 
 Optional asset rebuilds (logo is vendored under `assets/logo-source.png`):
@@ -27,14 +41,17 @@ npm run build:fonts
 |------|------|
 | `/` (`index.html`) | Gated entrance + skillet catch game |
 | `/hub` | Crossroads: menu, call, directions, hours |
-| `/menu` | Interactive parchment menu + **Get the Menu App** install |
+| `/menu` | Interactive parchment menu + **Get the Menu App** install + street specials board |
+| `/owner` | Private PIN editor for monthly swaps + daily specials (not linked from guest nav) |
 | `POST /api/reward` | Issues patio promo codes (worker only — not in client JS) |
+| `GET /api/menu-board` | Public month cycle + currently active specials |
+| `POST /api/owner/login` · `PUT /api/owner/board` · `GET /api/owner/history` | Owner board auth, save, audit trail |
 
 From the menu page, Chromium browsers get the native install prompt; iOS Safari gets an Add to Home Screen coach mark. The menu uses `manifest-menu.webmanifest` (`start_url: /menu`) so the installed app opens straight into the manuscript.
 
 ## Configuration
 
-Venue copy and SEO facts live in [`data/site.json`](data/site.json). Game recipes (no codes) live in [`data/recipes.json`](data/recipes.json). Reward codes are mapped only in [`worker.js`](worker.js).
+Venue copy and SEO facts live in [`data/site.json`](data/site.json). Game recipes (no codes) live in [`data/recipes.json`](data/recipes.json). Reward codes are mapped only in [`worker.js`](worker.js). Monthly swaps + specials seed data live in [`data/menu-board.json`](data/menu-board.json) and are served/edited via the worker + `MENU_BOARD` KV.
 
 To re-skin for another venue: update `data/site.json`, recipes, menu HTML, and brand colors in the page `<style>` / Tailwind theme — keep the gate → hub → menu flow.
 

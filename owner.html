@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Owner Board — Dirty Gringo</title>
+  <link rel="canonical" href="https://www.dirtygringonny.com/owner" />
+  <meta property="og:title" content="Owner Board — Dirty Gringo" />
+  <meta property="og:description" content="Private monthly swaps and daily specials editor." />
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","name":"Owner Board","isAccessibleForFree":false}
+  </script>
+  <link rel="stylesheet" href="fonts.css" />
+  <style>
+    :root {
+      --ink: #1f160f;
+      --paper: #efe2c4;
+      --paper-deep: #d9c39a;
+      --chalk: #f4f1e6;
+      --board: #1c2a22;
+      --ember: #c45c2a;
+      --line: rgba(31, 22, 15, 0.18);
+      --danger: #7a1f1f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "IM Fell English", Georgia, serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 20% 0%, rgba(196, 92, 42, 0.18), transparent 45%),
+        radial-gradient(ellipse at 80% 100%, rgba(28, 42, 34, 0.2), transparent 50%),
+        linear-gradient(165deg, #f6ecd4 0%, #e7d3a8 48%, #d7c08b 100%);
+    }
+    .wrap {
+      width: min(720px, 100%);
+      margin: 0 auto;
+      padding: max(1rem, env(safe-area-inset-top)) 1rem max(2rem, env(safe-area-inset-bottom));
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      font-family: "Cinzel", serif;
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      margin: 0 0 0.25rem;
+      letter-spacing: 0.04em;
+    }
+    .sub { margin: 0; opacity: 0.75; font-size: 0.95rem; }
+    .panel {
+      background: color-mix(in srgb, var(--paper) 92%, white);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 10px 30px rgba(20, 12, 6, 0.12);
+    }
+    label {
+      display: grid;
+      gap: 0.35rem;
+      font-family: "Cinzel", serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    input, textarea, button {
+      font: inherit;
+      color: inherit;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1.5px solid rgba(31, 22, 15, 0.28);
+      border-radius: 0.7rem;
+      background: rgba(255, 255, 255, 0.55);
+      padding: 0.85rem 0.9rem;
+      font-size: 1.05rem;
+    }
+    textarea { min-height: 6.5rem; resize: vertical; font-family: "IM Fell English", Georgia, serif; }
+    .stack { display: grid; gap: 0.9rem; }
+    .grid-2 {
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+    button {
+      border: 1.5px solid #3a2a14;
+      border-radius: 999px;
+      padding: 0.8rem 1.15rem;
+      font-family: "Cinzel", serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(160deg, #f0d38a, #b8892d);
+    }
+    button.secondary {
+      background: transparent;
+    }
+    button.danger {
+      background: #f3d6d0;
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .error {
+      color: var(--danger);
+      min-height: 1.25rem;
+      margin: 0.4rem 0 0;
+      font-size: 0.95rem;
+    }
+    #owner-status {
+      margin: 0.75rem 0 0;
+      min-height: 1.3rem;
+      font-size: 0.95rem;
+    }
+    #owner-status.is-error { color: var(--danger); }
+    h2 {
+      font-family: "Cinzel", serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      margin: 1.4rem 0 0.7rem;
+    }
+    .special-row {
+      display: grid;
+      gap: 0.7rem;
+      grid-template-columns: 1fr 1fr;
+      padding: 0.85rem;
+      border: 1px dashed rgba(31, 22, 15, 0.28);
+      border-radius: 0.85rem;
+      background: rgba(255,255,255,0.28);
+      margin-bottom: 0.75rem;
+    }
+    .special-row .span-2 { grid-column: 1 / -1; }
+    .active-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.95rem;
+      font-family: "IM Fell English", Georgia, serif;
+      font-weight: 400;
+    }
+    .active-toggle input { width: auto; }
+    #history-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+    }
+    #history-list li {
+      display: grid;
+      gap: 0.15rem;
+      padding: 0.75rem 0.85rem;
+      border-radius: 0.75rem;
+      background: rgba(28, 42, 34, 0.08);
+      font-size: 0.92rem;
+    }
+    #history-list .muted,
+    .muted { opacity: 0.65; font-style: italic; }
+    .hint {
+      font-size: 0.88rem;
+      opacity: 0.72;
+      margin: 0 0 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Patio Board</h1>
+        <p class="sub">Monthly swaps + daily specials — Dirty Gringo staff only.</p>
+      </div>
+      <button type="button" class="secondary" id="owner-logout" hidden>Sign out</button>
+    </header>
+
+    <section id="owner-login" class="panel">
+      <form id="owner-login-form" class="stack">
+        <label>
+          Owner PIN
+          <input id="owner-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" required />
+        </label>
+        <div class="actions">
+          <button type="submit">Unlock board</button>
+        </div>
+        <p class="error" id="owner-login-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="owner-editor" hidden>
+      <form id="owner-board-form" class="stack">
+        <div class="panel stack">
+          <h2 style="margin-top:0">This month</h2>
+          <p class="hint">One label for the cover, then what’s new and what’s gone.</p>
+          <div class="grid-2">
+            <label>Month label<input id="month-label" name="label" type="text" required placeholder="August 2026" /></label>
+            <label>Year<input id="month-year" name="year" type="number" min="2024" max="2100" required /></label>
+          </div>
+          <label>Notes<textarea id="month-notes" name="notes" placeholder="Short patio note for the cycle"></textarea></label>
+          <div class="grid-2">
+            <label>Additions (one per line)<textarea id="month-additions" name="additions"></textarea></label>
+            <label>Takeaways (one per line)<textarea id="month-takeaways" name="takeaways"></textarea></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 style="margin-top:0">Daily specials</h2>
+          <p class="hint">Leave dates blank for always-on. Guests only see active items inside their date window.</p>
+          <div id="specials-editor"></div>
+          <div class="actions">
+            <button type="button" class="secondary" id="add-special">Add special</button>
+            <button type="submit">Save board</button>
+          </div>
+          <p id="owner-status" role="status"></p>
+        </div>
+      </form>
+
+      <div class="panel" style="margin-top:1rem">
+        <div class="actions" style="justify-content:space-between; align-items:center; margin:0 0 0.75rem">
+          <h2 style="margin:0">History</h2>
+          <button type="button" class="secondary" id="refresh-history">Refresh</button>
+        </div>
+        <ul id="history-list"></ul>
+      </div>
+    </section>
+  </div>
+  <script src="js/owner-board.js"></script>
+  <script src="js/sw-register.js"></script>
+</body>
+</html>

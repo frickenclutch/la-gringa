@@ -57,27 +57,47 @@
             overscroll-behavior: none;
         }
 
-        /* Ambient Environment */
+        /* Ambient Environment — oversized so parallax never shows edges */
         .river-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
+            position: fixed;
+            inset: -8%;
+            width: 116%;
+            height: 116%;
+            background-image:
                 radial-gradient(ellipse at bottom, rgba(50,70,80,0.4) 0%, transparent 80%),
                 url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.08"/></svg>');
-            z-index: -2; pointer-events: none;
+            z-index: -2;
+            pointer-events: none;
+            will-change: transform;
+            transform: translate3d(calc(var(--parallax-x, 0) * -18px), calc(var(--parallax-y, 0) * -12px), 0);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .fire-glow {
-            position: absolute; bottom: -20vh; left: 50%; transform: translateX(-50%);
-            width: 100vw; height: 50vh;
-            background: radial-gradient(ellipse, rgba(200, 60, 10, 0.15) 0%, rgba(100, 20, 0, 0.05) 50%, transparent 80%);
-            filter: blur(50px); animation: pulseGlow 5s infinite alternate ease-in-out;
-            z-index: -1; pointer-events: none;
+            position: fixed;
+            bottom: -28vh;
+            left: 50%;
+            width: 120vw;
+            height: 58vh;
+            background: radial-gradient(ellipse, rgba(200, 60, 10, 0.18) 0%, rgba(100, 20, 0, 0.06) 50%, transparent 80%);
+            filter: blur(50px);
+            animation: pulseGlow 5s infinite alternate ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+            will-change: transform;
+            transform: translate3d(calc(-50% + var(--parallax-x, 0) * 28px), calc(var(--parallax-y, 0) * 16px), 0);
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         @keyframes pulseGlow { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
         #smokeCanvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 50;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            will-change: transform;
+            transform: translate3d(calc(var(--parallax-x, 0) * 10px), calc(var(--parallax-y, 0) * 8px), 0);
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .scene {
@@ -89,6 +109,7 @@
             padding-top: max(0.5rem, env(safe-area-inset-top));
             padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
             touch-action: pan-y pinch-zoom;
+            z-index: 1;
         }
 
         .book {
@@ -97,6 +118,7 @@
             height: min(88dvh, 820px);
             transform-style: preserve-3d;
             -webkit-transform-style: preserve-3d;
+            will-change: transform;
         }
         .book.is-ready {
             transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
@@ -241,11 +263,23 @@
         .menu-item-title { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; align-items: flex-end; }
         .dotted-leader { flex-grow: 1; border-bottom: 2px dotted rgba(42, 27, 18, 0.4); margin: 0 8px; position: relative; top: -6px;}
 
+        /* Patio chrome stack — always available on every manuscript page
+           Left: Install · Right: Specials above brass dialer */
+        :root {
+            --chrome-x: max(16px, env(safe-area-inset-right));
+            --chrome-y: max(16px, env(safe-area-inset-bottom));
+            --chrome-x-left: max(16px, env(safe-area-inset-left));
+            --dialer-size: 65px;
+            --chrome-gap: 12px;
+        }
+
         .dialer-container {
             position: fixed;
-            bottom: max(20px, calc(10px + env(safe-area-inset-bottom)));
-            right: max(20px, calc(10px + env(safe-area-inset-right)));
-            width: 65px; height: 65px; z-index: 9999;
+            bottom: var(--chrome-y);
+            right: var(--chrome-x);
+            width: var(--dialer-size);
+            height: var(--dialer-size);
+            z-index: 9999;
         }
 
         .dial-main {
@@ -358,8 +392,8 @@
 
         .menu-install-btn {
             position: fixed;
-            left: 20px;
-            bottom: 28px;
+            left: var(--chrome-x-left);
+            bottom: var(--chrome-y);
             z-index: 9998;
             display: inline-flex;
             align-items: center;
@@ -394,7 +428,7 @@
         .menu-install-btn .menu-install-label-short { display: none; }
 
         html[data-menu-layout="single"] .menu-install-btn {
-            bottom: max(18px, calc(8px + env(safe-area-inset-bottom)));
+            bottom: max(14px, calc(8px + env(safe-area-inset-bottom)));
             left: max(14px, env(safe-area-inset-left));
             transform-origin: bottom left;
         }
@@ -498,6 +532,365 @@
         }
         body.install-coach-open { overflow: hidden; }
 
+        @keyframes specials-hot-pulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 0 0 rgba(255, 90, 20, 0),
+                    0 0 18px 2px rgba(255, 120, 40, 0.55),
+                    0 8px 22px rgba(0, 0, 0, 0.55),
+                    inset 0 1px 0 rgba(255, 220, 160, 0.35);
+                filter: brightness(1);
+            }
+            50% {
+                box-shadow:
+                    0 0 28px 6px rgba(255, 70, 10, 0.7),
+                    0 0 52px 12px rgba(255, 140, 40, 0.4),
+                    0 8px 22px rgba(0, 0, 0, 0.55),
+                    inset 0 1px 0 rgba(255, 230, 180, 0.55);
+                filter: brightness(1.1);
+            }
+        }
+        @keyframes chalk-sizzle {
+            0%, 100% {
+                opacity: 0.88;
+                text-shadow:
+                    0 0 0 rgba(255, 255, 255, 0),
+                    0.5px 0.5px 0 rgba(255, 255, 255, 0.15),
+                    0 1px 0 rgba(0, 0, 0, 0.7);
+                filter: brightness(0.96) contrast(1.05);
+            }
+            22% {
+                opacity: 1;
+                text-shadow:
+                    0 0 6px rgba(255, 255, 255, 0.55),
+                    0 0 18px rgba(255, 210, 160, 0.28),
+                    0.6px 0.4px 0 rgba(255, 255, 255, 0.4),
+                    0 1px 0 rgba(0, 0, 0, 0.7);
+                filter: brightness(1.18) contrast(1.12);
+            }
+            48% {
+                opacity: 0.94;
+                text-shadow:
+                    0 0 3px rgba(255, 255, 255, 0.25),
+                    0 1px 0 rgba(0, 0, 0, 0.7);
+                filter: brightness(1.02);
+            }
+            71% {
+                opacity: 1;
+                text-shadow:
+                    0 0 10px rgba(255, 255, 255, 0.45),
+                    0 0 22px rgba(255, 120, 40, 0.2),
+                    -0.4px 0.3px 0 rgba(255, 255, 255, 0.25),
+                    0 1px 0 rgba(0, 0, 0, 0.7);
+                filter: brightness(1.14);
+            }
+        }
+        @keyframes chalk-heat-haze {
+            0%, 100% { transform: translate3d(0, 0, 0) skewX(0deg); }
+            33% { transform: translate3d(0.3px, -0.8px, 0) skewX(0.15deg); }
+            66% { transform: translate3d(-0.35px, -0.4px, 0) skewX(-0.12deg); }
+        }
+        @keyframes chalk-ember-rise {
+            0% { transform: translate3d(0, 12px, 0) scale(0.6); opacity: 0; }
+            18% { opacity: 1; }
+            100% { transform: translate3d(var(--ember-drift, 8px), -110px, 0) scale(0.2); opacity: 0; }
+        }
+        @keyframes board-heat-pulse {
+            0%, 100% { opacity: 0.35; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Specials — always above the brass dialer on every page */
+        .specials-board-btn {
+            position: fixed;
+            right: var(--chrome-x);
+            bottom: calc(var(--chrome-y) + var(--dialer-size) + var(--chrome-gap));
+            z-index: 9998;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.78rem 1.1rem;
+            border: 2px solid #5a1800;
+            border-radius: 0.45rem;
+            background:
+                radial-gradient(circle at 30% 20%, rgba(255, 210, 120, 0.55), transparent 42%),
+                linear-gradient(165deg, #ff7a28 0%, #e23a0c 42%, #6a1200 100%);
+            color: #fff6e8;
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-shadow: 0 1px 0 rgba(60, 10, 0, 0.55);
+            -webkit-tap-highlight-color: transparent;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(14px);
+        }
+        .specials-board-btn.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation:
+                install-rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+                specials-hot-pulse 1.8s ease-in-out 0.5s infinite;
+        }
+        .specials-board-btn::before {
+            content: '';
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 999px;
+            background: radial-gradient(circle, #fff3c4 0%, #ffb040 45%, #ff4a00 100%);
+            box-shadow: 0 0 12px rgba(255, 120, 40, 0.95);
+            animation: install-ember 1.4s ease-in-out infinite;
+        }
+        .specials-board-btn:hover { filter: brightness(1.1); }
+        .specials-board-btn:active {
+            transform: scale(0.97);
+            animation: none;
+        }
+
+        html[data-menu-layout="single"] .specials-board-btn {
+            right: max(14px, env(safe-area-inset-right));
+            bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--dialer-size) + var(--chrome-gap));
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .specials-board-btn,
+            html[data-menu-layout="single"] .specials-board-btn {
+                bottom: var(--chrome-y);
+                right: calc(var(--chrome-x) + var(--dialer-size) + var(--chrome-gap));
+            }
+        }
+
+        .street-board {
+            position: fixed;
+            inset: 0;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding:
+                max(1rem, calc(0.75rem + env(safe-area-inset-top)))
+                max(1rem, calc(0.75rem + env(safe-area-inset-right)))
+                max(5.75rem, calc(4.75rem + env(safe-area-inset-bottom)))
+                max(1rem, calc(0.75rem + env(safe-area-inset-left)));
+            background:
+                radial-gradient(ellipse at 50% 85%, rgba(255, 70, 10, 0.16), transparent 48%),
+                rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+        html[data-menu-layout="single"] .street-board {
+            padding-top: max(1.25rem, calc(1rem + env(safe-area-inset-top)));
+            padding-bottom: max(5.75rem, calc(4.75rem + env(safe-area-inset-bottom)));
+        }
+        .street-board[hidden] { display: none !important; }
+        .street-board-panel {
+            position: relative;
+            width: min(420px, 100%);
+            max-height: min(72dvh, 620px);
+            overflow: auto;
+            border-radius: 0.15rem;
+            border: 1px solid #1a1a1a;
+            background:
+                radial-gradient(ellipse at 50% 115%, rgba(255, 70, 10, 0.14), transparent 40%),
+                repeating-linear-gradient(
+                    -18deg,
+                    rgba(255, 255, 255, 0.028) 0 1px,
+                    transparent 1px 5px
+                ),
+                #000000;
+            color: #f7f7f2;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.06),
+                0 28px 70px rgba(0, 0, 0, 0.9),
+                inset 0 0 100px rgba(0, 0, 0, 0.95);
+            padding: 1.25rem 1.2rem 1.35rem;
+            animation: install-rise 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+            isolation: isolate;
+        }
+        .street-board-panel::before {
+            content: '';
+            position: absolute;
+            inset: auto 8% -8% 8%;
+            height: 42%;
+            background: radial-gradient(ellipse, rgba(255, 90, 20, 0.45), transparent 70%);
+            filter: blur(18px);
+            pointer-events: none;
+            z-index: 0;
+            animation: board-heat-pulse 2.4s ease-in-out infinite;
+        }
+        .street-board-embers {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .street-board-embers span {
+            position: absolute;
+            bottom: 8%;
+            left: var(--ember-x, 50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 999px;
+            background: radial-gradient(circle, #fff6c8 0%, #ff7a28 55%, transparent 75%);
+            box-shadow: 0 0 10px rgba(255, 120, 40, 0.9);
+            animation: chalk-ember-rise var(--ember-dur, 2.8s) ease-out infinite;
+            animation-delay: var(--ember-delay, 0s);
+        }
+        html[data-menu-layout="single"] .street-board-panel {
+            width: min(100%, 26rem);
+            max-height: min(68dvh, 560px);
+        }
+        .street-board-head {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+            padding-bottom: 0.75rem;
+        }
+        .street-board-head h2 {
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #ffffff;
+            animation: chalk-sizzle 2.2s ease-in-out infinite;
+        }
+        .street-board-head p {
+            margin: 0.3rem 0 0;
+            font-family: 'IM Fell English', serif;
+            font-size: 0.9rem;
+            color: rgba(245, 245, 240, 0.68);
+        }
+        .street-board-close {
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            background: rgba(0, 0, 0, 0.55);
+            color: #ffffff;
+            border-radius: 999px;
+            width: 2.4rem;
+            height: 2.4rem;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .street-board-list {
+            position: relative;
+            z-index: 2;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 1.05rem;
+        }
+        .street-board-item {
+            animation: chalk-heat-haze 2.8s ease-in-out infinite;
+        }
+        .street-board-item:nth-child(2n) { animation-delay: 0.35s; }
+        .street-board-item:nth-child(3n) { animation-delay: 0.7s; }
+        .street-board-item-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.12rem;
+            letter-spacing: 0.06em;
+            color: #ffffff;
+            text-shadow:
+                0.5px 0.5px 0 rgba(255, 255, 255, 0.4),
+                -0.5px -0.35px 0 rgba(0, 0, 0, 0.85),
+                0 0 12px rgba(255, 255, 255, 0.22);
+            animation: chalk-sizzle 2.1s ease-in-out infinite;
+        }
+        .street-board-item:nth-child(2n) .street-board-item-title { animation-delay: 0.28s; }
+        .street-board-item:nth-child(3n) .street-board-item-title { animation-delay: 0.55s; }
+        .street-board-price {
+            color: #ffffff;
+            white-space: nowrap;
+            opacity: 0.95;
+        }
+        .street-board-note {
+            margin: 0.3rem 0 0;
+            font-size: 0.92rem;
+            color: rgba(245, 245, 240, 0.62);
+            font-family: 'IM Fell English', serif;
+        }
+        .street-board-empty {
+            position: relative;
+            z-index: 2;
+            margin: 0.5rem 0 0;
+            font-style: italic;
+            color: rgba(245, 245, 240, 0.5);
+        }
+        .month-cycle-strip {
+            position: relative;
+            z-index: 2;
+            margin: 1.1rem 0 0;
+            padding: 0.85rem 0.15rem 0.15rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+            display: grid;
+            gap: 0.55rem;
+        }
+        .month-cycle-strip h3 {
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.88);
+            animation: chalk-sizzle 3s ease-in-out infinite;
+        }
+        .month-cycle-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+        }
+        .month-cycle-cols h4 {
+            margin: 0 0 0.25rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.48);
+        }
+        .month-cycle-cols ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.2rem;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .month-cycle-cols .muted { opacity: 0.4; font-style: italic; }
+        #month-notes {
+            margin: 0;
+            font-size: 0.86rem;
+            color: rgba(245, 245, 240, 0.6);
+            font-style: italic;
+        }
+
+        body.street-board-open { overflow: hidden; }
+        body.street-board-open .dialer-container,
+        body.street-board-open .menu-install-btn,
+        body.street-board-open .specials-board-btn,
+        body.street-board-open .nav-hint {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        body.dialer-open .specials-board-btn {
+            opacity: 0.35;
+        }
+
         /* Wide phones and foldables in landscape: use width to reduce vertical travel. */
         @media (max-height: 560px) and (orientation: landscape) {
             html { font-size: 13px; }
@@ -529,6 +922,11 @@
             }
             .leaf, .book { transition-duration: 0.12s !important; }
             .fire-glow, #smokeCanvas { display: none; }
+            .river-bg, .fire-glow, #smokeCanvas {
+                transform: none !important;
+                transition: none !important;
+            }
+            .street-board-embers { display: none !important; }
         }
 
     </style>
@@ -561,6 +959,46 @@
       <span class="menu-install-label-short">Get Menu</span>
     </button>
 
+    <button type="button" id="specials-board-btn" class="specials-board-btn" hidden aria-hidden="true" aria-haspopup="dialog" aria-controls="street-board" aria-expanded="false">
+      Specials
+    </button>
+
+    <div id="street-board" class="street-board" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="street-board-title">
+      <div class="street-board-panel">
+        <div class="street-board-embers" aria-hidden="true">
+          <span style="--ember-x:12%;--ember-delay:0s;--ember-dur:2.6s;--ember-drift:10px"></span>
+          <span style="--ember-x:28%;--ember-delay:0.4s;--ember-dur:3.1s;--ember-drift:-12px"></span>
+          <span style="--ember-x:46%;--ember-delay:0.9s;--ember-dur:2.4s;--ember-drift:6px"></span>
+          <span style="--ember-x:63%;--ember-delay:1.3s;--ember-dur:3.4s;--ember-drift:-8px"></span>
+          <span style="--ember-x:78%;--ember-delay:0.2s;--ember-dur:2.9s;--ember-drift:14px"></span>
+          <span style="--ember-x:88%;--ember-delay:1.7s;--ember-dur:2.5s;--ember-drift:-6px"></span>
+        </div>
+        <div class="street-board-head">
+          <div>
+            <h2 id="street-board-title">Street Board</h2>
+            <p>Chalk on black — skillet still singing.</p>
+          </div>
+          <button type="button" class="street-board-close" id="street-board-close" aria-label="Close specials board">&times;</button>
+        </div>
+        <ul id="street-board-list" class="street-board-list"></ul>
+        <p id="street-board-empty" class="street-board-empty" hidden>No specials posted right now — ask the patio.</p>
+        <div id="month-cycle-strip" class="month-cycle-strip" hidden>
+          <h3>This month</h3>
+          <div class="month-cycle-cols">
+            <div>
+              <h4>Additions</h4>
+              <ul id="month-adds"></ul>
+            </div>
+            <div>
+              <h4>Takeaways</h4>
+              <ul id="month-takes"></ul>
+            </div>
+          </div>
+          <p id="month-notes" hidden></p>
+        </div>
+      </div>
+    </div>
+
     <div id="install-coach" class="install-coach" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="install-coach-title">
       <div class="install-coach-sheet">
         <h2 id="install-coach-title">Put this menu on your home screen</h2>
@@ -589,7 +1027,7 @@
                           <img src="/icons/icon-512.png" alt="" width="96" height="96" decoding="async" />
                         </div>
                         
-                        <h2 class="font-header text-sm tracking-[0.2em] uppercase mb-4 border-none opacity-80">July 2026</h2>
+                        <h2 id="cover-month" class="font-header text-sm tracking-[0.2em] uppercase mb-4 border-none opacity-80">July 2026</h2>
                         
                         <div class="cover-hero bg-[rgba(255,255,255,0.1)] p-4 rounded-full aspect-square w-48 h-48 mx-auto flex items-center justify-center border-4 border-double border-[rgba(42,27,18,0.3)] mb-6 shadow-md">
                             <div>
@@ -928,6 +1366,7 @@
     <script src="js/haptics.js"></script>
     <script src="js/menu-book.js"></script>
     <script src="js/menu-install.js"></script>
+    <script src="js/menu-board-ui.js"></script>
     <script src="js/sw-register.js"></script>
 </body>
 </html>

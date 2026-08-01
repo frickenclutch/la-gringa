@@ -29,13 +29,17 @@ console.log('structure');
   'index.html',
   'hub.html',
   'menu.html',
+  'owner.html',
   'worker.js',
   'data/site.json',
   'data/recipes.json',
+  'data/menu-board.json',
   'js/gate-game.js',
   'js/haptics.js',
   'js/menu-book.js',
   'js/menu-install.js',
+  'js/menu-board-ui.js',
+  'js/owner-board.js',
   'js/sw-register.js',
   'assets/logo-source.png',
   'robots.txt',
@@ -64,12 +68,24 @@ const clientBlob = ['js/gate-game.js', 'js/menu-book.js', 'index.html', 'hub.htm
   .join('\n');
 ok(!/PATIOQUESO20|MARINOBRIDGE15|RIVERMARLEY10/.test(clientBlob), 'promo strings absent from client');
 
-console.log('\nworker holds rewards');
+console.log('\nworker holds rewards + menu board APIs');
 const worker = read('worker.js');
 ok(/PATIOQUESO20/.test(worker) && /\/api\/reward/.test(worker), 'worker maps recipe → code');
+ok(/\/api\/menu-board/.test(worker), 'public menu-board route');
+ok(/\/api\/owner\/login/.test(worker), 'owner login route');
+ok(/\/api\/owner\/board/.test(worker), 'owner board route');
+ok(/\/api\/owner\/history/.test(worker), 'owner history route');
+ok(/OWNER_PIN|OWNER_TOKEN/.test(worker), 'owner PIN secret supported');
+ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
+
+console.log('\nmenu-board seed');
+const boardSeed = JSON.parse(read('data/menu-board.json'));
+ok(!!boardSeed.month?.label && Array.isArray(boardSeed.month.additions), 'month label + additions');
+ok(Array.isArray(boardSeed.specials) && boardSeed.specials.length >= 1, 'seed specials present');
+ok(boardSeed.specials.every((s) => s.id && s.name), 'specials have id + name');
 
 console.log('\nHTML hygiene');
-['index.html', 'hub.html', 'menu.html'].forEach((page) => {
+['index.html', 'hub.html', 'menu.html', 'owner.html'].forEach((page) => {
   const html = read(page);
   ok(html.includes('rel="canonical"'), page + ' has canonical');
   ok(html.includes('og:title'), page + ' has Open Graph');
@@ -82,6 +98,10 @@ ok(read('index.html').includes('js/haptics.js'), 'index loads haptics before gam
 ok(read('menu.html').includes('js/menu-book.js'), 'menu loads menu-book.js');
 ok(read('menu.html').includes('js/haptics.js'), 'menu loads haptics before book');
 ok(read('menu.html').includes('js/menu-install.js'), 'menu loads menu-install.js');
+ok(read('menu.html').includes('js/menu-board-ui.js'), 'menu loads menu-board-ui.js');
+ok(read('menu.html').includes('id="cover-month"'), 'cover month is data-driven');
+ok(read('menu.html').includes('id="specials-board-btn"'), 'specials street-board control');
+ok(read('menu.html').includes('id="street-board"'), 'street-board overlay markup');
 ok(read('menu.html').includes('manifest-menu.webmanifest'), 'menu uses menu-scoped manifest');
 ok(read('manifest-menu.webmanifest').includes('"/menu"'), 'menu manifest starts at /menu');
 ok(read('menu.html').includes('href="tel:+13157138151"'), 'menu phone opens the preferred dialer');
@@ -89,19 +109,31 @@ ok(
   read('menu.html').includes('href="https://www.dirtygringonny.com/"'),
   'menu domain links to the restaurant website'
 );
+ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');
+ok(read('owner.html').includes('noindex'), 'owner page is noindex');
+ok(read('wrangler.jsonc').includes('MENU_BOARD'), 'wrangler binds MENU_BOARD KV');
+ok(read('sw.js').includes('dg-v9'), 'service worker bumped for board assets');
+ok(read('sw.js').includes('/js/menu-board-ui.js'), 'SW precaches menu-board UI');
+ok(read('tools/stage-assets.mjs').includes('owner.html'), 'stage includes owner.html');
 ok(!/wp-content\/uploads/.test(read('tools/build-icons.mjs')), 'icon build uses local logo');
 
 console.log('\nJavaScript syntax');
-['js/gate-game.js', 'js/haptics.js', 'js/menu-book.js', 'js/menu-install.js', 'js/sw-register.js'].forEach(
-  (file) => {
-    try {
-      new Function(read(file));
-      ok(true, file + ' parses');
-    } catch (error) {
-      ok(false, file + ' parses: ' + error.message);
-    }
+[
+  'js/gate-game.js',
+  'js/haptics.js',
+  'js/menu-book.js',
+  'js/menu-install.js',
+  'js/menu-board-ui.js',
+  'js/owner-board.js',
+  'js/sw-register.js',
+].forEach((file) => {
+  try {
+    new Function(read(file));
+    ok(true, file + ' parses');
+  } catch (error) {
+    ok(false, file + ' parses: ' + error.message);
   }
-);
+});
 
 console.log('\n' + (failed ? failed + ' failed' : 'all passed'));
 process.exit(failed ? 1 : 0);

@@ -3,7 +3,7 @@
   "name": "la-gringas",
   "account_id": "0159ef82c2b48adea5a695c46f2312bb",
   "main": "worker.js",
-  "compatibility_date": "2026-06-18",
+  "compatibility_date": "2026-04-08",
   "observability": {
     "enabled": true
   },
@@ -16,5 +16,15 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  // Create with: npx wrangler kv namespace create MENU_BOARD
+  // then replace both IDs. Until then GET falls back to the embedded seed;
+  // PUT returns 503 without a real namespace.
+  "kv_namespaces": [
+    {
+      "binding": "MENU_BOARD",
+      "id": "00000000000000000000000000000000",
+      "preview_id": "00000000000000000000000000000000"
+    }
   ]
 }

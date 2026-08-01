@@ -63,6 +63,37 @@
     root.dataset.menuView = String(currentView);
   }
 
+  function bookShiftX() {
+    if (layoutMode === 'single') return currentView % 2 === 0 ? '-25%' : '25%';
+    if (currentView === 0) return '-25%';
+    if (currentView === totalViews) return '25%';
+    return '0%';
+  }
+
+  let parallaxX = 0;
+  let parallaxY = 0;
+  let parallaxViewBias = 0;
+
+  function applyBookTransform() {
+    const px = prefersReducedMotion() ? 0 : parallaxX * 10;
+    const py = prefersReducedMotion() ? 0 : parallaxY * 7;
+    book.style.transform =
+      'translateX(' + bookShiftX() + ') translate3d(' + px.toFixed(2) + 'px, ' + py.toFixed(2) + 'px, 0)';
+  }
+
+  function setParallax(nx, ny) {
+    if (prefersReducedMotion()) {
+      root.style.setProperty('--parallax-x', '0');
+      root.style.setProperty('--parallax-y', '0');
+      return;
+    }
+    parallaxX = Math.max(-1, Math.min(1, nx + parallaxViewBias));
+    parallaxY = Math.max(-1, Math.min(1, ny));
+    root.style.setProperty('--parallax-x', parallaxX.toFixed(3));
+    root.style.setProperty('--parallax-y', parallaxY.toFixed(3));
+    applyBookTransform();
+  }
+
   function updateBookState() {
     updateLayoutMode();
     const flippedStates = getLeafFlippedState(currentView);
@@ -90,15 +121,8 @@
       }
     });
 
-    if (layoutMode === 'single') {
-      book.style.transform = currentView % 2 === 0 ? 'translateX(-25%)' : 'translateX(25%)';
-    } else if (currentView === 0) {
-      book.style.transform = 'translateX(-25%)';
-    } else if (currentView === totalViews) {
-      book.style.transform = 'translateX(25%)';
-    } else {
-      book.style.transform = 'translateX(0%)';
-    }
+    parallaxViewBias = ((currentView / Math.max(1, totalViews)) - 0.5) * 0.22;
+    applyBookTransform();
 
     root.dataset.menuView = String(currentView);
     document.getElementById('nav-left').disabled = currentView <= 0;
@@ -170,12 +194,13 @@
       provideTurnFeedback(direction);
     }
     document.getElementById('dialer').classList.remove('open');
+    document.body.classList.remove('dialer-open');
   }
 
   function isControlTarget(target) {
     return Boolean(
       target.closest(
-        '.dialer-container, .nav-hint, #menu-install-btn, #install-coach, a, button'
+        '.dialer-container, .nav-hint, #menu-install-btn, #install-coach, #specials-board-btn, #street-board, a, button'
       )
     );
   }
@@ -261,9 +286,29 @@
   });
 
   function toggleDialer(e) {
-    document.getElementById('dialer').classList.toggle('open');
+    const dialer = document.getElementById('dialer');
+    dialer.classList.toggle('open');
+    document.body.classList.toggle('dialer-open', dialer.classList.contains('open'));
     e.stopPropagation();
   }
+
+  function syncParallaxFromPointer(event) {
+    if (document.body.classList.contains('street-board-open')) return;
+    const viewport = getViewportSize();
+    const nx = (event.clientX / Math.max(1, viewport.width)) * 2 - 1;
+    const ny = (event.clientY / Math.max(1, viewport.height)) * 2 - 1;
+    setParallax(nx * 0.55, ny * 0.45);
+  }
+
+  window.addEventListener('pointermove', syncParallaxFromPointer, { passive: true });
+  window.addEventListener(
+    'deviceorientation',
+    (event) => {
+      if (event.gamma == null || event.beta == null) return;
+      setParallax((event.gamma || 0) / 45, ((event.beta || 0) - 45) / 45);
+    },
+    { passive: true }
+  );
 
   window.addEventListener('resize', scheduleLayoutUpdate);
   window.addEventListener('orientationchange', scheduleLayoutUpdate);

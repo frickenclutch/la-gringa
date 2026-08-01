@@ -13,6 +13,7 @@ const FILES = [
   'index.html',
   'hub.html',
   'menu.html',
+  'owner.html',
   'styles.css',
   'fonts.css',
   'sw.js',
