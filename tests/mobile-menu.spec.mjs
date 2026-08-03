@@ -226,6 +226,14 @@ test('live-menu map derives stable ids for dishes, tables, and beverages', async
   expect(probe.count).toBeGreaterThan(40);
 });
 
+test('owner page on a worker-less host steers to the real board', async ({ page }) => {
+  await page.goto('/owner.html');
+  await page.waitForSelector('#owner-mirror-note:not([hidden])', { timeout: 5_000 });
+  expect(await page.locator('#owner-login').isHidden()).toBe(true);
+  const href = await page.locator('#owner-mirror-note a').getAttribute('href');
+  expect(href).toContain('/owner');
+});
+
 test('Android page turns request best-effort haptics', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'galaxy-chromium');
   await page.addInitScript(() => {

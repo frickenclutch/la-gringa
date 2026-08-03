@@ -18,6 +18,7 @@
   const pinNew = document.getElementById('pin-new');
   const pinMsg = document.getElementById('owner-pin-msg');
   const loginNote = document.getElementById('owner-login-note');
+  const mirrorNote = document.getElementById('owner-mirror-note');
   const saveForm = document.getElementById('owner-board-form');
   const statusEl = document.getElementById('owner-status');
   const specialsList = document.getElementById('specials-editor');
@@ -70,7 +71,15 @@
       data = null;
     }
     if (!res.ok) {
-      const err = new Error((data && data.error) || 'Request failed');
+      // Static hosts (the pages.dev mirror, local previews) answer API calls
+      // with empty 404/405s — name the real problem instead of "Request failed".
+      const staticHost = res.status === 404 || res.status === 405;
+      const err = new Error(
+        (data && data.error) ||
+          (staticHost
+            ? 'Owner tools don’t run on this address — use the main site.'
+            : 'Request failed (HTTP ' + res.status + ')')
+      );
       err.status = res.status;
       throw err;
     }
@@ -93,6 +102,14 @@
     if (claimView) claimView.hidden = !hasToken;
     if (setupNote) setupNote.hidden = hasToken;
     if (hasToken && claimPin) claimPin.focus();
+  }
+
+  function showMirrorNote() {
+    if (loginView) loginView.hidden = true;
+    if (editorView) editorView.hidden = true;
+    if (claimView) claimView.hidden = true;
+    if (setupNote) setupNote.hidden = true;
+    if (mirrorNote) mirrorNote.hidden = false;
   }
 
   function getClaimToken() {
@@ -348,12 +365,19 @@
   });
 
   async function boot() {
-    let mode = 'login';
+    // The status probe must return real JSON with a mode. Static hosts (the
+    // pages.dev mirror, local file previews) 404 it or answer with HTML —
+    // there is no worker there, so the PIN login can never succeed. Say so.
+    let mode = null;
     try {
       const status = await api('/api/owner/status');
-      mode = status?.mode || 'login';
+      mode = status && status.mode ? status.mode : null;
     } catch {
-      // Static preview without the worker — fall through to the login card.
+      mode = null;
+    }
+    if (!mode) {
+      showMirrorNote();
+      return;
     }
     if (mode === 'claim' || mode === 'unconfigured') {
       showClaim(mode === 'claim' && Boolean(getClaimToken()));

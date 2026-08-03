@@ -31,7 +31,13 @@
       data = null;
     }
     if (!res.ok) {
-      var err = new Error((data && data.error) || 'Request failed');
+      var staticHost = res.status === 404 || res.status === 405;
+      var err = new Error(
+        (data && data.error) ||
+          (staticHost
+            ? 'Editing doesn’t run on this address — use the main site.'
+            : 'Request failed (HTTP ' + res.status + ')')
+      );
       err.status = res.status;
       throw err;
     }
@@ -313,7 +319,10 @@
 
   async function boot() {
     try {
-      await api('/api/owner/board'); // auth probe: owner session required
+      // Auth probe: must be a real board payload. Static mirrors answer API
+      // paths with HTML (parsed to null) — that's not an owner session.
+      var probe = await api('/api/owner/board');
+      if (!probe || !probe.month) throw new Error('no worker on this host');
     } catch (error) {
       window.location.href = '/owner';
       return;

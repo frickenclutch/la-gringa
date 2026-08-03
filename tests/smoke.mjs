@@ -95,6 +95,9 @@ ok(/sanitizeMenuOverrides/.test(worker) && /MENU_FIELDS/.test(worker), 'menu ove
 ok(read('sw.js').includes('/js/menu-live.js'), 'SW precaches menu-live for guests');
 ok(read('owner.html').includes('/menu?edit=1'), 'owner panel links into menu edit mode');
 ok(read('js/menu-live.js').includes('menu-edit.js') && read('js/menu-edit.js').includes('/api/owner/menu'), 'edit mode loads on ?edit=1 and saves through the owner API');
+ok(read('owner.html').includes('owner-mirror-note'), 'owner page has a static-mirror notice');
+ok(read('js/owner-board.js').includes('showMirrorNote'), 'owner UI detects worker-less hosts');
+ok(read('js/menu-edit.js').includes('probe.month'), 'menu editor probe rejects HTML impostor responses');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');
