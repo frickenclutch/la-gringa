@@ -221,7 +221,7 @@
   function isControlTarget(target) {
     return Boolean(
       target.closest(
-        '.dialer-container, .nav-hint, #menu-install-btn, #install-coach, #specials-board-btn, #street-board, #lang-toggle, #lang-passport, a, button'
+        '.dialer-container, .nav-hint, #menu-install-btn, #install-coach, #specials-board-btn, #street-board, #lang-toggle, #lang-passport, #cover-seal, a, button'
       )
     );
   }

@@ -113,6 +113,8 @@ ok(
 );
 ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');
 ok(read('owner.html').includes('noindex'), 'owner page is noindex');
+ok(read('js/menu-board-ui.js').includes("window.location.href = '/owner'"), 'seal secret door routes to owner');
+ok(read('menu.html').includes('pointer-events: auto'), 'cover seal accepts owner taps');
 ok(read('wrangler.jsonc').includes('MENU_BOARD'), 'wrangler binds MENU_BOARD KV');
 ok(Number((read('sw.js').match(/dg-v(\d+)/) || [])[1] || 0) >= 12, 'service worker bumped for board assets');
 ok(read('menu.html').includes('data-perf'), 'menu sets early perf gate');

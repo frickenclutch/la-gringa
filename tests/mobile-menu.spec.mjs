@@ -1,6 +1,13 @@
 import { expect, test } from '@playwright/test';
 
 async function openMenu(page) {
+  // Pre-stamp the language passport; without dg-lang the fixed overlay covers
+  // the book and swallows gestures (and whether it beats the drag is a race).
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('dg-lang', 'en');
+    } catch {}
+  });
   await page.goto('/menu.html');
   await page.waitForFunction(() => Boolean(window.DGMenu));
 }
@@ -95,6 +102,22 @@ test('install and dialer controls remain inside the viewport', async ({ page }, 
   await openMenu(page);
   await page.waitForTimeout(1_000);
 
+  // Headless WebKit can stall rAF, freezing the install button mid-entrance
+  // (translateY(18px) sink). Jump every animation to its settled end state so
+  // we measure the geometry a real browser lands on.
+  await page.evaluate(() => {
+    const btn = document.getElementById('menu-install-btn');
+    btn.hidden = false;
+    btn.classList.add('is-visible');
+    for (const el of [btn, document.getElementById('dialer')]) {
+      el.getAnimations({ subtree: true }).forEach((a) => {
+        try {
+          a.finish();
+        } catch {}
+      });
+    }
+  });
+
   const boxes = await page.evaluate(() => {
     const ids = ['menu-install-btn', 'dialer'];
     return ids.map((id) => {
@@ -137,6 +160,48 @@ test('gate and hub remain within mobile viewport bounds', async ({ page }, testI
   expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);
   expect(dimensions.grid.left).toBeGreaterThanOrEqual(0);
   expect(dimensions.grid.right).toBeLessThanOrEqual(dimensions.viewport + 1);
+});
+
+test('first visit shows the language passport and stamping it frees the book', async ({ page }) => {
+  await page.goto('/menu.html');
+  await page.waitForSelector('#lang-passport:not([hidden])', { timeout: 5_000 });
+  // dispatchEvent instead of click(): headless WebKit stalls Playwright's
+  // two-frame stability wait on the freshly risen passport stage.
+  await page.locator('.lang-skillet[data-lang="en"]').dispatchEvent('click');
+  await page.waitForSelector('#lang-passport[hidden]', { state: 'attached', timeout: 5_000 });
+
+  const viewport = page.viewportSize();
+  await drag(
+    page,
+    { x: viewport.width * 0.78, y: viewport.height * 0.55 },
+    { x: viewport.width * 0.2, y: viewport.height * 0.55 }
+  );
+  await expect.poll(() => page.evaluate(() => window.DGMenu.getCurrentView())).toBe(1);
+});
+
+test('five quick taps on the cover seal open the owner door', async ({ page }) => {
+  await openMenu(page);
+  const seal = page.locator('#cover-seal');
+  for (let i = 0; i < 5; i += 1) {
+    await seal.dispatchEvent('pointerdown');
+    await seal.dispatchEvent('click');
+  }
+  // The seal sits inside the book's edge click-to-turn zone; its taps must be
+  // treated as control taps, never page turns (else tap 1 flips the cover away).
+  expect(await page.evaluate(() => window.DGMenu.getCurrentView())).toBe(0);
+  await page.waitForURL('**/owner', { timeout: 5_000 });
+});
+
+test('slow seal taps stay on the menu', async ({ page }) => {
+  await openMenu(page);
+  const seal = page.locator('#cover-seal');
+  for (let i = 0; i < 4; i += 1) {
+    await seal.dispatchEvent('pointerdown');
+  }
+  await page.waitForTimeout(2_600);
+  await seal.dispatchEvent('pointerdown');
+  await page.waitForTimeout(900);
+  expect(page.url()).toContain('menu');
 });
 
 test('Android page turns request best-effort haptics', async ({ page }, testInfo) => {

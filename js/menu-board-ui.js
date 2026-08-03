@@ -179,6 +179,35 @@
     if (window.DGLang && typeof window.DGLang.apply === 'function') window.DGLang.apply();
   });
 
+  // ---- Owner's secret door ----
+  // Five quick taps on the cover wax seal walk staff to the PIN gate at /owner.
+  // Deliberately silent until it triggers; the PIN is the real lock, this is a doorbell.
+  const seal = document.getElementById('cover-seal');
+  if (seal) {
+    const TAPS_NEEDED = 5;
+    const TAP_WINDOW_MS = 2500;
+    let taps = [];
+    let unlocking = false;
+    seal.addEventListener('pointerdown', (event) => {
+      // Keep seal taps out of the page-flip gesture engine.
+      event.stopPropagation();
+      if (unlocking) return;
+      const now = Date.now();
+      taps = taps.filter((t) => now - t < TAP_WINDOW_MS);
+      taps.push(now);
+      if (taps.length < TAPS_NEEDED) return;
+      unlocking = true;
+      taps = [];
+      if (window.DGHaptics) window.DGHaptics.trigger('success');
+      seal.classList.remove('is-singeing');
+      void seal.offsetWidth; // restart the flame even if a flip just played it
+      seal.classList.add('is-singeing');
+      window.setTimeout(() => {
+        window.location.href = '/owner';
+      }, 650);
+    });
+  }
+
   loadBoard()
     .then(applyBoard)
     .catch(() => {

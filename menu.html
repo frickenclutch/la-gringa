@@ -358,15 +358,21 @@
            grid so they bunch up and the LOADED column reads empty. Keep table prices as cells. */
         td.price { float: none; white-space: nowrap; padding-left: 0.9rem; }
 
-        /* ---- Cover brand seal (real logo stamp) ---- */
+        /* ---- Cover brand seal (real logo stamp) ----
+           Accepts pointer events (owner's secret door lives here) but must LOOK inert:
+           no cursor hint, no tap flash, no selection, no iOS callout. */
         .cover-seal {
             position: absolute; top: 6px; right: 6px; width: 74px; height: 74px;
-            pointer-events: none; transform: rotate(-7deg); transform-origin: center;
+            pointer-events: auto; touch-action: manipulation; cursor: default;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+            transform: rotate(-7deg); transform-origin: center;
             filter: drop-shadow(0 2px 3px rgba(42,11,0,0.45));
             opacity: 0.95;
         }
         .cover-seal img {
             width: 100%; height: 100%; object-fit: contain; display: block;
+            pointer-events: none;
         }
         @media (min-width: 640px) {
             .cover-seal { width: 96px; height: 96px; top: 10px; right: 10px; }
