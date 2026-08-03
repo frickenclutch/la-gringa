@@ -17,7 +17,7 @@ const HISTORY_LIMIT = 40;
 
 const SEED_BOARD = {
   month: {
-    label: 'July 2026',
+    label: 'August 2026',
     year: 2026,
     additions: ['Street corn elote cup', 'Mango chile agua fresca'],
     takeaways: ['Winter pozole'],
@@ -43,7 +43,7 @@ const SEED_BOARD = {
       active: true,
     },
   ],
-  updatedAt: '2026-07-31T12:00:00.000Z',
+  updatedAt: '2026-08-01T12:00:00.000Z',
   updatedBy: 'seed',
 };
 
