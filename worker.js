@@ -356,6 +356,11 @@ function sessionCookie(token, maxAgeSec) {
   return `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly; ${secure}SameSite=Lax; Max-Age=${maxAgeSec}`;
 }
 
+// The session cookie is HttpOnly, so signing out must happen server-side.
+function clearSessionCookie() {
+  return `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+}
+
 async function isAuthed(request, env) {
   const secret = await getSigningSecret(env);
   if (!secret) return false;
@@ -644,6 +649,13 @@ export default {
     }
     if (path === '/api/owner/pin') {
       return handleOwnerPinChange(request, env);
+    }
+    if (path === '/api/owner/logout') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS });
+      }
+      if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+      return json({ ok: true }, 200, { 'Set-Cookie': clearSessionCookie() });
     }
     if (path === '/api/owner/board') {
       if (request.method === 'GET') return handleOwnerBoardGet(request, env);

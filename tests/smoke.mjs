@@ -83,6 +83,9 @@ ok(/\/api\/owner\/claim/.test(worker) && /\/api\/owner\/status/.test(worker) && 
 ok(/PBKDF2/.test(worker) && /owner-claim-token/.test(worker), 'owner PIN stored as PBKDF2 hash, claimed via one-time token');
 ok(read('owner.html').includes('owner-claim-form') && read('owner.html').includes('owner-pin-form'), 'owner page has claim + change-PIN forms');
 ok(read('js/owner-board.js').includes('/api/owner/claim') && read('js/owner-board.js').includes('/api/owner/status'), 'owner UI drives claim flow');
+ok(/\/api\/owner\/logout/.test(worker) && /clearSessionCookie/.test(worker), 'worker clears HttpOnly session on logout');
+ok(read('js/owner-board.js').includes('/api/owner/logout'), 'sign out hits the logout endpoint');
+ok(/back-link/.test(read('owner.html')) && /href="\/hub"/.test(read('owner.html')), 'owner page links back to the site');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');

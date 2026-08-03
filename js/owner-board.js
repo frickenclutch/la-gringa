@@ -17,6 +17,7 @@
   const pinCurrent = document.getElementById('pin-current');
   const pinNew = document.getElementById('pin-new');
   const pinMsg = document.getElementById('owner-pin-msg');
+  const loginNote = document.getElementById('owner-login-note');
   const saveForm = document.getElementById('owner-board-form');
   const statusEl = document.getElementById('owner-status');
   const specialsList = document.getElementById('specials-editor');
@@ -237,6 +238,7 @@
   loginForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (loginError) loginError.textContent = '';
+    if (loginNote) loginNote.hidden = true;
     setStatus('');
     try {
       await api('/api/owner/login', {
@@ -280,10 +282,22 @@
 
   refreshHistoryBtn?.addEventListener('click', () => loadHistory());
 
-  logoutBtn?.addEventListener('click', () => {
-    document.cookie = 'dg_owner=; Path=/; Max-Age=0; SameSite=Lax';
+  logoutBtn?.addEventListener('click', async () => {
+    // The session cookie is HttpOnly — only the worker can actually clear it.
+    try {
+      await api('/api/owner/logout', { method: 'POST' });
+    } catch {
+      // Static preview without the worker; nothing server-side to clear.
+    }
+    if (pinInput) pinInput.value = '';
+    if (loginError) loginError.textContent = '';
+    setStatus('');
     showEditor(false);
-    setStatus('Signed out.');
+    if (loginNote) {
+      loginNote.textContent = 'Signed out — see you on the patio.';
+      loginNote.hidden = false;
+    }
+    pinInput?.focus();
   });
 
   claimForm?.addEventListener('submit', async (event) => {

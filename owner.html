@@ -179,6 +179,21 @@
       opacity: 0.72;
       margin: 0 0 0.75rem;
     }
+    .back-link {
+      display: inline-block;
+      margin-top: 0.4rem;
+      font-family: "Cinzel", serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.6;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(31, 22, 15, 0.35);
+      padding-bottom: 1px;
+    }
+    .back-link:hover, .back-link:focus-visible { opacity: 1; }
   </style>
 </head>
 <body>
@@ -187,6 +202,7 @@
       <div>
         <h1>Patio Board</h1>
         <p class="sub">Monthly swaps + daily specials — Dirty Gringo staff only.</p>
+        <a class="back-link" href="/hub">&larr; Back to the site</a>
       </div>
       <button type="button" class="secondary" id="owner-logout" hidden>Sign out</button>
     </header>
@@ -201,6 +217,7 @@
           <button type="submit">Unlock board</button>
         </div>
         <p class="error" id="owner-login-error" role="alert"></p>
+        <p class="hint" id="owner-login-note" role="status" style="margin:0.4rem 0 0" hidden></p>
       </form>
     </section>
 
