@@ -178,8 +178,9 @@
     sheetError.textContent = '';
     sheetTitle.textContent = m.name ? m.name.textContent : id.split('.').pop();
     sheet.querySelector('#mlive-hint').textContent =
-      (m.name || m.desc ? 'Text edits apply to ' + (lang === 'es' ? 'Español' : 'English') + ' (flip EN | ES to edit the other). ' : '') +
-      'Leave a field matching the original to un-override it.';
+      (m.name || m.desc
+        ? 'Editing ' + (lang === 'es' ? 'Español' : 'English') + ' — the other language is translated for you on save, until you customize it yourself (flip EN | ES). '
+        : '') + 'Leave a field matching the original to un-override it.';
     sheetFields.innerHTML = '';
     if (m.name) {
       sheetFields.appendChild(
@@ -258,6 +259,7 @@
       body: JSON.stringify({ items: items }),
     });
     live.setOverrides(data.overrides || { items: items });
+    return data;
   }
 
   function restoreBaseDom(id) {
@@ -282,10 +284,15 @@
       delete items[activeId];
     }
     try {
-      await putOverrides(items);
+      var data = await putOverrides(items);
       restoreBaseDom(activeId);
       live.applyAll();
-      toast('Saved — guests see it now');
+      var didTranslate = data && Array.isArray(data.translated) && data.translated.length;
+      toast(
+        didTranslate
+          ? 'Saved — ' + (live.currentLang() === 'es' ? 'English' : 'Spanish') + ' translated automatically'
+          : 'Saved — guests see it now'
+      );
       closeSheet();
     } catch (error) {
       if (error.status === 401) {

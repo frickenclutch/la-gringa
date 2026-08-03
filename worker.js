@@ -24,6 +24,19 @@ const MENU_HISTORY_LIMIT = 20;
 const MENU_MAX_ITEMS = 400;
 const MENU_ID_RE = /^[A-Za-z0-9][A-Za-z0-9.-]{0,79}$/;
 const MENU_FIELDS = ['price', 'regular', 'loaded', 'p1', 'p2', 'name_en', 'name_es', 'desc_en', 'desc_es'];
+// Text fields auto-translated to their sibling language on save. Fields the
+// owner typed themselves ("manual") always beat machine output; machine-filled
+// fields are tracked per item in `_auto` (server-derived, never client-trusted).
+const TRANSLATE_PAIRS = [
+  ['name_en', 'name_es'],
+  ['desc_en', 'desc_es'],
+];
+const TRANSLATE_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+const TRANSLATE_FALLBACK_MODEL = '@cf/meta/m2m100-1.2b';
+const TRANSLATE_SYSTEM =
+  'You translate text for a US Mexican restaurant menu between English and Spanish (Latin American). ' +
+  'Return ONLY the translation, no quotes, no commentary. Keep food terms natural for a menu.';
+const LANG_OF_FIELD = (field) => (field.endsWith('_es') ? 'spanish' : 'english');
 // PBKDF2 sized for the Workers free-tier CPU budget; the per-IP lockout and a
 // passphrase-length PIN carry the brute-force load, not iteration count.
 const PBKDF2_ITERATIONS = 25000;
@@ -437,6 +450,84 @@ function sanitizeMenuOverrides(input) {
   };
 }
 
+function cleanTranslation(raw) {
+  let t = String(raw == null ? '' : raw).trim();
+  // Strip a single layer of wrapping quotes an LLM might add.
+  if (t.length > 1 && ((t[0] === '"' && t.endsWith('"')) || (t[0] === '“' && t.endsWith('”')))) {
+    t = t.slice(1, -1).trim();
+  }
+  return t.slice(0, 500) || null;
+}
+
+async function translateText(env, text, from, to) {
+  if (!env.AI || !text) return null;
+  try {
+    const out = await env.AI.run(TRANSLATE_MODEL, {
+      messages: [
+        { role: 'system', content: TRANSLATE_SYSTEM },
+        { role: 'user', content: 'Translate to ' + (to === 'spanish' ? 'Spanish' : 'English') + ':\n' + text },
+      ],
+      max_tokens: 300,
+      temperature: 0.1,
+    });
+    const t = cleanTranslation(out && out.response);
+    if (t) return t;
+  } catch {
+    // fall through to the dedicated translation model
+  }
+  try {
+    const out = await env.AI.run(TRANSLATE_FALLBACK_MODEL, {
+      text,
+      source_lang: from,
+      target_lang: to,
+    });
+    return cleanTranslation(out && out.translated_text);
+  } catch {
+    return null; // AI unavailable (local dev, quota) — save proceeds untranslated
+  }
+}
+
+/** Diff-based provenance + machine fill:
+ *  - a field whose value differs from the stored doc is a fresh human edit;
+ *  - its sibling language gets machine-translated only while absent or
+ *    machine-owned — text the owner typed is never overwritten;
+ *  - `_auto` (machine-owned fields) is re-derived here, never client-trusted
+ *    (the sanitizer already strips it from incoming payloads). */
+async function autoTranslateMenu(env, next, previous) {
+  const translated = [];
+  const prevItems = (previous && previous.items) || {};
+  for (const [id, entry] of Object.entries(next.items)) {
+    const prevEntry = prevItems[id] || {};
+    const prevAuto = new Set(Array.isArray(prevEntry._auto) ? prevEntry._auto : []);
+    const auto = new Set();
+    for (const f of prevAuto) {
+      if (entry[f] != null && entry[f] === prevEntry[f]) auto.add(f); // unchanged machine text
+    }
+    for (const [a, b] of TRANSLATE_PAIRS) {
+      for (const [src, dst] of [
+        [a, b],
+        [b, a],
+      ]) {
+        const srcFreshManual =
+          entry[src] != null && entry[src] !== prevEntry[src] && !auto.has(src);
+        const dstFreshManual =
+          entry[dst] != null && entry[dst] !== prevEntry[dst] && !auto.has(dst);
+        if (!srcFreshManual || dstFreshManual) continue;
+        const dstMachineOwned = entry[dst] == null || prevAuto.has(dst);
+        if (!dstMachineOwned) continue;
+        const t = await translateText(env, entry[src], LANG_OF_FIELD(src), LANG_OF_FIELD(dst));
+        if (t) {
+          entry[dst] = t;
+          auto.add(dst);
+          translated.push(id + '.' + dst);
+        }
+      }
+    }
+    if (auto.size) entry._auto = [...auto];
+  }
+  return translated;
+}
+
 async function loadMenuOverrides(env) {
   const stored = await readKvJson(env.MENU_BOARD, MENU_OVERRIDES_KEY);
   if (stored && stored.items && typeof stored.items === 'object') return stored;
@@ -470,6 +561,7 @@ async function handleOwnerMenuPut(request, env) {
 
   const overrides = sanitizeMenuOverrides(body);
   const previous = await loadMenuOverrides(env);
+  const translated = await autoTranslateMenu(env, overrides, previous);
   const history = (await readKvJson(env.MENU_BOARD, MENU_HISTORY_KEY)) || [];
   history.unshift({ at: overrides.updatedAt, by: overrides.updatedBy, items: previous.items });
   while (history.length > MENU_HISTORY_LIMIT) history.pop();
@@ -477,7 +569,7 @@ async function handleOwnerMenuPut(request, env) {
   await writeKvJson(env.MENU_BOARD, MENU_OVERRIDES_KEY, overrides);
   await writeKvJson(env.MENU_BOARD, MENU_HISTORY_KEY, history);
 
-  return json({ ok: true, overrides });
+  return json({ ok: true, overrides, translated });
 }
 
 async function handleOwnerLogin(request, env) {

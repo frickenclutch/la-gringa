@@ -17,6 +17,10 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  // Workers AI: auto-translates owner menu edits between EN and ES.
+  "ai": {
+    "binding": "AI"
+  },
   "kv_namespaces": [
     {
       "binding": "MENU_BOARD",

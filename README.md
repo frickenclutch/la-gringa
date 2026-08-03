@@ -58,6 +58,7 @@ npm run build:fonts
 | `GET /api/menu-board` | Public month cycle + currently active specials |
 | `POST /api/owner/login` · `PUT /api/owner/board` · `GET /api/owner/history` | Owner board auth, save, audit trail |
 | `GET /api/owner/status` · `POST /api/owner/claim` · `POST /api/owner/pin` | First-run claim flow + self-service PIN change |
+| `GET /api/menu-overrides` · `PUT /api/owner/menu` | Live menu edits (names/descriptions/prices) layered over the printed manuscript; text edits auto-translate EN⇄ES via Workers AI (`llama-3.3-70b`, `m2m100` fallback) — machine fills never overwrite text the owner typed |
 
 From the menu page, Chromium browsers get the native install prompt; iOS Safari gets an Add to Home Screen coach mark. The menu uses `manifest-menu.webmanifest` (`start_url: /menu`) so the installed app opens straight into the manuscript.
 

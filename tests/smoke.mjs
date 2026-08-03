@@ -98,6 +98,8 @@ ok(read('js/menu-live.js').includes('menu-edit.js') && read('js/menu-edit.js').i
 ok(read('owner.html').includes('owner-mirror-note'), 'owner page has a static-mirror notice');
 ok(read('js/owner-board.js').includes('showMirrorNote'), 'owner UI detects worker-less hosts');
 ok(read('js/menu-edit.js').includes('probe.month'), 'menu editor probe rejects HTML impostor responses');
+ok(read('wrangler.jsonc').includes('"ai"'), 'wrangler binds Workers AI');
+ok(/m2m100/.test(worker) && /autoTranslateMenu/.test(worker) && /_auto/.test(worker), 'menu edits auto-translate with machine-ownership tracking');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');
