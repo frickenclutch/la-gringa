@@ -16,6 +16,12 @@ const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
 const HISTORY_LIMIT = 40;
 const LOGIN_MAX_FAILS = 5;
 const LOGIN_WINDOW_SEC = 600;
+const OWNER_AUTH_KEY = 'owner-auth';
+const CLAIM_TOKEN_KEY = 'owner-claim-token';
+// PBKDF2 sized for the Workers free-tier CPU budget; the per-IP lockout and a
+// passphrase-length PIN carry the brute-force load, not iteration count.
+const PBKDF2_ITERATIONS = 25000;
+const MIN_PIN_LENGTH = 6;
 
 const SEED_BOARD = {
   month: {
@@ -202,6 +208,78 @@ async function clearLoginFails(env, request) {
   }
 }
 
+async function pbkdf2Hash(pin, saltBytes, iterations) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(pin),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-256', salt: saltBytes, iterations },
+    key,
+    256
+  );
+  return new Uint8Array(bits);
+}
+
+function bytesEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+/** Owner auth config lives in KV once the owner claims the board:
+ *  { salt, hash, iterations, sessionSecret, updatedAt } (base64url fields).
+ *  env.OWNER_PIN remains a legacy/dev override when no KV config exists. */
+async function loadOwnerAuth(env) {
+  const cfg = await readKvJson(env.MENU_BOARD, OWNER_AUTH_KEY);
+  if (!cfg || !cfg.salt || !cfg.hash || !cfg.sessionSecret) return null;
+  return cfg;
+}
+
+async function saveOwnerAuth(env, pin) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await pbkdf2Hash(pin, salt, PBKDF2_ITERATIONS);
+  const sessionSecret = crypto.getRandomValues(new Uint8Array(32));
+  const cfg = {
+    salt: b64urlEncode(salt),
+    hash: b64urlEncode(hash),
+    iterations: PBKDF2_ITERATIONS,
+    sessionSecret: b64urlEncode(sessionSecret),
+    updatedAt: new Date().toISOString(),
+  };
+  await writeKvJson(env.MENU_BOARD, OWNER_AUTH_KEY, cfg);
+  return cfg;
+}
+
+async function verifyOwnerPin(cfg, pin) {
+  const expected = b64urlDecode(cfg.hash);
+  const actual = await pbkdf2Hash(
+    pin,
+    b64urlDecode(cfg.salt),
+    Number(cfg.iterations) || PBKDF2_ITERATIONS
+  );
+  return bytesEqual(expected, actual);
+}
+
+async function getSigningSecret(env) {
+  const cfg = await loadOwnerAuth(env);
+  if (cfg) return cfg.sessionSecret;
+  return getOwnerSecret(env);
+}
+
+/** Active one-time setup token: KV in production, env override for local dev
+ *  (wrangler dev --var OWNER_CLAIM_TOKEN:… — the local KV CLI is flaky on Windows). */
+async function getActiveClaimToken(env) {
+  const fromEnv = String(env.OWNER_CLAIM_TOKEN || '').trim();
+  if (fromEnv) return fromEnv;
+  if (!env.MENU_BOARD) return '';
+  return String((await env.MENU_BOARD.get(CLAIM_TOKEN_KEY)) || '').trim();
+}
+
 function parseCookies(header) {
   const out = {};
   if (!header) return out;
@@ -279,7 +357,7 @@ function sessionCookie(token, maxAgeSec) {
 }
 
 async function isAuthed(request, env) {
-  const secret = getOwnerSecret(env);
+  const secret = await getSigningSecret(env);
   if (!secret) return false;
   const cookies = parseCookies(request.headers.get('Cookie') || '');
   if (await verifySession(secret, cookies[COOKIE_NAME])) return true;
@@ -327,9 +405,10 @@ async function handleOwnerLogin(request, env) {
     return json({ error: 'Method not allowed' }, 405);
   }
 
-  const secret = getOwnerSecret(env);
-  if (!secret) {
-    return json({ error: 'Owner PIN is not configured on the worker' }, 503);
+  const cfg = await loadOwnerAuth(env);
+  const envSecret = getOwnerSecret(env);
+  if (!cfg && !envSecret) {
+    return json({ error: 'Owner PIN is not set up yet', mode: 'claim' }, 503);
   }
 
   let pin = '';
@@ -349,17 +428,134 @@ async function handleOwnerLogin(request, env) {
     );
   }
 
-  if (!pin || !safeEqual(pin, secret)) {
+  const valid = pin && (cfg ? await verifyOwnerPin(cfg, pin) : safeEqual(pin, envSecret));
+  if (!valid) {
     await recordLoginFail(env, request, fails);
     return json({ error: 'Invalid PIN' }, 401);
   }
 
   await clearLoginFails(env, request);
-  const token = await signSession(secret, Date.now());
+  const token = await signSession(cfg ? cfg.sessionSecret : envSecret, Date.now());
   return json(
     { ok: true, expiresIn: TOKEN_TTL_MS },
     200,
     { 'Set-Cookie': sessionCookie(token, Math.floor(TOKEN_TTL_MS / 1000)) }
+  );
+}
+
+async function handleOwnerStatus(env) {
+  const cfg = await loadOwnerAuth(env);
+  if (cfg || getOwnerSecret(env)) return json({ mode: 'login' });
+  const claimToken = await getActiveClaimToken(env);
+  return json({ mode: claimToken ? 'claim' : 'unconfigured' });
+}
+
+async function handleOwnerClaim(request, env) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: CORS });
+  }
+  if (request.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405);
+  }
+  if (!env.MENU_BOARD) {
+    return json({ error: 'MENU_BOARD KV binding is not configured' }, 503);
+  }
+  if (await loadOwnerAuth(env)) {
+    return json({ error: 'The board is already claimed' }, 409);
+  }
+
+  let token = '';
+  let pin = '';
+  try {
+    const body = await request.json();
+    token = String(body?.token || '').trim();
+    pin = String(body?.pin || '').trim();
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400);
+  }
+
+  const fails = await loginFailCount(env, request);
+  if (fails >= LOGIN_MAX_FAILS) {
+    return json(
+      { error: 'Too many attempts — try again later.' },
+      429,
+      { 'Retry-After': String(LOGIN_WINDOW_SEC) }
+    );
+  }
+
+  const stored = await getActiveClaimToken(env);
+  if (!stored) {
+    return json({ error: 'No setup link is active — ask for a fresh one' }, 403);
+  }
+  if (!token || !safeEqual(token, stored)) {
+    await recordLoginFail(env, request, fails);
+    return json({ error: 'That setup link is not valid' }, 403);
+  }
+  if (pin.length < MIN_PIN_LENGTH) {
+    return json({ error: `PIN must be at least ${MIN_PIN_LENGTH} characters` }, 400);
+  }
+
+  const cfg = await saveOwnerAuth(env, pin);
+  await env.MENU_BOARD.delete(CLAIM_TOKEN_KEY);
+  await clearLoginFails(env, request);
+
+  const session = await signSession(cfg.sessionSecret, Date.now());
+  return json(
+    { ok: true, expiresIn: TOKEN_TTL_MS },
+    200,
+    { 'Set-Cookie': sessionCookie(session, Math.floor(TOKEN_TTL_MS / 1000)) }
+  );
+}
+
+async function handleOwnerPinChange(request, env) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: CORS });
+  }
+  if (request.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405);
+  }
+  if (!(await isAuthed(request, env))) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const cfg = await loadOwnerAuth(env);
+  if (!cfg) {
+    return json({ error: 'PIN is managed by the deployment secret on this install' }, 400);
+  }
+
+  let currentPin = '';
+  let newPin = '';
+  try {
+    const body = await request.json();
+    currentPin = String(body?.currentPin || '').trim();
+    newPin = String(body?.newPin || '').trim();
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400);
+  }
+
+  const fails = await loginFailCount(env, request);
+  if (fails >= LOGIN_MAX_FAILS) {
+    return json(
+      { error: 'Too many attempts — try again later.' },
+      429,
+      { 'Retry-After': String(LOGIN_WINDOW_SEC) }
+    );
+  }
+  if (!currentPin || !(await verifyOwnerPin(cfg, currentPin))) {
+    await recordLoginFail(env, request, fails);
+    return json({ error: 'Current PIN is wrong' }, 401);
+  }
+  if (newPin.length < MIN_PIN_LENGTH) {
+    return json({ error: `New PIN must be at least ${MIN_PIN_LENGTH} characters` }, 400);
+  }
+
+  const next = await saveOwnerAuth(env, newPin);
+  await clearLoginFails(env, request);
+  // Rotating the session secret invalidates every other signed-in device.
+  const session = await signSession(next.sessionSecret, Date.now());
+  return json(
+    { ok: true },
+    200,
+    { 'Set-Cookie': sessionCookie(session, Math.floor(TOKEN_TTL_MS / 1000)) }
   );
 }
 
@@ -435,6 +631,19 @@ export default {
     }
     if (path === '/api/owner/login') {
       return handleOwnerLogin(request, env);
+    }
+    if (path === '/api/owner/status') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS });
+      }
+      if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
+      return handleOwnerStatus(env);
+    }
+    if (path === '/api/owner/claim') {
+      return handleOwnerClaim(request, env);
+    }
+    if (path === '/api/owner/pin') {
+      return handleOwnerPinChange(request, env);
     }
     if (path === '/api/owner/board') {
       if (request.method === 'GET') return handleOwnerBoardGet(request, env);

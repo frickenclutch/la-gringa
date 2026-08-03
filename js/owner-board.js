@@ -7,6 +7,16 @@
   const loginForm = document.getElementById('owner-login-form');
   const pinInput = document.getElementById('owner-pin');
   const loginError = document.getElementById('owner-login-error');
+  const claimView = document.getElementById('owner-claim');
+  const claimForm = document.getElementById('owner-claim-form');
+  const claimPin = document.getElementById('claim-pin');
+  const claimPinConfirm = document.getElementById('claim-pin-confirm');
+  const claimError = document.getElementById('owner-claim-error');
+  const setupNote = document.getElementById('owner-setup-note');
+  const pinForm = document.getElementById('owner-pin-form');
+  const pinCurrent = document.getElementById('pin-current');
+  const pinNew = document.getElementById('pin-new');
+  const pinMsg = document.getElementById('owner-pin-msg');
   const saveForm = document.getElementById('owner-board-form');
   const statusEl = document.getElementById('owner-status');
   const specialsList = document.getElementById('specials-editor');
@@ -70,6 +80,26 @@
     if (loginView) loginView.hidden = show;
     if (editorView) editorView.hidden = !show;
     if (logoutBtn) logoutBtn.hidden = !show;
+    if (show) {
+      if (claimView) claimView.hidden = true;
+      if (setupNote) setupNote.hidden = true;
+    }
+  }
+
+  function showClaim(hasToken) {
+    if (loginView) loginView.hidden = true;
+    if (editorView) editorView.hidden = true;
+    if (claimView) claimView.hidden = !hasToken;
+    if (setupNote) setupNote.hidden = hasToken;
+    if (hasToken && claimPin) claimPin.focus();
+  }
+
+  function getClaimToken() {
+    const fromQuery = new URLSearchParams(window.location.search).get('claim');
+    if (fromQuery) return fromQuery.trim();
+    const hash = window.location.hash || '';
+    if (hash.startsWith('#claim=')) return decodeURIComponent(hash.slice(7)).trim();
+    return '';
   }
 
   function specialRow(special) {
@@ -256,5 +286,67 @@
     setStatus('Signed out.');
   });
 
-  bootEditor();
+  claimForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (claimError) claimError.textContent = '';
+    const pin = claimPin?.value || '';
+    if (pin.length < 6) {
+      if (claimError) claimError.textContent = 'PIN must be at least 6 characters.';
+      return;
+    }
+    if (pin !== (claimPinConfirm?.value || '')) {
+      if (claimError) claimError.textContent = 'Those PINs don’t match — try again.';
+      return;
+    }
+    try {
+      await api('/api/owner/claim', {
+        method: 'POST',
+        body: JSON.stringify({ token: getClaimToken(), pin }),
+      });
+      // Burn the token out of the address bar/history.
+      window.history.replaceState(null, '', window.location.pathname);
+      await bootEditor();
+      setStatus('Board claimed. This PIN is yours now — the setup link is dead.');
+    } catch (error) {
+      if (claimError) claimError.textContent = error.message || 'Claim failed';
+    }
+  });
+
+  pinForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (pinMsg) pinMsg.textContent = '';
+    const next = pinNew?.value || '';
+    if (next.length < 6) {
+      if (pinMsg) pinMsg.textContent = 'New PIN must be at least 6 characters.';
+      return;
+    }
+    try {
+      await api('/api/owner/pin', {
+        method: 'POST',
+        body: JSON.stringify({ currentPin: pinCurrent?.value || '', newPin: next }),
+      });
+      if (pinCurrent) pinCurrent.value = '';
+      if (pinNew) pinNew.value = '';
+      if (pinMsg) pinMsg.textContent = 'PIN updated. Other signed-in devices were logged out.';
+    } catch (error) {
+      if (pinMsg) pinMsg.textContent = error.message || 'PIN change failed';
+    }
+  });
+
+  async function boot() {
+    let mode = 'login';
+    try {
+      const status = await api('/api/owner/status');
+      mode = status?.mode || 'login';
+    } catch {
+      // Static preview without the worker — fall through to the login card.
+    }
+    if (mode === 'claim' || mode === 'unconfigured') {
+      showClaim(mode === 'claim' && Boolean(getClaimToken()));
+      return;
+    }
+    bootEditor();
+  }
+
+  boot();
 })();

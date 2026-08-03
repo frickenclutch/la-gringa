@@ -204,6 +204,29 @@
       </form>
     </section>
 
+    <section id="owner-claim" class="panel" hidden>
+      <form id="owner-claim-form" class="stack">
+        <h2 style="margin-top:0">Claim your board</h2>
+        <p class="hint">First time in. Choose the PIN you'll unlock the board with from now on — longer is stronger, a short phrase works great.</p>
+        <label>
+          Choose a PIN (6+ characters)
+          <input id="claim-pin" type="password" minlength="6" required autocomplete="new-password" />
+        </label>
+        <label>
+          Repeat it
+          <input id="claim-pin-confirm" type="password" minlength="6" required autocomplete="new-password" />
+        </label>
+        <div class="actions">
+          <button type="submit">Stamp it — claim the board</button>
+        </div>
+        <p class="error" id="owner-claim-error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="owner-setup-note" class="panel" hidden>
+      <p class="hint" style="margin:0">This board hasn't been claimed yet. Open the private setup link you were sent to choose your PIN — or ask for a fresh link if it expired.</p>
+    </section>
+
     <section id="owner-editor" hidden>
       <form id="owner-board-form" class="stack">
         <div class="panel stack">
@@ -238,6 +261,20 @@
           <button type="button" class="secondary" id="refresh-history">Refresh</button>
         </div>
         <ul id="history-list"></ul>
+      </div>
+
+      <div class="panel" style="margin-top:1rem">
+        <h2 style="margin-top:0">Change PIN</h2>
+        <form id="owner-pin-form" class="stack">
+          <div class="grid-2">
+            <label>Current PIN<input id="pin-current" type="password" autocomplete="current-password" required /></label>
+            <label>New PIN (6+ characters)<input id="pin-new" type="password" minlength="6" autocomplete="new-password" required /></label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="secondary">Update PIN</button>
+          </div>
+          <p class="error" id="owner-pin-msg" role="status"></p>
+        </form>
       </div>
     </section>
   </div>

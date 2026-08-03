@@ -14,13 +14,24 @@ npm run test:mobile  # Playwright: iPhone/WebKit, Galaxy, Fold, desktop
 npm run dev          # local preview with worker APIs
 ```
 
-For the owner board locally:
+### Owner board — self-service setup
 
-```bash
-npx wrangler secret put OWNER_PIN   # production
-# or for local:
-echo OWNER_PIN=1234 >> .dev.vars
-```
+The owner claims the board from the site itself; no terminal or deploy secrets needed:
+
+1. Seed a one-time setup token (7-day TTL) and send the owner the link it prints:
+
+   ```bash
+   TOKEN=$(node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))") \
+     && npx wrangler kv key put --binding MENU_BOARD --remote owner-claim-token "$TOKEN" --expiration-ttl 604800 \
+     && echo "https://la-gringas.the-dirty-gringo.workers.dev/owner?claim=$TOKEN"
+   ```
+
+2. The owner opens the link, chooses a PIN (6+ characters — a short phrase is best), and lands straight in the editor. The PIN is stored as a salted PBKDF2 hash in KV; the token burns on claim.
+3. The PIN can be changed anytime from the editor's **Change PIN** panel (rotates the session secret, signing out all other devices). Lost PIN: re-run step 1 after deleting the `owner-auth` KV key.
+
+Login, claim, and PIN change share a per-IP throttle: 5 failures → 10-minute lockout.
+
+Local dev: `OWNER_PIN=...` in `.dev.vars` runs the legacy env-PIN mode; `wrangler dev --var OWNER_CLAIM_TOKEN:demo` exercises the claim flow (see `.claude/launch.json` configs).
 
 Create the KV namespace once (requires Cloudflare auth for the Dirty Gringo account), then paste the id into `wrangler.jsonc`:
 
@@ -46,6 +57,7 @@ npm run build:fonts
 | `POST /api/reward` | Issues patio promo codes (worker only — not in client JS) |
 | `GET /api/menu-board` | Public month cycle + currently active specials |
 | `POST /api/owner/login` · `PUT /api/owner/board` · `GET /api/owner/history` | Owner board auth, save, audit trail |
+| `GET /api/owner/status` · `POST /api/owner/claim` · `POST /api/owner/pin` | First-run claim flow + self-service PIN change |
 
 From the menu page, Chromium browsers get the native install prompt; iOS Safari gets an Add to Home Screen coach mark. The menu uses `manifest-menu.webmanifest` (`start_url: /menu`) so the installed app opens straight into the manuscript.
 

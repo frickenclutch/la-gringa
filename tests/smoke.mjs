@@ -79,7 +79,10 @@ ok(/\/api\/owner\/board/.test(worker), 'owner board route');
 ok(/\/api\/owner\/history/.test(worker), 'owner history route');
 ok(/OWNER_PIN|OWNER_TOKEN/.test(worker), 'owner PIN secret supported');
 ok(/429/.test(worker) && /Retry-After/.test(worker) && /login-fails:/.test(worker), 'owner login is rate limited');
-ok(/safeEqual\(pin, secret\)/.test(worker), 'owner PIN compare is constant-time');
+ok(/\/api\/owner\/claim/.test(worker) && /\/api\/owner\/status/.test(worker) && /\/api\/owner\/pin/.test(worker), 'owner claim/status/pin routes');
+ok(/PBKDF2/.test(worker) && /owner-claim-token/.test(worker), 'owner PIN stored as PBKDF2 hash, claimed via one-time token');
+ok(read('owner.html').includes('owner-claim-form') && read('owner.html').includes('owner-pin-form'), 'owner page has claim + change-PIN forms');
+ok(read('js/owner-board.js').includes('/api/owner/claim') && read('js/owner-board.js').includes('/api/owner/status'), 'owner UI drives claim flow');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');
