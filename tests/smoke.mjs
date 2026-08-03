@@ -100,6 +100,8 @@ ok(read('js/owner-board.js').includes('showMirrorNote'), 'owner UI detects worke
 ok(read('js/menu-edit.js').includes('probe.month'), 'menu editor probe rejects HTML impostor responses');
 ok(read('wrangler.jsonc').includes('"ai"'), 'wrangler binds Workers AI');
 ok(/m2m100/.test(worker) && /autoTranslateMenu/.test(worker) && /_auto/.test(worker), 'menu edits auto-translate with machine-ownership tracking');
+ok(read('_redirects').includes('workers.dev/:splat 301'), 'pages.dev mirror 301s to the canonical site');
+ok(!read('tools/stage-assets.mjs').includes('_redirects'), 'redirect file stays out of worker assets (would self-loop)');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');

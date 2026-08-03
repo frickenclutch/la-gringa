@@ -1,0 +1,6 @@
+# Cloudflare Pages only (the legacy la-gringa.pages.dev mirror).
+# Everything 301s to the canonical Worker deployment. Point this at
+# the custom domain when dirtygringonny.com moves onto the Worker.
+# NOTE: never stage this into dist/ — the Worker serving it would
+# redirect to itself in a loop (tools/stage-assets.mjs excludes it).
+/* https://la-gringas.the-dirty-gringo.workers.dev/:splat 301
