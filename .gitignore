@@ -6,3 +6,7 @@ playwright-report/
 .env
 .env.*
 .dev.vars
+.wrangler/
+previews/
+/valuation*.png
+/upgrades to add value now..png

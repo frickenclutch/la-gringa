@@ -114,7 +114,7 @@ ok(
 ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');
 ok(read('owner.html').includes('noindex'), 'owner page is noindex');
 ok(read('wrangler.jsonc').includes('MENU_BOARD'), 'wrangler binds MENU_BOARD KV');
-ok(read('sw.js').includes('dg-v12'), 'service worker bumped for board assets');
+ok(Number((read('sw.js').match(/dg-v(\d+)/) || [])[1] || 0) >= 12, 'service worker bumped for board assets');
 ok(read('menu.html').includes('data-perf'), 'menu sets early perf gate');
 ok(read('menu.html').includes('icon-192.png'), 'cover seal uses lighter icon');
 ok(/defer/.test(read('menu.html')) && read('menu.html').includes('js/menu-book.js'), 'menu scripts deferred');

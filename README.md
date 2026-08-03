@@ -65,6 +65,8 @@ npm run deploy
 
 `deploy` builds CSS, stages a clean `dist/` (no `node_modules`), then runs Wrangler. Point the custom domain in the Cloudflare dashboard when ready. Enable **Web Analytics** (free, cookieless) on the project for traffic without a third-party tag manager.
 
+Note: pushes to `main` also auto-refresh the static mirror at **la-gringa.pages.dev** (legacy Cloudflare Pages project, serves the repo root with no `/api/*` — the skillet game falls back to its counter message and the board reads `data/menu-board.json`). The Worker deploy (`npm run deploy`) is the canonical site; remember it does **not** happen on push.
+
 ## Stack notes
 
 - Production Tailwind build (not Play CDN)
