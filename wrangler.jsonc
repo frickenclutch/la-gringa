@@ -17,14 +17,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  // Create with: npx wrangler kv namespace create MENU_BOARD
-  // then replace both IDs. Until then GET falls back to the embedded seed;
-  // PUT returns 503 without a real namespace.
   "kv_namespaces": [
     {
       "binding": "MENU_BOARD",
-      "id": "00000000000000000000000000000000",
-      "preview_id": "00000000000000000000000000000000"
+      "id": "fdc3065f14b44dc4a538b6a9cd2bc267",
+      "preview_id": "1b106b4ec4e34a57aaf8b5d21e27c816"
     }
   ]
 }

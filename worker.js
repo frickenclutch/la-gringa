@@ -14,6 +14,8 @@ const HISTORY_KEY = 'history';
 const COOKIE_NAME = 'dg_owner';
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
 const HISTORY_LIMIT = 40;
+const LOGIN_MAX_FAILS = 5;
+const LOGIN_WINDOW_SEC = 600;
 
 const SEED_BOARD = {
   month: {
@@ -160,6 +162,46 @@ function getOwnerSecret(env) {
   return String(env.OWNER_PIN || env.OWNER_TOKEN || '').trim();
 }
 
+function safeEqual(a, b) {
+  const x = String(a);
+  const y = String(b);
+  if (x.length !== y.length) return false;
+  let diff = 0;
+  for (let i = 0; i < x.length; i++) diff |= x.charCodeAt(i) ^ y.charCodeAt(i);
+  return diff === 0;
+}
+
+// Best-effort per-IP login throttle on the KV binding. KV is eventually
+// consistent with ~60s edge read caching, so this is a brake on casual
+// brute force, not a hard guarantee — the long PIN is the real defense.
+function loginFailKey(request) {
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  return 'login-fails:' + ip;
+}
+
+async function loginFailCount(env, request) {
+  if (!env.MENU_BOARD) return 0;
+  const raw = await env.MENU_BOARD.get(loginFailKey(request));
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+async function recordLoginFail(env, request, fails) {
+  if (!env.MENU_BOARD) return;
+  await env.MENU_BOARD.put(loginFailKey(request), String(fails + 1), {
+    expirationTtl: LOGIN_WINDOW_SEC,
+  });
+}
+
+async function clearLoginFails(env, request) {
+  if (!env.MENU_BOARD) return;
+  try {
+    await env.MENU_BOARD.delete(loginFailKey(request));
+  } catch {
+    // best-effort
+  }
+}
+
 function parseCookies(header) {
   const out = {};
   if (!header) return out;
@@ -298,10 +340,21 @@ async function handleOwnerLogin(request, env) {
     return json({ error: 'Invalid JSON' }, 400);
   }
 
-  if (!pin || pin !== secret) {
+  const fails = await loginFailCount(env, request);
+  if (fails >= LOGIN_MAX_FAILS) {
+    return json(
+      { error: 'Too many attempts — the board is resting. Try again later.' },
+      429,
+      { 'Retry-After': String(LOGIN_WINDOW_SEC) }
+    );
+  }
+
+  if (!pin || !safeEqual(pin, secret)) {
+    await recordLoginFail(env, request, fails);
     return json({ error: 'Invalid PIN' }, 401);
   }
 
+  await clearLoginFails(env, request);
   const token = await signSession(secret, Date.now());
   return json(
     { ok: true, expiresIn: TOKEN_TTL_MS },

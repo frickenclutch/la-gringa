@@ -78,6 +78,8 @@ ok(/\/api\/owner\/login/.test(worker), 'owner login route');
 ok(/\/api\/owner\/board/.test(worker), 'owner board route');
 ok(/\/api\/owner\/history/.test(worker), 'owner history route');
 ok(/OWNER_PIN|OWNER_TOKEN/.test(worker), 'owner PIN secret supported');
+ok(/429/.test(worker) && /Retry-After/.test(worker) && /login-fails:/.test(worker), 'owner login is rate limited');
+ok(/safeEqual\(pin, secret\)/.test(worker), 'owner PIN compare is constant-time');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');
