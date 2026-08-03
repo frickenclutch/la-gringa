@@ -41,6 +41,8 @@ console.log('structure');
   'js/menu-book.js',
   'js/menu-install.js',
   'js/menu-board-ui.js',
+  'js/menu-live.js',
+  'js/menu-edit.js',
   'js/owner-board.js',
   'js/sw-register.js',
   'assets/logo-source.png',
@@ -86,6 +88,13 @@ ok(read('js/owner-board.js').includes('/api/owner/claim') && read('js/owner-boar
 ok(/\/api\/owner\/logout/.test(worker) && /clearSessionCookie/.test(worker), 'worker clears HttpOnly session on logout');
 ok(read('js/owner-board.js').includes('/api/owner/logout'), 'sign out hits the logout endpoint');
 ok(/back-link/.test(read('owner.html')) && /href="\/hub"/.test(read('owner.html')), 'owner page links back to the site');
+ok((read('menu.html').match(/data-msec="/g) || []).length >= 6, 'menu tables carry override scopes');
+ok(read('menu.html').includes('js/menu-live.js'), 'menu loads the live-overrides patcher');
+ok(/\/api\/menu-overrides/.test(worker) && /\/api\/owner\/menu/.test(worker), 'worker serves menu overrides + owner menu PUT');
+ok(/sanitizeMenuOverrides/.test(worker) && /MENU_FIELDS/.test(worker), 'menu overrides are sanitized against a field whitelist');
+ok(read('sw.js').includes('/js/menu-live.js'), 'SW precaches menu-live for guests');
+ok(read('owner.html').includes('/menu?edit=1'), 'owner panel links into menu edit mode');
+ok(read('js/menu-live.js').includes('menu-edit.js') && read('js/menu-edit.js').includes('/api/owner/menu'), 'edit mode loads on ?edit=1 and saves through the owner API');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');
@@ -150,6 +159,8 @@ console.log('\nJavaScript syntax');
   'js/menu-book.js',
   'js/menu-install.js',
   'js/menu-board-ui.js',
+  'js/menu-live.js',
+  'js/menu-edit.js',
   'js/owner-board.js',
   'js/sw-register.js',
 ].forEach((file) => {

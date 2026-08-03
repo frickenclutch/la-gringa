@@ -1136,7 +1136,7 @@
                             <div class="menu-item"><div class="menu-item-title"><span data-i18n="menu.item.dirtyBeans.name">Dirty Beans</span><span class="dotted-leader"></span><span class="price">3.00</span></div><p class="text-small" data-i18n="menu.item.dirtyBeans.desc">Refried or black beans, cheese and salsa.</p></div>
                             <div class="menu-item"><div class="menu-item-title"><span data-i18n="menu.item.cheesyBeans.name">Cheesy Beans</span><span class="dotted-leader"></span><span class="price">3.50</span></div><p class="text-small" data-i18n="menu.item.cheesyBeans.desc">Choice of refried or black beans topped with queso.</p></div>
                             
-                            <table class="w-full text-body font-bold mb-4 mt-2">
+                            <table class="w-full text-body font-bold mb-4 mt-2" data-msec="sides">
                                 <tr><td class="pb-1" data-i18n="menu.label.beans">Beans</td><td class="text-right price pb-1">1.75</td></tr>
                                 <tr><td class="pb-1" data-i18n="menu.label.rice">Rice</td><td class="text-right price pb-1">1.75</td></tr>
                                 <tr><td data-i18n="menu.label.chips">Chips</td><td class="text-right price">1.25</td></tr>
@@ -1151,7 +1151,7 @@
 
                         <div>
                             <h3 class="font-header text-h3" data-i18n="menu.sec.extraMeat">Extra Meat</h3>
-                            <table class="w-full text-small font-bold mb-4">
+                            <table class="w-full text-small font-bold mb-4" data-msec="extra-meat">
                                 <tr><td class="pb-1" data-i18n="menu.label.seasonedBeef">Seasoned Beef</td><td class="text-right price pb-1">3.00</td></tr>
                                 <tr><td class="pb-1" data-i18n="menu.label.seasonedChicken">Seasoned Chicken</td><td class="text-right price pb-1">3.00</td></tr>
                                 <tr><td class="pb-1" data-i18n="menu.label.chorizo">Chorizo</td><td class="text-right price pb-1">3.00</td></tr>
@@ -1161,7 +1161,7 @@
                             </table>
 
                             <h3 class="font-header text-h3" data-i18n="menu.sec.extras">Extras</h3>
-                            <table class="w-full text-small font-bold mb-4">
+                            <table class="w-full text-small font-bold mb-4" data-msec="extras">
                                 <tr><td class="pb-1" data-i18n="menu.label.extraCheese">Extra Cheese</td><td class="text-right price pb-1">.75</td></tr>
                                 <tr><td class="pb-1" data-i18n="menu.label.extraVeggies">Extra Veggies</td><td class="text-right price pb-1">.75</td></tr>
                                 <tr><td data-i18n="menu.label.egg">Egg</td><td class="text-right price">1.25</td></tr>
@@ -1248,7 +1248,7 @@
                         <h3 class="font-header text-h3 text-center mb-1 mt-0" data-i18n="menu.sec.buildYourOwn">Build Your Own Burrito or Bowl</h3>
                         <p class="text-[0.75rem] text-center mb-3 italic leading-tight" data-i18n="menu.note.buildYourOwn">Filled with rice, choice of meat, refried or black beans, cheddar jack blend, lettuce, onion, red bell pepper, black olives and jalapeño. Choice of salsa and sour cream.</p>
                         
-                        <table class="w-full text-small font-bold">
+                        <table class="w-full text-small font-bold" data-msec="byo">
                             <tr><td class="pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.seasonedGroundBeef">Seasoned Ground Beef</td><td class="text-right price pb-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
                             <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.chicken">Chicken</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
                             <tr><td class="py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]" data-i18n="menu.label.chorizo">Chorizo</td><td class="text-right price py-1 border-b border-dotted border-[rgba(0,0,0,0.2)]">8.99</td></tr>
@@ -1267,7 +1267,7 @@
                     <p class="text-small text-center mb-4 italic leading-tight" data-i18n="menu.note.quesadillaIntro">13" flour tortilla filled with your choice of meat, cheddar jack blend, choice of salsa and sour cream. Make it loaded by adding a medley of onion, bell peppers, jalapeño and black olive.</p>
                     
                     <div class="bg-[rgba(255,255,255,0.2)] p-2 border border-[rgba(0,0,0,0.2)] shadow-sm mb-6">
-                        <table class="w-full text-small border-collapse">
+                        <table class="w-full text-small border-collapse" data-msec="quesadillas">
                             <thead>
                                 <tr class="border-b-2 border-black">
                                     <th class="text-left font-header pb-1 text-sm" data-i18n="menu.label.meat">MEAT</th>
@@ -1379,7 +1379,7 @@
                     </div>
 
                     <div class="w-full bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.2)] p-2 mb-4">
-                        <table class="w-full text-[0.7rem] sm:text-[0.8rem] font-bold border-collapse">
+                        <table class="w-full text-[0.7rem] sm:text-[0.8rem] font-bold border-collapse" data-msec="salsa-sizes">
                             <tbody>
                                 <tr class="border-b border-[rgba(0,0,0,0.2)]">
                                     <td class="py-2 pr-2" data-i18n="menu.label.salsaMediumHotPineapple">MEDIUM, HOT OR PINEAPPLE HABANERO SALSA</td>
@@ -1438,6 +1438,7 @@
     <script src="js/menu-book.js" defer></script>
     <script src="js/menu-install.js" defer></script>
     <script src="js/menu-board-ui.js" defer></script>
+    <script src="js/menu-live.js" defer></script>
     <script src="js/sw-register.js" defer></script>
 </body>
 </html>

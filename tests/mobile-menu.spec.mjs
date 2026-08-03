@@ -204,6 +204,28 @@ test('slow seal taps stay on the menu', async ({ page }) => {
   expect(page.url()).toContain('menu');
 });
 
+test('live-menu map derives stable ids for dishes, tables, and beverages', async ({ page }) => {
+  await openMenu(page);
+  await page.waitForFunction(
+    () => window.DGMenuLive && Object.keys(window.DGMenuLive.getMap()).length > 0
+  );
+  const probe = await page.evaluate(() => {
+    const map = window.DGMenuLive.getMap();
+    return {
+      count: Object.keys(map).length,
+      tacoSalad: Boolean(map['item.tacoSalad']?.price && map['item.tacoSalad']?.name && map['item.tacoSalad']?.desc),
+      quesadillaChorizo: Boolean(map['quesadillas.chorizo']?.regular && map['quesadillas.chorizo']?.loaded),
+      extraMeatChorizo: Boolean(map['extra-meat.chorizo']?.price),
+      beverage: Boolean(map['bev.bottledSoda']?.price),
+    };
+  });
+  expect(probe.tacoSalad).toBe(true);
+  expect(probe.quesadillaChorizo).toBe(true);
+  expect(probe.extraMeatChorizo).toBe(true);
+  expect(probe.beverage).toBe(true);
+  expect(probe.count).toBeGreaterThan(40);
+});
+
 test('Android page turns request best-effort haptics', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'galaxy-chromium');
   await page.addInitScript(() => {

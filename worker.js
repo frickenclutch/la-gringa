@@ -18,6 +18,12 @@ const LOGIN_MAX_FAILS = 5;
 const LOGIN_WINDOW_SEC = 600;
 const OWNER_AUTH_KEY = 'owner-auth';
 const CLAIM_TOKEN_KEY = 'owner-claim-token';
+const MENU_OVERRIDES_KEY = 'menu-overrides';
+const MENU_HISTORY_KEY = 'menu-history';
+const MENU_HISTORY_LIMIT = 20;
+const MENU_MAX_ITEMS = 400;
+const MENU_ID_RE = /^[A-Za-z0-9][A-Za-z0-9.-]{0,79}$/;
+const MENU_FIELDS = ['price', 'regular', 'loaded', 'p1', 'p2', 'name_en', 'name_es', 'desc_en', 'desc_es'];
 // PBKDF2 sized for the Workers free-tier CPU budget; the per-IP lockout and a
 // passphrase-length PIN carry the brute-force load, not iteration count.
 const PBKDF2_ITERATIONS = 25000;
@@ -402,6 +408,78 @@ async function handleMenuBoardGet(env) {
   return json(publicBoard(board));
 }
 
+/** Menu overrides: sparse per-dish patches the owner lays over the printed
+ *  manuscript. Only whitelisted fields, bounded ids, bounded sizes. */
+function sanitizeMenuOverrides(input) {
+  const src = input && typeof input === 'object' ? input : {};
+  const itemsIn = src.items && typeof src.items === 'object' ? src.items : {};
+  const items = {};
+  let count = 0;
+  for (const [id, entryIn] of Object.entries(itemsIn)) {
+    if (count >= MENU_MAX_ITEMS) break;
+    if (!MENU_ID_RE.test(id) || !entryIn || typeof entryIn !== 'object') continue;
+    const entry = {};
+    for (const field of MENU_FIELDS) {
+      const value = entryIn[field];
+      if (value == null) continue;
+      const text = String(value).trim().slice(0, 500);
+      if (text) entry[field] = text;
+    }
+    if (Object.keys(entry).length) {
+      items[id] = entry;
+      count++;
+    }
+  }
+  return {
+    items,
+    updatedAt: new Date().toISOString(),
+    updatedBy: String(src.updatedBy || 'owner').trim() || 'owner',
+  };
+}
+
+async function loadMenuOverrides(env) {
+  const stored = await readKvJson(env.MENU_BOARD, MENU_OVERRIDES_KEY);
+  if (stored && stored.items && typeof stored.items === 'object') return stored;
+  return { items: {}, updatedAt: null, updatedBy: null };
+}
+
+async function handleMenuOverridesGet(env) {
+  return json(await loadMenuOverrides(env));
+}
+
+async function handleOwnerMenuPut(request, env) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: CORS });
+  }
+  if (request.method !== 'PUT') {
+    return json({ error: 'Method not allowed' }, 405);
+  }
+  if (!(await isAuthed(request, env))) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  if (!env.MENU_BOARD) {
+    return json({ error: 'MENU_BOARD KV binding is not configured' }, 503);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400);
+  }
+
+  const overrides = sanitizeMenuOverrides(body);
+  const previous = await loadMenuOverrides(env);
+  const history = (await readKvJson(env.MENU_BOARD, MENU_HISTORY_KEY)) || [];
+  history.unshift({ at: overrides.updatedAt, by: overrides.updatedBy, items: previous.items });
+  while (history.length > MENU_HISTORY_LIMIT) history.pop();
+
+  await writeKvJson(env.MENU_BOARD, MENU_OVERRIDES_KEY, overrides);
+  await writeKvJson(env.MENU_BOARD, MENU_HISTORY_KEY, history);
+
+  return json({ ok: true, overrides });
+}
+
 async function handleOwnerLogin(request, env) {
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
@@ -649,6 +727,16 @@ export default {
     }
     if (path === '/api/owner/pin') {
       return handleOwnerPinChange(request, env);
+    }
+    if (path === '/api/menu-overrides') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS });
+      }
+      if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
+      return handleMenuOverridesGet(env);
+    }
+    if (path === '/api/owner/menu') {
+      return handleOwnerMenuPut(request, env);
     }
     if (path === '/api/owner/logout') {
       if (request.method === 'OPTIONS') {
