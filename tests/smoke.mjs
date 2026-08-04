@@ -101,6 +101,11 @@ ok(read('js/menu-edit.js').includes('probe.month'), 'menu editor probe rejects H
 ok(read('wrangler.jsonc').includes('"ai"'), 'wrangler binds Workers AI');
 ok(/m2m100/.test(worker) && /autoTranslateMenu/.test(worker) && /_auto/.test(worker), 'menu edits auto-translate with machine-ownership tracking');
 ok(read('_redirects').includes('workers.dev/:splat 301'), 'pages.dev mirror 301s to the canonical site');
+const i18nPacks = JSON.parse(read('data/i18n.json'));
+ok(i18nPacks.fr && Object.keys(i18nPacks.fr).length === Object.keys(i18nPacks.en).length, 'French pack has full key parity');
+ok(i18nPacks.fr['menu.sec.sidesSalads'] === 'Accompagnements et salades', 'French pack is actually French');
+ok(read('js/i18n.js').includes('data-lang="fr"') && read('js/i18n.js').includes('data-set-lang="fr"'), 'passport skillet + chip offer Français');
+ok(/name_fr/.test(worker) && /desc_fr/.test(worker) && /french/.test(worker), 'worker overrides + auto-translate cover French');
 ok(!read('tools/stage-assets.mjs').includes('_redirects'), 'redirect file stays out of worker assets (would self-loop)');
 ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 

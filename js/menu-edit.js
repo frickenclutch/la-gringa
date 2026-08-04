@@ -177,9 +177,10 @@
     var lang = live.currentLang();
     sheetError.textContent = '';
     sheetTitle.textContent = m.name ? m.name.textContent : id.split('.').pop();
+    var langName = { en: 'English', es: 'Español', fr: 'Français' }[lang] || lang;
     sheet.querySelector('#mlive-hint').textContent =
       (m.name || m.desc
-        ? 'Editing ' + (lang === 'es' ? 'Español' : 'English') + ' — the other language is translated for you on save, until you customize it yourself (flip EN | ES). '
+        ? 'Editing ' + langName + ' — the other languages are translated for you on save, until you customize them yourself (flip EN | ES | FR). '
         : '') + 'Leave a field matching the original to un-override it.';
     sheetFields.innerHTML = '';
     if (m.name) {
@@ -290,7 +291,7 @@
       var didTranslate = data && Array.isArray(data.translated) && data.translated.length;
       toast(
         didTranslate
-          ? 'Saved — ' + (live.currentLang() === 'es' ? 'English' : 'Spanish') + ' translated automatically'
+          ? 'Saved — other languages translated automatically'
           : 'Saved — guests see it now'
       );
       closeSheet();

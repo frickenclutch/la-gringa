@@ -6,26 +6,44 @@
   var dict = null;
   var ready = false;
 
+  var LANGS = ['en', 'es', 'fr'];
+
   var FALLBACK = {
     en: {
       'passport.eyebrow': 'Crossing the river · St. Lawrence border',
-      'passport.title': '¿Español o English,\nmy friend?',
+      'passport.title': '¿Español, English,\nou Français?',
       'passport.sub': 'Pick your tongue. Stamp your passport. Enter the patio.',
       'passport.es': 'Español',
       'passport.esHint': 'Mi amigo',
       'passport.en': 'English',
       'passport.enHint': 'My friend',
+      'passport.fr': 'Français',
+      'passport.frHint': 'Mon ami',
       'passport.toggle': 'Language',
     },
     es: {
       'passport.eyebrow': 'Cruzando el río · frontera del San Lorenzo',
-      'passport.title': '¿Español o English,\nmy friend?',
+      'passport.title': '¿Español, English,\nou Français?',
       'passport.sub': 'Elige tu lengua. Sella tu pasaporte. Entra al patio.',
       'passport.es': 'Español',
       'passport.esHint': 'Mi amigo',
       'passport.en': 'English',
       'passport.enHint': 'My friend',
+      'passport.fr': 'Français',
+      'passport.frHint': 'Mon ami',
       'passport.toggle': 'Idioma',
+    },
+    fr: {
+      'passport.eyebrow': 'Traversée du fleuve · frontière du Saint-Laurent',
+      'passport.title': '¿Español, English,\nou Français?',
+      'passport.sub': 'Choisis ta langue. Tamponne ton passeport. Entre sur le patio.',
+      'passport.es': 'Español',
+      'passport.esHint': 'Mi amigo',
+      'passport.en': 'English',
+      'passport.enHint': 'My friend',
+      'passport.fr': 'Français',
+      'passport.frHint': 'Mon ami',
+      'passport.toggle': 'Langue',
     },
   };
 
@@ -41,13 +59,13 @@
   function getLang() {
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'en' || stored === 'es') return stored;
+      if (LANGS.indexOf(stored) !== -1) return stored;
     } catch (e) {}
     return null;
   }
 
   function setLang(lang) {
-    if (lang !== 'en' && lang !== 'es') return;
+    if (LANGS.indexOf(lang) === -1) return;
     try {
       localStorage.setItem(STORAGE_KEY, lang);
     } catch (e) {}
@@ -110,7 +128,9 @@
       'line-height:1.15;color:#f7d070;text-shadow:0 2px 0 rgba(0,0,0,.35)}' +
       '.lang-passport-sub{margin:0 auto 1.35rem;max-width:22rem;font-family:"IM Fell English",Georgia,serif;' +
       'font-size:.98rem;line-height:1.4;color:rgba(255,246,232,.78)}' +
-      '.lang-skillets{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}' +
+      '.lang-skillets{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}' +
+      '@media (max-width:380px){.lang-skillet{padding:.8rem .4rem .7rem}' +
+      '.lang-skillet-pan{width:2.5rem;height:2.5rem}.lang-skillet-label{font-size:.95rem}}' +
       '.lang-skillet{appearance:none;border:2px solid #4a3600;border-radius:1rem;padding:1rem .7rem .9rem;' +
       'background:linear-gradient(165deg,#2a1b12 0%,#1a100a 55%,#0d0906 100%);color:#fff6e8;cursor:pointer;' +
       'box-shadow:0 10px 28px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);transition:transform .15s ease,filter .15s ease;' +
@@ -127,6 +147,7 @@
       'opacity:.7;font-style:italic}' +
       '.lang-skillet[data-lang="es"]{border-color:#087f5b}' +
       '.lang-skillet[data-lang="en"]{border-color:#c92a2a}' +
+      '.lang-skillet[data-lang="fr"]{border-color:#1d5fbf}' +
       'body.lang-passport-open{overflow:hidden}' +
       '.lang-toggle{position:fixed;bottom:max(16px,env(safe-area-inset-bottom));left:max(16px,env(safe-area-inset-left));' +
       'z-index:10050;display:inline-flex;align-items:center;gap:0;padding:0;border:1.5px solid #4a3600;' +
@@ -171,6 +192,11 @@
       '<span class="lang-skillet-label" data-i18n="passport.en"></span>' +
       '<span class="lang-skillet-hint" data-i18n="passport.enHint"></span>' +
       '</button>' +
+      '<button type="button" class="lang-skillet" data-lang="fr" aria-label="Français">' +
+      '<span class="lang-skillet-pan" aria-hidden="true"></span>' +
+      '<span class="lang-skillet-label" data-i18n="passport.fr"></span>' +
+      '<span class="lang-skillet-hint" data-i18n="passport.frHint"></span>' +
+      '</button>' +
       '</div></div>';
     document.body.appendChild(root);
 
@@ -191,7 +217,8 @@
     wrap.setAttribute('aria-label', 'Language');
     wrap.innerHTML =
       '<button type="button" data-set-lang="en" aria-pressed="false">EN</button>' +
-      '<button type="button" data-set-lang="es" aria-pressed="false">ES</button>';
+      '<button type="button" data-set-lang="es" aria-pressed="false">ES</button>' +
+      '<button type="button" data-set-lang="fr" aria-pressed="false">FR</button>';
     document.body.appendChild(wrap);
     wrap.querySelectorAll('button').forEach(function (btn) {
       btn.addEventListener('click', function () {

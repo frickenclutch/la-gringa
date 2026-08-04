@@ -226,6 +226,18 @@ test('live-menu map derives stable ids for dishes, tables, and beverages', async
   expect(probe.count).toBeGreaterThan(40);
 });
 
+test('French passport stamp renders the manuscript in French', async ({ page }) => {
+  await page.goto('/menu.html');
+  await page.waitForSelector('#lang-passport:not([hidden])', { timeout: 5_000 });
+  await page.locator('.lang-skillet[data-lang="fr"]').dispatchEvent('click');
+  await page.waitForSelector('#lang-passport[hidden]', { state: 'attached', timeout: 5_000 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe('fr');
+  const section = await page.evaluate(
+    () => document.querySelector('[data-i18n="menu.sec.sidesSalads"]').textContent
+  );
+  expect(section).toBe('Accompagnements et salades');
+});
+
 test('owner page on a worker-less host steers to the real board', async ({ page }) => {
   await page.goto('/owner.html');
   await page.waitForSelector('#owner-mirror-note:not([hidden])', { timeout: 5_000 });
