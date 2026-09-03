@@ -70,49 +70,15 @@
     return '0%';
   }
 
-  let parallaxX = 0;
-  let parallaxY = 0;
-  let parallaxViewBias = 0;
-  let parallaxFrame = 0;
-  let pendingParallax = null;
-
   function isLitePerf() {
     return root.dataset.perf === 'lite' || prefersReducedMotion();
   }
 
+  // The book only moves when the view changes (cover / single-page shift).
+  // Pointer-driven parallax was removed: it re-composited the 3D book on
+  // every mouse move and made the whole menu feel laggy.
   function applyBookTransform() {
-    if (isLitePerf()) {
-      book.style.transform = 'translateX(' + bookShiftX() + ')';
-      return;
-    }
-    const px = parallaxX * 10;
-    const py = parallaxY * 7;
-    book.style.transform =
-      'translateX(' + bookShiftX() + ') translate3d(' + px.toFixed(2) + 'px, ' + py.toFixed(2) + 'px, 0)';
-  }
-
-  function setParallax(nx, ny) {
-    if (isLitePerf()) {
-      root.style.setProperty('--parallax-x', '0');
-      root.style.setProperty('--parallax-y', '0');
-      return;
-    }
-    parallaxX = Math.max(-1, Math.min(1, nx + parallaxViewBias));
-    parallaxY = Math.max(-1, Math.min(1, ny));
-    root.style.setProperty('--parallax-x', parallaxX.toFixed(3));
-    root.style.setProperty('--parallax-y', parallaxY.toFixed(3));
-    applyBookTransform();
-  }
-
-  function scheduleParallax(nx, ny) {
-    pendingParallax = { nx, ny };
-    if (parallaxFrame) return;
-    parallaxFrame = requestAnimationFrame(() => {
-      parallaxFrame = 0;
-      if (!pendingParallax) return;
-      setParallax(pendingParallax.nx, pendingParallax.ny);
-      pendingParallax = null;
-    });
+    book.style.transform = 'translateX(' + bookShiftX() + ')';
   }
 
   function updateBookState() {
@@ -142,7 +108,6 @@
       }
     });
 
-    parallaxViewBias = ((currentView / Math.max(1, totalViews)) - 0.5) * 0.22;
     applyBookTransform();
 
     root.dataset.menuView = String(currentView);
@@ -311,30 +276,6 @@
     dialer.classList.toggle('open');
     document.body.classList.toggle('dialer-open', dialer.classList.contains('open'));
     e.stopPropagation();
-  }
-
-  function syncParallaxFromPointer(event) {
-    if (isLitePerf() || document.body.classList.contains('street-board-open')) return;
-    if (event.pointerType === 'touch') return;
-    const viewport = getViewportSize();
-    const nx = (event.clientX / Math.max(1, viewport.width)) * 2 - 1;
-    const ny = (event.clientY / Math.max(1, viewport.height)) * 2 - 1;
-    scheduleParallax(nx * 0.55, ny * 0.45);
-  }
-
-  if (!isLitePerf()) {
-    window.addEventListener('pointermove', syncParallaxFromPointer, { passive: true });
-    window.addEventListener(
-      'deviceorientation',
-      (event) => {
-        if (isLitePerf() || event.gamma == null || event.beta == null) return;
-        scheduleParallax((event.gamma || 0) / 45, ((event.beta || 0) - 45) / 45);
-      },
-      { passive: true }
-    );
-  } else {
-    root.style.setProperty('--parallax-x', '0');
-    root.style.setProperty('--parallax-y', '0');
   }
 
   window.addEventListener('resize', scheduleLayoutUpdate);
