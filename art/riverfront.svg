@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+  <!-- The Dobisky waterfront in Ogdensburg, seen from the St. Lawrence looking in:
+       gazebo on its rock point (left), the marina's floating dock and slips (foreground),
+       the long gabled building with its glass front (right). Paper-cut style: parchment
+       grain and ink outlines on the built things only. Colours come from CSS variables
+       set per time of day in menu.html; the fallbacks here are the night palette.
+       js/menu-ambience.js inlines this file and redraws #fx-sky-moon-lit for tonight's phase.
+       Cheap by design: the grain is one small noise tile repeated through patterns (rendered
+       once), and the only real filter is the ink wobble, which menu.html disables on lite devices. -->
+  <defs>
+    <linearGradient id="fx-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--fx-sky-top,#070d1a)"/>
+      <stop offset="1" style="stop-color:var(--fx-sky-bottom,#1a2b45)"/>
+    </linearGradient>
+    <linearGradient id="fx-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--fx-water-top,#14263a)"/>
+      <stop offset="1" style="stop-color:var(--fx-water-bottom,#04080e)"/>
+    </linearGradient>
+    <linearGradient id="fx-reflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--fx-window,#ffcf7a);stop-opacity:0.34"/>
+      <stop offset="1" style="stop-color:var(--fx-window,#ffcf7a);stop-opacity:0"/>
+    </linearGradient>
+    <radialGradient id="fx-lamp">
+      <stop offset="0" style="stop-color:var(--fx-window,#ffcf7a);stop-opacity:0.85"/>
+      <stop offset="1" style="stop-color:var(--fx-window,#ffcf7a);stop-opacity:0"/>
+    </radialGradient>
+
+    <!-- one 160px noise tile; every parchment fill below is a colour plus this tile -->
+    <filter id="fx-noise" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="11" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.16  0 0 0 0 0.10  0 0 0 0 0.04  0 0 0 0.26 0"/>
+    </filter>
+    <pattern id="fx-grain" width="160" height="160" patternUnits="userSpaceOnUse">
+      <rect width="160" height="160" filter="url(#fx-noise)"/>
+    </pattern>
+    <pattern id="p-wall" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-wall,#e6cf95)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-wall-shade" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-wall-shade,#cdb47c)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-stone" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-stone,#8c7b68)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-roof" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-roof,#4a2e1e)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-roof-light" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-roof-light,#6a4630)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-dock" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-dock,#6b5136)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-dock-light" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-dock-light,#8a6a47)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-rock" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-rock,#55504a)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-gazebo" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-gazebo,#f2e6c8)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-gazebo-roof" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-gazebo-roof,#3f6b5f)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-gazebo-roof-light" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" style="fill:var(--fx-gazebo-roof-light,#4f7f72)"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-cream" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" fill="#f2e6c8"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-red" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" fill="#a83a2c"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-teal" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" fill="#3f6b5f"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+    <pattern id="p-blue" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" fill="#3b82a6"/><rect width="160" height="160" fill="url(#fx-grain)"/></pattern>
+
+    <!-- hand-drawn wobble for the ink work (menu.html sets filter:none on lite devices) -->
+    <filter id="fx-ink" x="-3%" y="-3%" width="106%" height="106%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="1" seed="3" result="warp"/>
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <!-- ===== sky ===== -->
+  <rect x="0" y="0" width="1600" height="345" fill="url(#fx-sky)"/>
+  <g id="fx-stars" fill="#fff8e1" style="opacity:var(--fx-stars-opacity,1)">
+    <circle cx="48" cy="38" r="1.3"/><circle cx="132" cy="92" r="1"/><circle cx="210" cy="24" r="1.6"/><circle cx="286" cy="150" r="1"/>
+    <circle cx="352" cy="58" r="1.2"/><circle cx="424" cy="118" r="1"/><circle cx="486" cy="30" r="1.5"/><circle cx="548" cy="86" r="1"/>
+    <circle cx="612" cy="160" r="1.1"/><circle cx="668" cy="44" r="1.4"/><circle cx="736" cy="108" r="1"/><circle cx="798" cy="20" r="1.2"/>
+    <circle cx="862" cy="132" r="1"/><circle cx="924" cy="66" r="1.6"/><circle cx="990" cy="176" r="1"/><circle cx="1048" cy="36" r="1.2"/>
+    <circle cx="1112" cy="96" r="1"/><circle cx="1176" cy="146" r="1.4"/><circle cx="1240" cy="28" r="1"/><circle cx="1302" cy="80" r="1.3"/>
+    <circle cx="1366" cy="122" r="1"/><circle cx="1428" cy="46" r="1.5"/><circle cx="1494" cy="168" r="1"/><circle cx="1556" cy="70" r="1.2"/>
+    <circle cx="90" cy="196" r="1"/><circle cx="380" cy="212" r="1.1"/><circle cx="700" cy="228" r="1"/><circle cx="1020" cy="236" r="1.2"/>
+    <circle cx="1340" cy="210" r="1"/><circle cx="1560" cy="230" r="1.1"/><circle cx="170" cy="60" r="0.8"/><circle cx="960" cy="14" r="0.9"/>
+  </g>
+  <g id="fx-sky-moon" transform="translate(300 62)" style="opacity:var(--fx-moon-opacity,1)">
+    <circle r="48" fill="#fff3d0" opacity="0.07"/>
+    <circle r="26" fill="#1c2436"/>
+    <path id="fx-sky-moon-lit" d="M 0 -26 A 26 26 0 0 1 0 26 A 26 26 0 0 1 0 -26 Z" fill="#f6ecd0"/>
+    <circle cx="-8" cy="-6" r="3.2" fill="#1c2436" opacity="0.18"/>
+    <circle cx="7" cy="8" r="4" fill="#1c2436" opacity="0.18"/>
+  </g>
+
+  <!-- ===== far shore (Prescott) and the bridge ===== -->
+  <g id="fx-far">
+    <path d="M0 340 L0 322 Q60 312 120 320 T240 318 T360 324 T480 316 T600 322 T720 318 T840 324 T960 320 T1080 326 T1200 320 T1320 326 T1440 318 T1600 324 L1600 340 Z" style="fill:var(--fx-far-shore,#0b1522)"/>
+    <g fill="none" stroke-linecap="round" style="stroke:var(--fx-far-shore,#0b1522)">
+      <path d="M900 322 H1600" stroke-width="3"/>
+      <path d="M1150 322 V262 M1400 322 V262" stroke-width="5"/>
+      <path d="M980 322 Q1150 250 1275 300 Q1400 250 1560 322" stroke-width="2.5"/>
+      <path d="M1060 302 V322 M1100 292 V322 M1200 290 V322 M1240 296 V322 M1320 296 V322 M1360 290 V322 M1450 292 V322 M1500 302 V322" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <!-- ===== river ===== -->
+  <rect x="0" y="335" width="1600" height="565" fill="url(#fx-water)"/>
+  <rect x="560" y="606" width="760" height="220" fill="url(#fx-reflect)" style="opacity:var(--fx-glow-opacity,1)"/>
+  <g id="fx-shimmer" fill="none" stroke-linecap="round" stroke-width="2" style="stroke:var(--fx-shimmer,rgba(255,255,255,0.08))">
+    <path d="M120 372 H260 M420 362 H520 M700 380 H860 M1000 366 H1090 M1250 378 H1420 M60 420 H150 M300 436 H470 M640 428 H720 M900 444 H1060 M1180 430 H1300 M1440 446 H1560"/>
+    <path d="M200 500 H330 M520 512 H700 M980 520 H1120 M1330 506 H1480 M80 700 H240 M420 740 H560 M1300 720 H1500 M700 760 H900 M1100 790 H1250"/>
+    <path d="M40 820 H160 M1400 850 H1560 M280 880 H420 M900 892 H1080 M1460 806 H1590 M20 870 H120"/>
+  </g>
+
+  <!-- ===== shore: lawn and the rock seawall ===== -->
+  <rect x="0" y="560" width="1600" height="44" style="fill:var(--fx-lawn,#24452c)"/>
+  <path d="M0 600 Q200 590 400 598 T800 596 T1200 600 T1600 596 L1600 622 L0 622 Z" fill="url(#p-rock)"/>
+
+  <!-- ===== trees ===== -->
+  <g id="fx-trees-left">
+    <rect x="352" y="520" width="14" height="60" fill="#3a2a1c"/>
+    <g style="fill:var(--fx-foliage,#1f3a28)"><circle cx="360" cy="480" r="58"/><circle cx="318" cy="514" r="40"/><circle cx="404" cy="508" r="44"/></g>
+    <circle cx="366" cy="452" r="34" style="fill:var(--fx-foliage-light,#2c5236)"/>
+    <rect x="452" y="536" width="10" height="44" fill="#3a2a1c"/>
+    <g style="fill:var(--fx-foliage,#1f3a28)"><circle cx="457" cy="516" r="30"/><circle cx="440" cy="540" r="20"/></g>
+  </g>
+  <g id="fx-trees-right">
+    <rect x="1556" y="500" width="16" height="80" fill="#3a2a1c"/>
+    <g style="fill:var(--fx-foliage,#1f3a28)"><circle cx="1564" cy="452" r="64"/><circle cx="1520" cy="498" r="44"/><circle cx="1600" cy="500" r="48"/></g>
+    <circle cx="1572" cy="418" r="36" style="fill:var(--fx-foliage-light,#2c5236)"/>
+  </g>
+
+  <!-- ===== the Dobisky building ===== -->
+  <g id="fx-building" filter="url(#fx-ink)">
+    <rect x="540" y="450" width="960" height="130" fill="url(#p-wall)"/>
+    <rect x="1300" y="450" width="200" height="130" fill="url(#p-wall-shade)"/>
+    <rect x="540" y="556" width="960" height="24" fill="url(#p-stone)"/>
+    <!-- glass front -->
+    <rect x="580" y="464" width="700" height="92" style="fill:var(--fx-window,#ffcf7a);fill-opacity:var(--fx-glass-opacity,0.85)"/>
+    <g fill="#fff4d6" style="opacity:var(--fx-glow-opacity,1)">
+      <rect x="620" y="480" width="40" height="18" opacity="0.55"/><rect x="760" y="486" width="52" height="16" opacity="0.5"/>
+      <rect x="960" y="478" width="36" height="20" opacity="0.5"/><rect x="1140" y="484" width="48" height="16" opacity="0.55"/>
+    </g>
+    <g fill="none" stroke="#2a1b12" stroke-width="3">
+      <path d="M580 464 H1280 V556 H580 Z"/>
+      <path d="M640 464 V556 M700 464 V556 M760 464 V556 M820 464 V556 M880 464 V556 M940 464 V556 M1000 464 V556 M1060 464 V556 M1120 464 V556 M1180 464 V556 M1240 464 V556"/>
+      <path d="M580 508 H1280"/>
+    </g>
+    <!-- end wall windows -->
+    <g stroke="#2a1b12" stroke-width="3" style="fill:var(--fx-window,#ffcf7a);fill-opacity:var(--fx-glass-opacity,0.85)">
+      <rect x="1345" y="478" width="36" height="46"/><rect x="1425" y="478" width="36" height="46"/>
+    </g>
+    <!-- roof and cupola -->
+    <path d="M470 462 L880 288 L1550 462 Z" fill="url(#p-roof)"/>
+    <path d="M470 462 L880 288 L1550 462 L1520 462 L880 306 L500 462 Z" fill="url(#p-roof-light)"/>
+    <rect x="838" y="248" width="96" height="44" fill="url(#p-wall)"/>
+    <path d="M826 250 L886 214 L946 250 Z" fill="url(#p-roof)"/>
+    <g style="fill:var(--fx-window,#ffcf7a);fill-opacity:var(--fx-glass-opacity,0.85)">
+      <rect x="850" y="258" width="18" height="22"/><rect x="878" y="258" width="18" height="22"/><rect x="906" y="258" width="18" height="22"/>
+    </g>
+    <!-- rafter tails under the eaves -->
+    <g style="fill:var(--fx-roof-light,#6a4630)">
+      <rect x="520" y="452" width="10" height="16"/><rect x="580" y="452" width="10" height="16"/><rect x="640" y="452" width="10" height="16"/>
+      <rect x="700" y="452" width="10" height="16"/><rect x="760" y="452" width="10" height="16"/><rect x="820" y="452" width="10" height="16"/>
+      <rect x="1000" y="452" width="10" height="16"/><rect x="1060" y="452" width="10" height="16"/><rect x="1120" y="452" width="10" height="16"/>
+      <rect x="1180" y="452" width="10" height="16"/><rect x="1240" y="452" width="10" height="16"/><rect x="1300" y="452" width="10" height="16"/>
+      <rect x="1360" y="452" width="10" height="16"/><rect x="1420" y="452" width="10" height="16"/><rect x="1480" y="452" width="10" height="16"/>
+    </g>
+    <!-- ink outlines -->
+    <g fill="none" stroke="#2a1b12" stroke-width="3.5" stroke-linejoin="round">
+      <path d="M470 462 L880 288 L1550 462"/>
+      <path d="M540 462 V580 H1500 V462"/>
+      <path d="M838 292 V248 L826 250 L886 214 L946 250 L934 248 V292"/>
+      <path d="M1300 462 V580"/>
+    </g>
+  </g>
+
+  <!-- ===== patio and lamp posts ===== -->
+  <g id="fx-patio" filter="url(#fx-ink)">
+    <rect x="560" y="580" width="760" height="26" fill="url(#p-dock-light)"/>
+    <g fill="none" stroke="#2a1b12" stroke-width="2.5">
+      <path d="M560 580 H1320 M560 606 H1320 M570 566 H1310"/>
+      <path d="M580 562 V582 M660 562 V582 M740 562 V582 M820 562 V582 M900 562 V582 M980 562 V582 M1060 562 V582 M1140 562 V582 M1220 562 V582 M1300 562 V582"/>
+    </g>
+    <g fill="none" stroke="#2a1b12" stroke-width="4" stroke-linecap="round">
+      <path d="M1392 600 V404 Q1392 392 1404 392 H1414"/>
+      <path d="M500 600 V470 Q500 460 510 460 H518"/>
+    </g>
+    <g style="opacity:var(--fx-glow-opacity,1)">
+      <circle cx="1418" cy="392" r="28" fill="url(#fx-lamp)"/><circle cx="1418" cy="392" r="5" fill="#fff1c9"/>
+      <circle cx="522" cy="460" r="22" fill="url(#fx-lamp)"/><circle cx="522" cy="460" r="4.5" fill="#fff1c9"/>
+    </g>
+  </g>
+
+  <!-- ===== gazebo on the rock point ===== -->
+  <g id="fx-gazebo" filter="url(#fx-ink)">
+    <path d="M80 660 L100 630 L140 622 L180 634 L226 620 L266 632 L300 626 L320 650 L330 672 L70 672 Z" fill="url(#p-rock)"/>
+    <path d="M60 690 L90 668 L140 674 L200 662 L260 672 L318 664 L350 690 Z" fill="url(#p-rock)" opacity="0.8"/>
+    <rect x="112" y="612" width="158" height="14" fill="url(#p-gazebo)"/>
+    <g fill="none" stroke-width="7" stroke-linecap="round" style="stroke:var(--fx-gazebo,#f2e6c8)">
+      <path d="M126 612 V548 M158 612 V540 M222 612 V540 M256 612 V548 M191 612 V536"/>
+    </g>
+    <path d="M126 586 H256 M126 596 H256" fill="none" stroke="#2a1b12" stroke-width="2"/>
+    <path d="M96 548 L191 468 L286 548 Z" fill="url(#p-gazebo-roof)"/>
+    <path d="M118 548 L191 486 L264 548 Z" fill="url(#p-gazebo-roof-light)" opacity="0.7"/>
+    <rect x="126" y="548" width="130" height="10" fill="#2a1b12" opacity="0.35"/>
+    <g style="opacity:var(--fx-glow-opacity,1)"><circle cx="191" cy="568" r="20" fill="url(#fx-lamp)"/><circle cx="191" cy="568" r="4" fill="#fff1c9"/></g>
+    <g fill="none" stroke="#2a1b12" stroke-width="3" stroke-linejoin="round">
+      <path d="M96 548 L191 468 L286 548 Z"/>
+      <path d="M112 612 H270 V626 H112 Z"/>
+      <path d="M191 468 V456"/><circle cx="191" cy="452" r="4"/>
+    </g>
+  </g>
+
+  <!-- ===== the marina: floating dock, slips, moored boats ===== -->
+  <g id="fx-marina" filter="url(#fx-ink)">
+    <rect x="350" y="830" width="900" height="20" fill="url(#p-dock)"/>
+    <rect x="350" y="830" width="900" height="5" fill="url(#p-dock-light)"/>
+    <g style="fill:var(--fx-dock,#6b5136)">
+      <rect x="352" y="818" width="8" height="34"/><rect x="600" y="818" width="8" height="34"/><rect x="850" y="818" width="8" height="34"/>
+      <rect x="1100" y="818" width="8" height="34"/><rect x="1242" y="818" width="8" height="34"/>
+    </g>
+    <g stroke="#2a1b12" stroke-width="2.5" stroke-linejoin="round">
+      <g transform="translate(430 852)"><path d="M0 8 H82 L74 26 H10 Z" fill="url(#p-cream)"/><rect x="26" y="-8" width="30" height="16" rx="2" fill="url(#p-teal)"/></g>
+      <g transform="translate(650 850)"><path d="M0 8 H90 L80 28 H12 Z" fill="url(#p-red)"/><rect x="30" y="-6" width="34" height="14" rx="2" fill="url(#p-cream)"/></g>
+      <g transform="translate(870 854)"><path d="M0 6 H70 L62 24 H8 Z" fill="url(#p-cream)"/><path d="M34 -30 V6" stroke-width="2"/><path d="M34 -28 L52 -4 H34 Z" fill="url(#p-cream)"/></g>
+      <g transform="translate(1080 852)"><path d="M0 8 H84 L76 26 H10 Z" fill="url(#p-blue)"/><rect x="28" y="-8" width="30" height="16" rx="2" fill="url(#p-cream)"/></g>
+    </g>
+    <g fill="url(#p-dock)">
+      <rect x="400" y="848" width="14" height="48"/><rect x="540" y="848" width="14" height="48"/><rect x="760" y="848" width="14" height="48"/>
+      <rect x="980" y="848" width="14" height="48"/><rect x="1200" y="848" width="14" height="48"/>
+    </g>
+    <path d="M350 830 H1250 V850 H350 Z" fill="none" stroke="#2a1b12" stroke-width="3"/>
+    <g style="opacity:var(--fx-glow-opacity,1)">
+      <circle cx="356" cy="816" r="14" fill="url(#fx-lamp)"/><circle cx="1246" cy="816" r="14" fill="url(#fx-lamp)"/>
+    </g>
+  </g>
+</svg>

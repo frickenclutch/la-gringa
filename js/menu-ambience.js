@@ -7,6 +7,7 @@
      time of day  -> <html data-daypart="day|dusk|night">   palette + which layers show
      season       -> <html data-season="marigold|snow|confetti|none">   falling particles
      moon phase   -> ink drawing on the cover (#fx-moon)
+     scene        -> art/riverfront.svg inlined behind the book (the Dobisky waterfront from the river)
      ambient      -> papel picado, boat + wake, fireflies, moth, lantern swing, morning mist
      moments      -> paper-flip sound (toggle, remembered), corner-curl hint, steam on dishes
 
@@ -95,10 +96,7 @@
 
   /* ---------- moon: an ink drawing of tonight's phase on the cover ---------- */
 
-  function moonSvg(phase) {
-    var r = 20;
-    var cx = 24;
-    var cy = 24;
+  function moonLitPath(phase, cx, cy, r) {
     var lit = (1 - Math.cos(phase * Math.PI * 2)) / 2; // 0 dark → 1 full
     var waxing = phase < 0.5;
     var rx = (Math.abs(Math.cos(phase * Math.PI * 2)) * r).toFixed(2);
@@ -110,10 +108,14 @@
     var crescent = lit < 0.5;
     var sweep = waxing ? (crescent ? 0 : 1) : crescent ? 1 : 0;
     var terminator = 'A ' + rx + ' ' + r + ' 0 0 ' + sweep + ' ' + top;
+    return 'M ' + top + ' ' + limb + ' ' + terminator + ' Z';
+  }
+
+  function moonSvg(phase) {
     return (
       '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" focusable="false">' +
       '<circle cx="24" cy="24" r="20" fill="rgba(42,27,18,0.30)"/>' +
-      '<path d="M ' + top + ' ' + limb + ' ' + terminator + ' Z" fill="rgba(255,248,226,0.82)"/>' +
+      '<path d="' + moonLitPath(phase, 24, 24, 20) + '" fill="rgba(255,248,226,0.82)"/>' +
       '<circle cx="17" cy="19" r="2.6" fill="rgba(42,27,18,0.16)"/>' +
       '<circle cx="28" cy="29" r="3.4" fill="rgba(42,27,18,0.16)"/>' +
       '<circle cx="30" cy="16" r="1.7" fill="rgba(42,27,18,0.16)"/>' +
@@ -169,7 +171,7 @@
   function buildBoat() {
     var boat = make('div', 'fx-boat fx-loop', { id: 'fx-boat' });
     boat.innerHTML =
-      '<div class="fx-boat-bob"><span class="fx-wake"></span>' +
+      '<div class="fx-boat-face"><div class="fx-boat-bob"><span class="fx-wake"></span>' +
       '<svg viewBox="0 0 160 60" xmlns="http://www.w3.org/2000/svg" focusable="false">' +
       '<g fill="#070b0f" stroke="rgba(255,220,160,0.30)" stroke-width="1">' +
       '<path d="M6 40H154L142 56H20Z"/>' +
@@ -180,7 +182,7 @@
       '</g>' +
       '<circle class="fx-boat-light" cx="109" cy="18.5" r="2.2" fill="#ffd27a"/>' +
       '<circle class="fx-boat-light" cx="53" cy="10.5" r="2" fill="#ff6a3d"/>' +
-      '</svg></div>';
+      '</svg></div></div>';
     return boat;
   }
 
@@ -225,6 +227,7 @@
     buildFireflies(layer);
     if (supportsOffsetPath()) layer.appendChild(buildMoth());
     document.body.appendChild(layer);
+    placeBoat();
 
     var resizeTimer = 0;
     window.addEventListener(
@@ -233,10 +236,60 @@
         window.clearTimeout(resizeTimer);
         resizeTimer = window.setTimeout(function () {
           if (Number(picado.dataset.count) !== flagCount()) fillPicado(picado);
+          placeBoat();
         }, 250);
       },
       { passive: true }
     );
+  }
+
+  /* ---------- the riverfront scene: art/riverfront.svg, inlined so CSS can recolour it ---------- */
+
+  var SCENE_URL = '/art/riverfront.svg';
+  var SCENE_W = 1600;
+  var SCENE_H = 900;
+  var DOCK = { x: 1246, y: 866 }; // where the excursion boat ties up, in scene units
+
+  // The scene uses preserveAspectRatio="xMidYMax slice": scaled to cover the viewport,
+  // centred horizontally and anchored to the bottom so the marina is always in view.
+  function sceneMapping() {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var s = Math.max(vw / SCENE_W, vh / SCENE_H);
+    return { s: s, x0: (vw - SCENE_W * s) / 2, y0: vh - SCENE_H * s };
+  }
+
+  // The boat is an HTML layer (compositor-animated), pinned to the dock through CSS variables.
+  function placeBoat() {
+    var boat = document.getElementById('fx-boat');
+    if (!boat) return;
+    var m = sceneMapping();
+    boat.style.setProperty('--bx', (m.x0 + DOCK.x * m.s).toFixed(1) + 'px');
+    boat.style.setProperty('--by', (m.y0 + DOCK.y * m.s - 60).toFixed(1) + 'px');
+    boat.style.setProperty('--bs', m.s.toFixed(3));
+  }
+
+  function mountScene() {
+    if (document.getElementById('fx-scene') || typeof window.fetch !== 'function') return;
+    var host = make('div', 'fx-scene', { id: 'fx-scene', 'aria-hidden': 'true' });
+    var river = document.querySelector('.river-bg');
+    if (river && river.parentNode) river.parentNode.insertBefore(host, river.nextSibling);
+    else document.body.insertBefore(host, document.body.firstChild);
+    fetch(SCENE_URL)
+      .then(function (res) {
+        if (!res.ok) throw new Error('scene ' + res.status);
+        return res.text();
+      })
+      .then(function (svg) {
+        host.innerHTML = svg;
+        var lit = host.querySelector('#fx-sky-moon-lit');
+        if (lit) lit.setAttribute('d', moonLitPath(moon, 0, 0, 26));
+        host.dataset.ready = 'true';
+        placeBoat();
+      })
+      .catch(function () {
+        if (host.parentNode) host.parentNode.removeChild(host);
+      });
   }
 
   /* ---------- seasonal overlay (above the book, never catches taps) ---------- */
@@ -485,6 +538,7 @@
   /* ---------- boot ---------- */
 
   function boot() {
+    mountScene();
     mountMoon();
     mountSoundToggle();
     stampFlipHint();
@@ -513,6 +567,8 @@
     },
     setSound: setSound,
     playFlip: playFlip,
+    moonLitPath: moonLitPath,
+    sceneMapping: sceneMapping,
   };
 
   if (document.readyState === 'loading') {

@@ -51,6 +51,7 @@ console.log('structure');
   'sitemap.xml',
   'icons/icon-192.png',
   'manifest-menu.webmanifest',
+  'art/riverfront.svg',
 ].forEach((f) => ok(existsSync(join(root, f)), f + ' exists'));
 
 console.log('\nsite.json');
@@ -98,6 +99,10 @@ ok(read('menu.html').includes('js/menu-ambience.js'), 'menu loads the ambience m
 ok(read('sw.js').includes('/js/menu-ambience.js'), 'SW precaches the ambience module');
 ok(!/--parallax-/.test(read('menu.html') + read('js/menu-book.js')), 'menu has no pointer parallax (it lagged the 3D book)');
 ok(read('js/menu-book.js').includes("'dg:turn'") && read('js/menu-ambience.js').includes("'dg:turn'"), 'page turns announce dg:turn for the paper-flip sound');
+const riverfront = read('art/riverfront.svg');
+ok(riverfront.startsWith('<svg') && riverfront.includes('preserveAspectRatio="xMidYMax slice"') && riverfront.includes('id="fx-sky-moon-lit"'), 'riverfront scene is an inlineable SVG with a redrawable moon');
+ok(read('sw.js').includes('/art/riverfront.svg') && read('tools/stage-assets.mjs').includes("'art'"), 'riverfront art is staged and precached');
+ok(read('js/menu-ambience.js').includes('/art/riverfront.svg'), 'ambience inlines the riverfront scene');
 ok(read('owner.html').includes('/menu?edit=1'), 'owner panel links into menu edit mode');
 ok(read('js/menu-live.js').includes('menu-edit.js') && read('js/menu-edit.js').includes('/api/owner/menu'), 'edit mode loads on ?edit=1 and saves through the owner API');
 ok(read('owner.html').includes('owner-mirror-note'), 'owner page has a static-mirror notice');

@@ -82,9 +82,8 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            background-image:
-                radial-gradient(ellipse at bottom, rgba(50,70,80,0.4) 0%, transparent 80%),
-                url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.08"/></svg>');
+            /* Plain gradient fallback under the riverfront scene; the paper grain moved onto the drawn buildings. */
+            background-image: radial-gradient(ellipse at bottom, rgba(50,70,80,0.4) 0%, transparent 80%);
             z-index: -2;
             pointer-events: none;
         }
@@ -1000,6 +999,45 @@
         @keyframes fx-glow-day { 0% { opacity: 0.22; } 100% { opacity: 0.42; } }
         html[data-daypart="day"] .fire-glow { animation-name: fx-glow-day; }
 
+        /* The riverfront scene (art/riverfront.svg, inlined by JS) reads these per time of day. */
+        :root {
+            --fx-sky-top: #070d1a; --fx-sky-bottom: #1a2b45;
+            --fx-water-top: #14263a; --fx-water-bottom: #04080e;
+            --fx-far-shore: #0b1522; --fx-shimmer: rgba(255,255,255,0.08);
+            --fx-window: #ffcf7a; --fx-glass-opacity: 0.85; --fx-glow-opacity: 1;
+            --fx-stars-opacity: 1; --fx-moon-opacity: 1;
+            --fx-lawn: #24452c; --fx-foliage: #1f3a28; --fx-foliage-light: #2c5236; --fx-rock: #55504a;
+            --fx-wall: #e6cf95; --fx-wall-shade: #cdb47c; --fx-stone: #8c7b68;
+            --fx-roof: #4a2e1e; --fx-roof-light: #6a4630;
+            --fx-dock: #6b5136; --fx-dock-light: #8a6a47;
+            --fx-gazebo: #f2e6c8; --fx-gazebo-roof: #3f6b5f; --fx-gazebo-roof-light: #4f7f72;
+        }
+        html[data-daypart="dusk"] {
+            --fx-sky-top: #2b1a3f; --fx-sky-bottom: #e08a4a;
+            --fx-water-top: #7a4a45; --fx-water-bottom: #1c1626;
+            --fx-far-shore: #2a1b2e; --fx-shimmer: rgba(255,200,150,0.14);
+            --fx-glass-opacity: 0.8; --fx-glow-opacity: 0.8;
+            --fx-stars-opacity: 0.35; --fx-moon-opacity: 0.8;
+            --fx-lawn: #315c36; --fx-foliage: #27482d; --fx-foliage-light: #386540; --fx-rock: #5e544c;
+            --fx-wall: #ecd39d;
+        }
+        html[data-daypart="day"] {
+            --fx-sky-top: #6fa8d6; --fx-sky-bottom: #dcecf6;
+            --fx-water-top: #6f9fbf; --fx-water-bottom: #3e6f93;
+            --fx-far-shore: #7f9c86; --fx-shimmer: rgba(255,255,255,0.22);
+            --fx-window: #dfeef6; --fx-glass-opacity: 0.55; --fx-glow-opacity: 0;
+            --fx-stars-opacity: 0; --fx-moon-opacity: 0.15;
+            --fx-lawn: #5aa04c; --fx-foliage: #3e8a46; --fx-foliage-light: #5aa65e; --fx-rock: #8a8378;
+            --fx-wall: #f0dfae; --fx-wall-shade: #d9c48f; --fx-stone: #a09080;
+            --fx-roof: #5a3a28; --fx-roof-light: #7a5238;
+            --fx-dock: #8a6a47; --fx-dock-light: #a8865c;
+        }
+        .fx-scene { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
+        .fx-scene svg { display: block; width: 100%; height: 100%; }
+        /* The ink-wobble filter inside the scene is the one costly thing: skip it where paint is slow. */
+        html[data-perf="lite"] .fx-scene [filter],
+        html[data-reduced-motion="true"] .fx-scene [filter] { filter: none; }
+
         .fx-ambient {
             position: fixed; inset: 0; z-index: 0;
             overflow: hidden; pointer-events: none; contain: layout paint;
@@ -1043,12 +1081,13 @@
         .fx-flag svg { display: block; width: 100%; height: 100%; }
         @keyframes fx-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
 
-        /* A boat crossing the river */
+        /* The excursion boat: parked at the marina dock, then out and back (position set by JS from the scene) */
         .fx-boat {
-            position: absolute; left: 0; bottom: 6vh; width: 160px; height: 60px;
-            animation: fx-sail 96s linear infinite;
-            animation-delay: -32s;
+            position: absolute; left: 0; top: 0; width: 160px; height: 60px;
+            transform-origin: 0 100%;
+            animation: fx-sail 64s ease-in-out infinite alternate;
         }
+        .fx-boat-face { width: 100%; height: 100%; animation: fx-face 128s steps(1, end) infinite; }
         .fx-boat-bob { position: relative; width: 100%; height: 100%; animation: fx-bob 3.4s ease-in-out infinite; }
         .fx-boat svg { display: block; width: 100%; height: 100%; }
         .fx-wake {
@@ -1056,7 +1095,11 @@
             background: linear-gradient(to left, rgba(255,255,255,0.30), rgba(255,255,255,0));
         }
         .fx-boat-light { animation: fx-blink 2.6s ease-in-out infinite; }
-        @keyframes fx-sail { from { transform: translate3d(-170px, 0, 0); } to { transform: translate3d(100vw, 0, 0); } }
+        @keyframes fx-sail {
+            0%, 12% { transform: translate3d(var(--bx, 60vw), var(--by, 86vh), 0) scale(var(--bs, 1)); }
+            100% { transform: translate3d(calc(var(--bx, 60vw) + 980px * var(--bs, 1)), calc(var(--by, 86vh) - 10px), 0) scale(calc(var(--bs, 1) * 0.85)); }
+        }
+        @keyframes fx-face { 0% { transform: scaleX(1); } 50% { transform: scaleX(-1); } 100% { transform: scaleX(1); } }
         @keyframes fx-bob { 0%, 100% { transform: translate3d(0, 0, 0) rotate(-0.8deg); } 50% { transform: translate3d(0, 2px, 0) rotate(0.8deg); } }
         @keyframes fx-blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
 

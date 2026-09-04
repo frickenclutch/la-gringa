@@ -396,3 +396,25 @@ test('the corner-curl hint shows once per device', async ({ page }) => {
   await page.waitForFunction(() => Boolean(window.DGAmbience));
   expect(await page.evaluate(() => document.documentElement.dataset.flipHint)).toBeUndefined();
 });
+
+test('the riverfront scene inlines and the boat ties up at its dock', async ({ page }) => {
+  await openMenu(page);
+  await page.waitForSelector('#fx-scene[data-ready="true"]', { state: 'attached', timeout: 5_000 });
+  const state = await page.evaluate(() => {
+    const boat = document.getElementById('fx-boat');
+    const m = window.DGAmbience.sceneMapping();
+    return {
+      lite: document.documentElement.dataset.perf === 'lite',
+      svg: Boolean(document.querySelector('#fx-scene svg')),
+      moon: document.querySelector('#fx-sky-moon-lit').getAttribute('d'),
+      sceneInert: getComputedStyle(document.getElementById('fx-scene')).pointerEvents,
+      boatX: boat ? parseFloat(boat.style.getPropertyValue('--bx')) : null,
+      dockX: m.x0 + 1246 * m.s,
+    };
+  });
+  expect(state.svg).toBe(true);
+  expect(state.sceneInert).toBe('none');
+  expect(state.moon).toContain('A 26 26');
+  if (state.lite) expect(state.boatX).toBeNull();
+  else expect(Math.abs(state.boatX - state.dockX)).toBeLessThan(1);
+});

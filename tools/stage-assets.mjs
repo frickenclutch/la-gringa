@@ -23,7 +23,7 @@ const FILES = [
   'sitemap.xml',
 ];
 
-const DIRS = ['js', 'data', 'icons', 'fonts'];
+const DIRS = ['js', 'data', 'icons', 'fonts', 'art'];
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
