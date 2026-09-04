@@ -149,6 +149,8 @@
 
   function provideTurnFeedback(direction) {
     if (window.DGHaptics) window.DGHaptics.trigger('page');
+    // Ambience listens for this (paper-flip sound); it fires only on real page turns.
+    document.dispatchEvent(new CustomEvent('dg:turn', { detail: { direction: direction, view: currentView } }));
     if (!prefersReducedMotion()) {
       window.setTimeout(() => fireParticleBurst(direction > 0), 50);
     }

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-async function openMenu(page) {
+async function openMenu(page, query = '') {
   // Pre-stamp the language passport; without dg-lang the fixed overlay covers
   // the book and swallows gestures (and whether it beats the drag is a race).
   await page.addInitScript(() => {
@@ -8,7 +8,7 @@ async function openMenu(page) {
       localStorage.setItem('dg-lang', 'en');
     } catch {}
   });
-  await page.goto('/menu.html');
+  await page.goto('/menu.html' + query);
   await page.waitForFunction(() => Boolean(window.DGMenu));
 }
 
@@ -261,4 +261,138 @@ test('Android page turns request best-effort haptics', async ({ page }, testInfo
   await openMenu(page);
   await page.evaluate(() => window.DGMenu.navigate(1));
   await expect.poll(() => page.evaluate(() => window.__vibrationCalls.length)).toBe(1);
+});
+
+test('ambience layers are static and never intercept taps', async ({ page }) => {
+  await openMenu(page);
+  await page.waitForFunction(() => Boolean(window.DGAmbience));
+  const state = await page.evaluate(() => {
+    const root = document.documentElement;
+    const ambient = document.getElementById('fx-ambient');
+    const hit = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+    const moon = document.querySelector('.cover-page-content #fx-moon');
+    return {
+      lite: root.dataset.perf === 'lite',
+      daypart: root.dataset.daypart,
+      season: root.dataset.season,
+      parallax: getComputedStyle(root).getPropertyValue('--parallax-x').trim(),
+      ambientMounted: Boolean(ambient),
+      ambientInert: ambient ? getComputedStyle(ambient).pointerEvents === 'none' : true,
+      hitInsideBook: Boolean(hit && hit.closest('.book')),
+      moonPhase: moon ? Number(moon.dataset.phase) : null,
+      soundToggle: Boolean(document.getElementById('fx-sound')),
+    };
+  });
+  expect(['day', 'dusk', 'night']).toContain(state.daypart);
+  expect(['marigold', 'snow', 'confetti', 'none']).toContain(state.season);
+  expect(state.parallax).toBe('');
+  expect(state.ambientMounted).toBe(!state.lite);
+  expect(state.ambientInert).toBe(true);
+  expect(state.hitInsideBook).toBe(true);
+  expect(state.moonPhase).toBeGreaterThanOrEqual(0);
+  expect(state.moonPhase).toBeLessThan(1);
+  expect(state.soundToggle).toBe(true);
+});
+
+test('season, daypart and moon overrides paint the requested state', async ({ page }) => {
+  await openMenu(page, '?season=snow&daypart=day&moon=0.5');
+  await page.waitForFunction(() => Boolean(window.DGAmbience));
+  const state = await page.evaluate(() => ({
+    lite: document.documentElement.dataset.perf === 'lite',
+    season: document.documentElement.dataset.season,
+    daypart: document.documentElement.dataset.daypart,
+    flakes: document.querySelectorAll('#fx-overlay .fx-flake').length,
+    moon: document.getElementById('fx-moon').dataset.phase,
+    litPath: document.querySelector('#fx-moon path').getAttribute('d'),
+  }));
+  expect(state.season).toBe('snow');
+  expect(state.daypart).toBe('day');
+  expect(state.moon).toBe('0.500');
+  // Full moon: the terminator arc carries the full radius, so the lit path closes the whole disc.
+  expect(state.litPath).toContain('A 20.00 20');
+  expect(state.flakes).toBe(state.lite ? 0 : 16);
+});
+
+test('moon phase math lands on reference new and full moons', async ({ page }) => {
+  await openMenu(page);
+  await page.waitForFunction(() => Boolean(window.DGAmbience));
+  const phases = await page.evaluate(() => [
+    window.DGAmbience.moonPhase(new Date(Date.UTC(2000, 0, 6, 18, 14))), // reference new moon
+    window.DGAmbience.moonPhase(new Date(Date.UTC(2000, 0, 21, 4, 40))), // full moon (total lunar eclipse)
+    window.DGAmbience.moonPhase(new Date(Date.UTC(2024, 3, 8, 18, 21))), // new moon (total solar eclipse)
+  ]);
+  expect(phases[0]).toBeCloseTo(0, 2);
+  expect(phases[1]).toBeCloseTo(0.49, 1);
+  expect(Math.min(phases[2], 1 - phases[2])).toBeLessThan(0.02);
+});
+
+test('page turns play the paper flip until the reader mutes it', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__flips = 0;
+    class FakeParam {
+      setValueAtTime() {}
+      exponentialRampToValueAtTime() {}
+    }
+    class FakeNode {
+      connect(next) {
+        return next;
+      }
+    }
+    class FakeContext {
+      constructor() {
+        this.state = 'running';
+        this.currentTime = 0;
+        this.sampleRate = 44100;
+        this.destination = new FakeNode();
+      }
+      resume() {
+        return Promise.resolve();
+      }
+      createBuffer(channels, length) {
+        return { getChannelData: () => new Float32Array(length) };
+      }
+      createBufferSource() {
+        const node = new FakeNode();
+        node.start = () => {
+          window.__flips += 1;
+        };
+        node.stop = () => {};
+        return node;
+      }
+      createBiquadFilter() {
+        const node = new FakeNode();
+        node.Q = { value: 0 };
+        node.frequency = new FakeParam();
+        return node;
+      }
+      createGain() {
+        const node = new FakeNode();
+        node.gain = new FakeParam();
+        return node;
+      }
+    }
+    window.AudioContext = FakeContext;
+    window.webkitAudioContext = FakeContext;
+  });
+  await openMenu(page);
+  await page.waitForFunction(() => Boolean(window.DGAmbience));
+  await page.evaluate(() => window.DGMenu.navigate(1));
+  await expect.poll(() => page.evaluate(() => window.__flips)).toBe(1);
+
+  await page.locator('#fx-sound').dispatchEvent('click');
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('dg-sound'))).toBe('0');
+  await page.waitForTimeout(1200); // navigation lock from the first turn
+  await page.evaluate(() => window.DGMenu.navigate(-1));
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => window.__flips)).toBe(1);
+});
+
+test('the corner-curl hint shows once per device', async ({ page }) => {
+  await openMenu(page);
+  await page.waitForFunction(() => Boolean(window.DGAmbience));
+  expect(await page.evaluate(() => document.documentElement.dataset.flipHint)).toBe('true');
+  expect(await page.evaluate(() => localStorage.getItem('dg-flip-hint'))).toBe('1');
+  await page.reload();
+  await page.waitForFunction(() => Boolean(window.DGAmbience));
+  expect(await page.evaluate(() => document.documentElement.dataset.flipHint)).toBeUndefined();
 });

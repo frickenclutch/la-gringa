@@ -90,6 +90,27 @@ Note: pushes to `main` also auto-refresh the static mirror at **la-gringa.pages.
 - Zero third-party runtime on the client
 - Logo source and generated icons are in-repo (no WordPress hotlink at build/runtime)
 
+### Menu ambience (`js/menu-ambience.js`)
+
+Atmosphere on the manuscript is built to cost nothing on the main thread: every loop is a
+CSS transform/opacity animation on a few small elements, nothing tracks the pointer, and
+nothing touches the 3D book. (The old pointer parallax re-composited the book on every mouse
+move and made the menu lag; it was removed on 2026-09-03.)
+
+- **Time of day** — `<html data-daypart="day|dusk|night">` picks the palette and which layers
+  show: morning mist by day; fireflies, a moth at the fire and a rocking lantern light after dark.
+- **Season** — `data-season` drops marigold petals for Día de los Muertos (Oct 25–Nov 3), snow
+  Dec–Feb, and confetti for Cinco de Mayo (May 1–6) and Independencia (Sep 15–16).
+- **Moon phase** — computed from the date and drawn in ink on the cover.
+- **Always** — papel picado strung across the top, a boat crossing the river, a page-corner curl
+  that hints the book flips, steam when a dish name is hovered or tapped, and a quiet paper-flip
+  sound on page turns (speaker button beside the language chip; the choice is remembered per device).
+- **Owner edits** — in `/menu?edit=1` a saved price or dish bleeds in like fresh ink.
+
+Preview any state with query params: `/menu?daypart=dusk&season=snow&moon=0.5`.
+Devices flagged `data-perf="lite"` (or `prefers-reduced-motion`) skip every loop and keep only
+the palette, the moon, the sound toggle and the hint.
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Menu prices and brand marks remain property of The Dirty Gringo.

@@ -273,6 +273,28 @@
     if (window.DGLang && typeof window.DGLang.apply === 'function') window.DGLang.apply();
   }
 
+  // Fresh ink: after a save, every field whose text actually changed bleeds in.
+  function snapshotText(id) {
+    var m = live.getMap()[id] || {};
+    var out = {};
+    Object.keys(m).forEach(function (field) {
+      if (m[field]) out[field] = m[field].textContent;
+    });
+    return out;
+  }
+
+  function inkFresh(id, before) {
+    var m = live.getMap()[id];
+    if (!m) return;
+    Object.keys(m).forEach(function (field) {
+      var el = m[field];
+      if (!el || before[field] === el.textContent) return;
+      el.classList.remove('ink-fresh');
+      void el.offsetWidth;
+      el.classList.add('ink-fresh');
+    });
+  }
+
   async function saveActive() {
     if (!activeId) return;
     sheetError.textContent = '';
@@ -286,8 +308,10 @@
     }
     try {
       var data = await putOverrides(items);
+      var before = snapshotText(activeId);
       restoreBaseDom(activeId);
       live.applyAll();
+      inkFresh(activeId, before);
       var didTranslate = data && Array.isArray(data.translated) && data.translated.length;
       toast(
         didTranslate
@@ -312,8 +336,10 @@
     delete items[activeId];
     try {
       await putOverrides(items);
+      var wasShown = snapshotText(activeId);
       restoreBaseDom(activeId);
       live.applyAll();
+      inkFresh(activeId, wasShown);
       toast('Back to the printed original');
       closeSheet();
     } catch (error) {

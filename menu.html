@@ -938,20 +938,10 @@
             }
             .leaf, .book { transition-duration: 0.12s !important; }
             .fire-glow, #smokeCanvas { display: none; }
-            .river-bg, .fire-glow, #smokeCanvas {
-                transform: none !important;
-                transition: none !important;
-            }
             .street-board-embers { display: none !important; }
         }
 
         /* Mobile / constrained devices: keep chalk look, drop continuous GPU work */
-        html[data-perf="lite"] .river-bg,
-        html[data-perf="lite"] .fire-glow,
-        html[data-perf="lite"] #smokeCanvas {
-            transform: none !important;
-            transition: none !important;
-        }
         html[data-perf="lite"] .fire-glow {
             filter: none;
             animation: none;
@@ -995,6 +985,201 @@
         }
         html[data-perf="lite"] .leaf {
             transition-duration: 0.7s;
+        }
+
+        /* ---- Ambience (js/menu-ambience.js) ----
+           Compositor-only loops on a few small elements: transform + opacity, no pointer
+           tracking, nothing touches the 3D book. Pointer parallax was removed 2026-09-03
+           because it re-composited the book on every mouse move. */
+        html[data-daypart="day"] body {
+            background: radial-gradient(circle at 50% 100%, #2f4f5c 0%, #17292f 55%, #0a1216 100%);
+        }
+        html[data-daypart="dusk"] body {
+            background: radial-gradient(circle at 50% 110%, #5a2a1c 0%, #2a1a22 45%, #0b0a12 100%);
+        }
+        @keyframes fx-glow-day { 0% { opacity: 0.22; } 100% { opacity: 0.42; } }
+        html[data-daypart="day"] .fire-glow { animation-name: fx-glow-day; }
+
+        .fx-ambient {
+            position: fixed; inset: 0; z-index: 0;
+            overflow: hidden; pointer-events: none; contain: layout paint;
+        }
+        .fx-overlay {
+            position: fixed; inset: 0; z-index: 30;
+            overflow: hidden; pointer-events: none; contain: layout paint;
+        }
+        body.street-board-open .fx-overlay,
+        body.install-coach-open .fx-overlay { display: none; }
+
+        /* Lantern light rocking over the room (night / dusk) */
+        .fx-lantern {
+            position: absolute; left: -12%; right: -12%; top: -12%; bottom: 0;
+            transform-origin: 50% -30%;
+            background: radial-gradient(ellipse 58% 52% at 50% -6%, rgba(255,196,110,0.14) 0%, rgba(255,196,110,0) 70%);
+            animation: fx-swing 7.5s ease-in-out infinite alternate;
+        }
+        @keyframes fx-swing { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
+
+        /* Morning mist on the river (day only) */
+        .fx-mist {
+            position: absolute; left: -50%; right: -50%; bottom: 0; height: 32vh;
+            background: linear-gradient(to top, rgba(215,230,236,0.20) 0%, rgba(215,230,236,0.08) 45%, rgba(215,230,236,0) 100%);
+            animation: fx-mist 42s ease-in-out infinite alternate;
+        }
+        @keyframes fx-mist { from { transform: translate3d(-6%, 0, 0); } to { transform: translate3d(6%, 0, 0); } }
+
+        /* Papel picado strung across the top */
+        .fx-picado {
+            position: absolute; top: 0; left: 0; right: 0; height: 64px;
+            display: flex; justify-content: space-between; padding: 0 2vw;
+            border-top: 2px solid rgba(255,235,200,0.35);
+        }
+        .fx-flag {
+            display: block; width: 44px; height: 52px; margin-top: 1px;
+            transform-origin: 50% 0; opacity: 0.9;
+            animation: fx-sway 4.2s ease-in-out infinite;
+            animation-delay: calc(var(--i, 0) * -0.37s);
+        }
+        .fx-flag svg { display: block; width: 100%; height: 100%; }
+        @keyframes fx-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+        /* A boat crossing the river */
+        .fx-boat {
+            position: absolute; left: 0; bottom: 6vh; width: 160px; height: 60px;
+            animation: fx-sail 96s linear infinite;
+            animation-delay: -32s;
+        }
+        .fx-boat-bob { position: relative; width: 100%; height: 100%; animation: fx-bob 3.4s ease-in-out infinite; }
+        .fx-boat svg { display: block; width: 100%; height: 100%; }
+        .fx-wake {
+            position: absolute; right: 86%; bottom: 3px; width: 150px; height: 3px; border-radius: 2px;
+            background: linear-gradient(to left, rgba(255,255,255,0.30), rgba(255,255,255,0));
+        }
+        .fx-boat-light { animation: fx-blink 2.6s ease-in-out infinite; }
+        @keyframes fx-sail { from { transform: translate3d(-170px, 0, 0); } to { transform: translate3d(100vw, 0, 0); } }
+        @keyframes fx-bob { 0%, 100% { transform: translate3d(0, 0, 0) rotate(-0.8deg); } 50% { transform: translate3d(0, 2px, 0) rotate(0.8deg); } }
+        @keyframes fx-blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+
+        /* Fireflies over the water (night / dusk) */
+        .fx-fly {
+            position: absolute; left: var(--x); top: var(--y); width: 4px; height: 4px; border-radius: 50%;
+            background: #ffe08a; box-shadow: 0 0 6px 2px rgba(255,214,110,0.55);
+            animation: fx-drift var(--d, 10s) ease-in-out var(--delay, 0s) infinite alternate,
+                       fx-blink var(--b, 3s) ease-in-out var(--delay, 0s) infinite;
+        }
+        @keyframes fx-drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(var(--dx, 40px), var(--dy, -20px), 0); } }
+
+        /* A moth circling the fire (night / dusk) */
+        .fx-moth {
+            position: absolute; left: 50%; bottom: 12vh; width: 22px; height: 15px;
+            offset-path: path('M0 0 C70 -50, 150 20, 60 70 S-90 30, -50 -60 S40 -80, 0 0');
+            offset-rotate: auto;
+            animation: fx-flight 13s ease-in-out infinite;
+        }
+        .fx-moth svg { display: block; width: 100%; height: 100%; }
+        .fx-wing { transform-box: fill-box; transform-origin: 100% 50%; animation: fx-flap 0.18s ease-in-out infinite alternate; }
+        .fx-wing-r { transform-origin: 0% 50%; }
+        @keyframes fx-flight { to { offset-distance: 100%; } }
+        @keyframes fx-flap { to { transform: scaleX(0.35); } }
+
+        html[data-daypart="day"] .fx-fly,
+        html[data-daypart="day"] .fx-moth,
+        html[data-daypart="day"] .fx-lantern { display: none; }
+        html:not([data-daypart="day"]) .fx-mist { display: none; }
+
+        /* Seasonal fall: marigold petals, snow, confetti */
+        .fx-fall {
+            position: absolute; top: -6vh; left: var(--x, 50%);
+            animation: fx-fall var(--d, 12s) linear var(--delay, 0s) infinite;
+        }
+        @keyframes fx-fall {
+            0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(var(--s, 1)); }
+            50%  { transform: translate3d(var(--sway, 30px), 56vh, 0) rotate(calc(var(--spin, 0deg) * 0.5)) scale(var(--s, 1)); }
+            100% { transform: translate3d(calc(var(--sway, 30px) * -0.5), 112vh, 0) rotate(var(--spin, 0deg)) scale(var(--s, 1)); }
+        }
+        .fx-petal {
+            width: 11px; height: 15px; opacity: 0.9;
+            border-radius: 60% 40% 60% 40% / 55% 45% 55% 45%;
+            background: linear-gradient(160deg, #ffb02e 0%, #f26d1d 70%, #c2410c 100%);
+        }
+        .fx-flake {
+            width: 7px; height: 7px; border-radius: 50%; opacity: 0.85;
+            background: #fff; box-shadow: 0 0 4px rgba(255,255,255,0.7);
+        }
+        .fx-confetti { width: 8px; height: 13px; border-radius: 1px; opacity: 0.92; background: var(--c, #ffd23f); }
+
+        /* Tonight's moon, drawn in ink on the cover */
+        .fx-moon { position: absolute; top: 12px; left: 12px; width: 44px; height: 44px; opacity: 0.85; pointer-events: none; }
+        .fx-moon svg { display: block; width: 100%; height: 100%; }
+        @media (min-width: 640px) { .fx-moon { width: 56px; height: 56px; top: 14px; left: 14px; } }
+
+        /* Paper-flip sound toggle: sits right of the EN/ES/FR chip so it never covers the cover seal */
+        .fx-sound {
+            position: fixed;
+            top: max(11px, env(safe-area-inset-top));
+            left: calc(max(12px, env(safe-area-inset-left)) + 124px);
+            z-index: 10050;
+            width: 32px; height: 32px; padding: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 1.5px solid #4a3600; border-radius: 999px;
+            background: linear-gradient(160deg, #f7d070 0%, #c9a227 45%, #8a6410 100%);
+            color: #2a1b12; cursor: pointer;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.45);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .fx-sound svg { width: 17px; height: 17px; fill: currentColor; }
+        .fx-sound .fx-sound-waves { transition: opacity 0.2s; }
+        .fx-sound.is-off .fx-sound-waves { opacity: 0; }
+        .fx-sound .fx-sound-slash { display: none; }
+        .fx-sound.is-off .fx-sound-slash { display: block; }
+        .fx-sound:active { transform: scale(0.95); }
+        .fx-sound:focus-visible { outline: 2px solid #ffd27a; outline-offset: 2px; }
+        body.street-board-open .fx-sound,
+        body.install-coach-open .fx-sound { opacity: 0 !important; pointer-events: none !important; }
+
+        /* Corner curl: the outer page corner lifts on hover, and peels a few times on a first visit */
+        .leaf::before, .leaf::after {
+            content: ''; position: absolute; right: 0; bottom: 0; width: 34px; height: 34px;
+            pointer-events: none; opacity: 0.6; transform-origin: 100% 100%;
+            background: linear-gradient(to top left, #f7ead0 0%, #e9d8ad 40%, rgba(42,27,18,0.32) 49%, rgba(0,0,0,0) 50%);
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+        .leaf::after { transform: translateZ(2px); }
+        .leaf::before { transform: translateZ(-2px); }
+        .leaf:not(.flipped)::before, .leaf.flipped::after { display: none; }
+        .leaf:hover::after { transform: translateZ(2px) scale(1.45); opacity: 0.95; }
+        .leaf.flipped:hover::before { transform: translateZ(-2px) scale(1.45); opacity: 0.95; }
+        @keyframes fx-peel { 0%, 100% { transform: translateZ(2px) scale(1); } 50% { transform: translateZ(2px) scale(1.6); } }
+        html[data-flip-hint="true"] .leaf:not(.flipped)::after { animation: fx-peel 1.4s ease-in-out 0.9s 3; }
+
+        /* Steam off a dish name */
+        .fx-steam { position: relative; flex: 0 0 0; width: 0; height: 0; pointer-events: none; }
+        .fx-steam i {
+            position: absolute; bottom: 0.1em; left: var(--sx, 8px); width: 9px; height: 14px;
+            border-radius: 50% 50% 45% 45%; opacity: 0;
+            background: radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 72%);
+            animation: fx-wisp 1.15s ease-out var(--sd, 0s) forwards;
+        }
+        @keyframes fx-wisp {
+            0%   { transform: translate3d(0, 0, 0) scale(0.55); opacity: 0; }
+            25%  { opacity: 0.6; }
+            100% { transform: translate3d(var(--wx, 0px), -24px, 0) scale(1.35); opacity: 0; }
+        }
+
+        /* Fresh ink: an owner's saved edit bleeds in */
+        @keyframes fx-ink {
+            0%   { opacity: 0.35; filter: blur(1.4px); text-shadow: 0 0 5px rgba(20,8,4,0.6); }
+            40%  { opacity: 1; filter: blur(0.5px); text-shadow: 0 0 3px rgba(20,8,4,0.35); }
+            100% { filter: blur(0); text-shadow: none; }
+        }
+        .ink-fresh { animation: fx-ink 1.7s ease-out both; }
+
+        /* Lite devices and reduced motion keep the palette, moon, sound and hint; every loop goes */
+        html[data-perf="lite"] .fx-ambient,
+        html[data-perf="lite"] .fx-overlay { display: none !important; }
+        @media (prefers-reduced-motion: reduce) {
+            .fx-ambient, .fx-overlay, .fx-steam { display: none !important; }
+            .leaf::before, .leaf::after { animation: none !important; transition: none !important; }
         }
 
     </style>
@@ -1437,6 +1622,7 @@
     <script src="js/menu-install.js" defer></script>
     <script src="js/menu-board-ui.js" defer></script>
     <script src="js/menu-live.js" defer></script>
+    <script src="js/menu-ambience.js" defer></script>
     <script src="js/sw-register.js" defer></script>
 </body>
 </html>

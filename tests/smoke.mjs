@@ -42,6 +42,7 @@ console.log('structure');
   'js/menu-install.js',
   'js/menu-board-ui.js',
   'js/menu-live.js',
+  'js/menu-ambience.js',
   'js/menu-edit.js',
   'js/owner-board.js',
   'js/sw-register.js',
@@ -93,6 +94,10 @@ ok(read('menu.html').includes('js/menu-live.js'), 'menu loads the live-overrides
 ok(/\/api\/menu-overrides/.test(worker) && /\/api\/owner\/menu/.test(worker), 'worker serves menu overrides + owner menu PUT');
 ok(/sanitizeMenuOverrides/.test(worker) && /MENU_FIELDS/.test(worker), 'menu overrides are sanitized against a field whitelist');
 ok(read('sw.js').includes('/js/menu-live.js'), 'SW precaches menu-live for guests');
+ok(read('menu.html').includes('js/menu-ambience.js'), 'menu loads the ambience module');
+ok(read('sw.js').includes('/js/menu-ambience.js'), 'SW precaches the ambience module');
+ok(!/--parallax-/.test(read('menu.html') + read('js/menu-book.js')), 'menu has no pointer parallax (it lagged the 3D book)');
+ok(read('js/menu-book.js').includes("'dg:turn'") && read('js/menu-ambience.js').includes("'dg:turn'"), 'page turns announce dg:turn for the paper-flip sound');
 ok(read('owner.html').includes('/menu?edit=1'), 'owner panel links into menu edit mode');
 ok(read('js/menu-live.js').includes('menu-edit.js') && read('js/menu-edit.js').includes('/api/owner/menu'), 'edit mode loads on ?edit=1 and saves through the owner API');
 ok(read('owner.html').includes('owner-mirror-note'), 'owner page has a static-mirror notice');
@@ -104,6 +109,7 @@ ok(read('_redirects').includes('workers.dev/:splat 301'), 'pages.dev mirror 301s
 const i18nPacks = JSON.parse(read('data/i18n.json'));
 ok(i18nPacks.fr && Object.keys(i18nPacks.fr).length === Object.keys(i18nPacks.en).length, 'French pack has full key parity');
 ok(i18nPacks.fr['menu.sec.sidesSalads'] === 'Accompagnements et salades', 'French pack is actually French');
+ok(['en', 'es', 'fr'].every((l) => i18nPacks[l]['menu.soundOn'] && i18nPacks[l]['menu.soundOff']), 'sound toggle labels in every pack');
 ok(read('js/i18n.js').includes('data-lang="fr"') && read('js/i18n.js').includes('data-set-lang="fr"'), 'passport skillet + chip offer Français');
 ok(/name_fr/.test(worker) && /desc_fr/.test(worker) && /french/.test(worker), 'worker overrides + auto-translate cover French');
 ok(!read('tools/stage-assets.mjs').includes('_redirects'), 'redirect file stays out of worker assets (would self-loop)');
@@ -172,6 +178,7 @@ console.log('\nJavaScript syntax');
   'js/menu-install.js',
   'js/menu-board-ui.js',
   'js/menu-live.js',
+  'js/menu-ambience.js',
   'js/menu-edit.js',
   'js/owner-board.js',
   'js/sw-register.js',
