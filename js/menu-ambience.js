@@ -6,7 +6,7 @@
 
      time of day  -> <html data-daypart="day|dusk|night">   palette + which layers show
      season       -> <html data-season="marigold|snow|confetti|none">   falling particles
-     moon phase   -> ink drawing on the cover (#fx-moon)
+     moon phase   -> drawn in the scene's sky (#fx-sky-moon) with tonight's real shape
      scene        -> art/riverfront.svg inlined behind the book (the Dobisky waterfront from the river)
      ambient      -> papel picado, boat + wake, fireflies, moth, lantern swing, morning mist
      moments      -> paper-flip sound (toggle, remembered), corner-curl hint, steam on dishes
@@ -94,7 +94,7 @@
   root.dataset.daypart = daypart;
   root.dataset.season = season;
 
-  /* ---------- moon: an ink drawing of tonight's phase on the cover ---------- */
+  /* ---------- moon phase geometry (the scene's sky moon is redrawn with it) ---------- */
 
   function moonLitPath(phase, cx, cy, r) {
     var lit = (1 - Math.cos(phase * Math.PI * 2)) / 2; // 0 dark → 1 full
@@ -109,27 +109,6 @@
     var sweep = waxing ? (crescent ? 0 : 1) : crescent ? 1 : 0;
     var terminator = 'A ' + rx + ' ' + r + ' 0 0 ' + sweep + ' ' + top;
     return 'M ' + top + ' ' + limb + ' ' + terminator + ' Z';
-  }
-
-  function moonSvg(phase) {
-    return (
-      '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" focusable="false">' +
-      '<circle cx="24" cy="24" r="20" fill="rgba(42,27,18,0.30)"/>' +
-      '<path d="' + moonLitPath(phase, 24, 24, 20) + '" fill="rgba(255,248,226,0.82)"/>' +
-      '<circle cx="17" cy="19" r="2.6" fill="rgba(42,27,18,0.16)"/>' +
-      '<circle cx="28" cy="29" r="3.4" fill="rgba(42,27,18,0.16)"/>' +
-      '<circle cx="30" cy="16" r="1.7" fill="rgba(42,27,18,0.16)"/>' +
-      '<circle cx="24" cy="24" r="20" fill="none" stroke="rgba(42,27,18,0.55)" stroke-width="1.4"/>' +
-      '</svg>'
-    );
-  }
-
-  function mountMoon() {
-    var host = document.querySelector('.cover-page-content');
-    if (!host || document.getElementById('fx-moon')) return;
-    var wrap = make('div', 'fx-moon', { id: 'fx-moon', 'aria-hidden': 'true', 'data-phase': moon.toFixed(3) });
-    wrap.innerHTML = moonSvg(moon);
-    host.insertBefore(wrap, host.firstChild);
   }
 
   /* ---------- ambient layer (behind the book) ---------- */
@@ -284,6 +263,7 @@
         host.innerHTML = svg;
         var lit = host.querySelector('#fx-sky-moon-lit');
         if (lit) lit.setAttribute('d', moonLitPath(moon, 0, 0, 26));
+        host.dataset.moon = moon.toFixed(3);
         host.dataset.ready = 'true';
         placeBoat();
       })
@@ -539,7 +519,6 @@
 
   function boot() {
     mountScene();
-    mountMoon();
     mountSoundToggle();
     stampFlipHint();
     if (!isLite()) {

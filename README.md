@@ -97,15 +97,17 @@ CSS transform/opacity animation on a few small elements, nothing tracks the poin
 nothing touches the 3D book. (The old pointer parallax re-composited the book on every mouse
 move and made the menu lag; it was removed on 2026-09-03.)
 
-- **The riverfront** — `art/riverfront.svg` is a paper-cut drawing of the Dobisky waterfront seen from
-  the river (the gazebo on its rock point, the marina slips, the glass-fronted building), inlined behind
+- **The riverfront** — `art/riverfront.svg` is a Ghibli-style painting of the Dobisky waterfront seen from
+  the river: the glass-fronted building left of centre, the marina slips in front, the gazebo on its rock
+  point at the right, the bridge far off to the left. Big soft cumulus, hazy layered hills, three-tone
+  canopies, grass tufts and wildflowers, sky-tinted water and a low sun at dusk; all of it inlined behind
   the book and recoloured per time of day. The excursion boat ties up at its dock and makes trips out
-  and back. The parchment grain and ink outlines sit on the drawn buildings, not on the page.
+  and back. The parchment grain and ink outlines sit on the drawn buildings only, not on the page.
 - **Time of day** — `<html data-daypart="day|dusk|night">` picks the palette and which layers
   show: morning mist by day; fireflies, a moth at the fire and a rocking lantern light after dark.
 - **Season** — `data-season` drops marigold petals for Día de los Muertos (Oct 25–Nov 3), snow
   Dec–Feb, and confetti for Cinco de Mayo (May 1–6) and Independencia (Sep 15–16).
-- **Moon phase** — computed from the date and drawn in ink on the cover.
+- **Moon phase** — computed from the date and drawn in the scene's sky with tonight's real shape.
 - **Always** — papel picado strung across the top, a boat crossing the river, a page-corner curl
   that hints the book flips, steam when a dish name is hovered or tapped, and a quiet paper-flip
   sound on page turns (speaker button beside the language chip; the choice is remembered per device).

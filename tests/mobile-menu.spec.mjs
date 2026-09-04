@@ -270,7 +270,6 @@ test('ambience layers are static and never intercept taps', async ({ page }) => 
     const root = document.documentElement;
     const ambient = document.getElementById('fx-ambient');
     const hit = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-    const moon = document.querySelector('.cover-page-content #fx-moon');
     return {
       lite: root.dataset.perf === 'lite',
       daypart: root.dataset.daypart,
@@ -279,7 +278,7 @@ test('ambience layers are static and never intercept taps', async ({ page }) => 
       ambientMounted: Boolean(ambient),
       ambientInert: ambient ? getComputedStyle(ambient).pointerEvents === 'none' : true,
       hitInsideBook: Boolean(hit && hit.closest('.book')),
-      moonPhase: moon ? Number(moon.dataset.phase) : null,
+      coverMoon: Boolean(document.querySelector('.cover-page-content #fx-moon')),
       soundToggle: Boolean(document.getElementById('fx-sound')),
     };
   });
@@ -289,27 +288,27 @@ test('ambience layers are static and never intercept taps', async ({ page }) => 
   expect(state.ambientMounted).toBe(!state.lite);
   expect(state.ambientInert).toBe(true);
   expect(state.hitInsideBook).toBe(true);
-  expect(state.moonPhase).toBeGreaterThanOrEqual(0);
-  expect(state.moonPhase).toBeLessThan(1);
+  expect(state.coverMoon).toBe(false); // the moon lives in the scene's sky, not on the cover
   expect(state.soundToggle).toBe(true);
 });
 
 test('season, daypart and moon overrides paint the requested state', async ({ page }) => {
   await openMenu(page, '?season=snow&daypart=day&moon=0.5');
   await page.waitForFunction(() => Boolean(window.DGAmbience));
+  await page.waitForSelector('#fx-scene[data-ready="true"]', { state: 'attached', timeout: 5_000 });
   const state = await page.evaluate(() => ({
     lite: document.documentElement.dataset.perf === 'lite',
     season: document.documentElement.dataset.season,
     daypart: document.documentElement.dataset.daypart,
     flakes: document.querySelectorAll('#fx-overlay .fx-flake').length,
-    moon: document.getElementById('fx-moon').dataset.phase,
-    litPath: document.querySelector('#fx-moon path').getAttribute('d'),
+    moon: document.getElementById('fx-scene').dataset.moon,
+    litPath: document.getElementById('fx-sky-moon-lit').getAttribute('d'),
   }));
   expect(state.season).toBe('snow');
   expect(state.daypart).toBe('day');
   expect(state.moon).toBe('0.500');
   // Full moon: the terminator arc carries the full radius, so the lit path closes the whole disc.
-  expect(state.litPath).toContain('A 20.00 20');
+  expect(state.litPath).toContain('A 26.00 26');
   expect(state.flakes).toBe(state.lite ? 0 : 16);
 });
 
