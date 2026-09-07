@@ -999,55 +999,71 @@
         @keyframes fx-glow-day { 0% { opacity: 0.22; } 100% { opacity: 0.42; } }
         html[data-daypart="day"] .fire-glow { animation-name: fx-glow-day; }
 
-        /* The riverfront scene (art/riverfront.svg, inlined by JS) reads these per time of day:
-           Ghibli-ish palettes — deep blue nights, a peach-and-violet dusk with a low sun, a clear
-           blue day with white cumulus. Sky, water, hills, clouds and foliage all take their tint here. */
+        /* The riverfront scene (art/riverfront.svg, inlined by JS) reads these per time of day.
+           Day is the photograph: blue sky with white puffs, bright river, silver roof, warm wood, tan stone,
+           dark green lamps and gazebo trim. Dusk warms everything; night goes deep blue and lights the windows. */
         :root {
-            --fx-sky-top: #0b1631; --fx-sky-mid: #1a2c56; --fx-sky-bottom: #2c4674;
-            --fx-water-top: #2c4674; --fx-water-mid: #1d3358; --fx-water-bottom: #0a1426;
-            --fx-hill-far: #17304a; --fx-hill-near: #14382e; --fx-far-shore: #0b1522;
-            --fx-cloud: #22315a; --fx-cloud-shade: #172342; --fx-cloud-light: #33487a; --fx-cloud-opacity: 0.55;
-            --fx-sun: #ffd9a0; --fx-sun-opacity: 0;
-            --fx-ripple: rgba(255,255,255,0.09);
-            --fx-window: #ffcf7a; --fx-glass-opacity: 0.85; --fx-glow-opacity: 1;
-            --fx-stars-opacity: 1; --fx-moon-opacity: 1;
-            --fx-lawn-top: #2f6a3a; --fx-lawn: #1f4a2a;
-            --fx-foliage-dark: #1c4a2c; --fx-foliage: #2d6b3b; --fx-foliage-light: #4a9a52;
-            --fx-rock: #5a5650; --fx-rock-light: #77716a;
-            --fx-wall: #e6cf95; --fx-wall-shade: #cdb47c; --fx-stone: #8c7b68;
-            --fx-roof: #4a2e1e; --fx-roof-light: #6a4630;
-            --fx-dock: #6b5136; --fx-dock-light: #8a6a47;
-            --fx-gazebo: #f2e6c8; --fx-gazebo-roof: #3f6b5f; --fx-gazebo-roof-light: #4f7f72;
+            --fx-sky-top: #3f86cf; --fx-sky-mid: #8dc0ea; --fx-sky-bottom: #dcecf7;
+            --fx-cloud: #ffffff; --fx-cloud-shade: #c9dced; --fx-cloud-light: #ffffff; --fx-cloud-opacity: 1;
+            --fx-sun: #ffd9a0; --fx-sun-opacity: 0; --fx-stars-opacity: 0; --fx-moon-opacity: 0.12;
+            --fx-water-top: #9dcbe8; --fx-water-mid: #3d8fcc; --fx-water-bottom: #1f5d96;
+            --fx-ripple: rgba(255,255,255,0.3);
+            --fx-hill-far: #8fb0c4; --fx-far-shore: #4d7d5c;
+            --fx-lawn-top: #7cc25c; --fx-lawn: #4f9a44;
+            --fx-foliage-dark: #2f6e3a; --fx-foliage: #4f9a4a; --fx-foliage-light: #8cc46a;
+            --fx-roof: #c3c8cd; --fx-roof-shade: #8f969c; --fx-fascia: #f4f4f2;
+            --fx-wood: #7a5233; --fx-wood-light: #96683f; --fx-porch: #3b2a1e;
+            --fx-stone: #b9a98d; --fx-stone-dark: #9c8a6e; --fx-stone-light: #d3c4a6;
+            --fx-glass-top: #a9d0ec; --fx-glass-bottom: #5e8fbb; --fx-mullion: #3a2f27;
+            --fx-window: #ffd27a; --fx-glow-opacity: 0;
+            --fx-shingle: #6b4a2e; --fx-shingle-light: #8a6440;
+            --fx-green: #2d5a3a; --fx-green-light: #3f7a50;
+            --fx-pier: #cfcfca; --fx-pier-shade: #b5b5af; --fx-pier-edge: #8a4a2a;
+            --fx-dock: #c9ccd0; --fx-dock-shade: #a9adb2; --fx-dock-trim: #2f6b45;
+            --fx-rock: #8c8a84; --fx-rock-light: #aaa79f;
+            --fx-tower: #d8dadb; --fx-tower-shade: #b3b6b9;
         }
         html[data-daypart="dusk"] {
             --fx-sky-top: #4b2a6a; --fx-sky-mid: #c96b6b; --fx-sky-bottom: #ffb36b;
-            --fx-water-top: #e0906a; --fx-water-mid: #9a5a58; --fx-water-bottom: #2a1a2e;
-            --fx-hill-far: #6a4a6a; --fx-hill-near: #3f5a44; --fx-far-shore: #2a1b2e;
             --fx-cloud: #ffd3c0; --fx-cloud-shade: #d98a8a; --fx-cloud-light: #fff1e6; --fx-cloud-opacity: 0.95;
-            --fx-sun-opacity: 1;
+            --fx-sun-opacity: 1; --fx-stars-opacity: 0.25; --fx-moon-opacity: 0.8;
+            --fx-water-top: #e0906a; --fx-water-mid: #9a5a58; --fx-water-bottom: #2a1a2e;
             --fx-ripple: rgba(255,214,170,0.16);
-            --fx-glass-opacity: 0.8; --fx-glow-opacity: 0.8;
-            --fx-stars-opacity: 0.25; --fx-moon-opacity: 0.8;
+            --fx-hill-far: #6a4a6a; --fx-far-shore: #2a1b2e;
             --fx-lawn-top: #4d8a45; --fx-lawn: #2e5e33;
             --fx-foliage-dark: #2c5e34; --fx-foliage: #4f8f4a; --fx-foliage-light: #86b866;
-            --fx-rock: #625a52; --fx-rock-light: #85796c;
-            --fx-wall: #ecd39d;
+            --fx-roof: #9a8f96; --fx-roof-shade: #6e6470; --fx-fascia: #f0e0d4;
+            --fx-wood: #6a4630; --fx-wood-light: #84583a; --fx-porch: #2a1c14;
+            --fx-stone: #a8957c; --fx-stone-dark: #8c7860; --fx-stone-light: #c4b294;
+            --fx-glass-top: #ffc990; --fx-glass-bottom: #c07a4a; --fx-mullion: #2a1f18;
+            --fx-glow-opacity: 0.8;
+            --fx-shingle: #5a3e26; --fx-shingle-light: #7a5638;
+            --fx-green: #274a32; --fx-green-light: #386a48;
+            --fx-pier: #b8a9a3; --fx-pier-shade: #9c8c86; --fx-pier-edge: #7a4224;
+            --fx-dock: #b3b0b6; --fx-dock-shade: #8e8b91; --fx-dock-trim: #2a5e3e;
+            --fx-rock: #7a716c; --fx-rock-light: #948b85;
+            --fx-tower: #b6a3ad; --fx-tower-shade: #8f7f8c;
         }
-        html[data-daypart="day"] {
-            --fx-sky-top: #4f95d8; --fx-sky-mid: #8ec2ea; --fx-sky-bottom: #dbeefb;
-            --fx-water-top: #a9d3ea; --fx-water-mid: #6fb0d8; --fx-water-bottom: #3c7fb0;
-            --fx-hill-far: #8fb3c9; --fx-hill-near: #6fa27a; --fx-far-shore: #5e8a6a;
-            --fx-cloud: #ffffff; --fx-cloud-shade: #cfe3f3; --fx-cloud-light: #ffffff; --fx-cloud-opacity: 1;
-            --fx-sun-opacity: 0;
-            --fx-ripple: rgba(255,255,255,0.28);
-            --fx-window: #e8f3fa; --fx-glass-opacity: 0.5; --fx-glow-opacity: 0;
-            --fx-stars-opacity: 0; --fx-moon-opacity: 0.12;
-            --fx-lawn-top: #7fc45a; --fx-lawn: #4f9a44;
-            --fx-foliage-dark: #3f8f47; --fx-foliage: #63b45a; --fx-foliage-light: #9ad46f;
-            --fx-rock: #8a8378; --fx-rock-light: #aaa398;
-            --fx-wall: #f0dfae; --fx-wall-shade: #d9c48f; --fx-stone: #a09080;
-            --fx-roof: #5a3a28; --fx-roof-light: #7a5238;
-            --fx-dock: #8a6a47; --fx-dock-light: #a8865c;
+        html[data-daypart="night"] {
+            --fx-sky-top: #0b1631; --fx-sky-mid: #1a2c56; --fx-sky-bottom: #2c4674;
+            --fx-cloud: #22315a; --fx-cloud-shade: #172342; --fx-cloud-light: #33487a; --fx-cloud-opacity: 0.55;
+            --fx-sun-opacity: 0; --fx-stars-opacity: 1; --fx-moon-opacity: 1;
+            --fx-water-top: #2c4674; --fx-water-mid: #1d3358; --fx-water-bottom: #0a1426;
+            --fx-ripple: rgba(255,255,255,0.09);
+            --fx-hill-far: #17304a; --fx-far-shore: #0b1522;
+            --fx-lawn-top: #2f6a3a; --fx-lawn: #1f4a2a;
+            --fx-foliage-dark: #1c4a2c; --fx-foliage: #2d6b3b; --fx-foliage-light: #4a9a52;
+            --fx-roof: #5c6672; --fx-roof-shade: #3d4650; --fx-fascia: #cfd3d8;
+            --fx-wood: #4a3120; --fx-wood-light: #5c3d28; --fx-porch: #1e1410;
+            --fx-stone: #6e6353; --fx-stone-dark: #57493c; --fx-stone-light: #8a7c66;
+            --fx-glass-top: #e0a860; --fx-glass-bottom: #b87838; --fx-mullion: #1e1610;
+            --fx-glow-opacity: 1;
+            --fx-shingle: #3e2a18; --fx-shingle-light: #563a24;
+            --fx-green: #1d3a26; --fx-green-light: #2a5236;
+            --fx-pier: #6d6f6c; --fx-pier-shade: #55574f; --fx-pier-edge: #4a2616;
+            --fx-dock: #7b8087; --fx-dock-shade: #5f646a; --fx-dock-trim: #1f4a30;
+            --fx-rock: #4a4844; --fx-rock-light: #605d57;
+            --fx-tower: #4a5260; --fx-tower-shade: #363c48;
         }
         .fx-scene { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
         .fx-scene svg { display: block; width: 100%; height: 100%; }

@@ -227,7 +227,7 @@
   var SCENE_URL = '/art/riverfront.svg';
   var SCENE_W = 1600;
   var SCENE_H = 900;
-  var DOCK = { x: 1246, y: 866 }; // where the excursion boat ties up, in scene units
+  var DOCK = { x: 752, y: 866 }; // the outer end of the marina's floating dock, in scene units
 
   // The scene uses preserveAspectRatio="xMidYMax slice": scaled to cover the viewport,
   // centred horizontally and anchored to the bottom so the marina is always in view.
@@ -548,6 +548,7 @@
     playFlip: playFlip,
     moonLitPath: moonLitPath,
     sceneMapping: sceneMapping,
+    dock: DOCK,
   };
 
   if (document.readyState === 'loading') {

@@ -97,12 +97,16 @@ CSS transform/opacity animation on a few small elements, nothing tracks the poin
 nothing touches the 3D book. (The old pointer parallax re-composited the book on every mouse
 move and made the menu lag; it was removed on 2026-09-03.)
 
-- **The riverfront** — `art/riverfront.svg` is a Ghibli-style painting of the Dobisky waterfront seen from
-  the river: the glass-fronted building left of centre, the marina slips in front, the gazebo on its rock
-  point at the right, the bridge far off to the left. Big soft cumulus, hazy layered hills, three-tone
-  canopies, grass tufts and wildflowers, sky-tinted water and a low sun at dusk; all of it inlined behind
-  the book and recoloured per time of day. The excursion boat ties up at its dock and makes trips out
-  and back. The parchment grain and ink outlines sit on the drawn buildings only, not on the page.
+- **The riverfront** — `art/riverfront.svg` is a painterly drawing of the Dobisky waterfront seen from the
+  river, worked up from photographs of the site: the long low building with its silver roof, deep
+  overhang and rows of white rafter tails, the clerestory along the ridge, full-height glass on a stacked-
+  stone knee wall and the open porch with red picnic tables; the two-tier shingle gazebo with dark green
+  posts on the concrete pier at the right; the marina's grey floating docks with green trim, a pontoon
+  boat and a blue powerboat in front; green lantern lamps and slat benches on the promenade, hydrangeas
+  and riprap along the water, the apartment tower behind the trees and the bridge far off to the left,
+  under a mackerel sky. Inlined behind the book and recoloured per time of day. The excursion boat
+  ties up at the end of the floating dock and makes trips out and back. The parchment grain and soft
+  ink outlines sit on the built things only, not on the page.
 - **Time of day** — `<html data-daypart="day|dusk|night">` picks the palette and which layers
   show: morning mist by day; fireflies, a moth at the fire and a rocking lantern light after dark.
 - **Season** — `data-season` drops marigold petals for Día de los Muertos (Oct 25–Nov 3), snow

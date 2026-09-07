@@ -408,7 +408,7 @@ test('the riverfront scene inlines and the boat ties up at its dock', async ({ p
       moon: document.querySelector('#fx-sky-moon-lit').getAttribute('d'),
       sceneInert: getComputedStyle(document.getElementById('fx-scene')).pointerEvents,
       boatX: boat ? parseFloat(boat.style.getPropertyValue('--bx')) : null,
-      dockX: m.x0 + 1246 * m.s,
+      dockX: m.x0 + window.DGAmbience.dock.x * m.s,
     };
   });
   expect(state.svg).toBe(true);
