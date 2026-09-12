@@ -802,9 +802,61 @@ async function handleOwnerHistory(request, env) {
   return json({ history });
 }
 
+// ── Canonical address ──────────────────────────────────────────────────────
+// https://dirtygringonny.com is the one public address. Every other way into
+// this Worker — www., the old new. test host, the workers.dev address, plain
+// http:// — answers with a 301 to the same path on the real domain, so old
+// links, QR codes and search results all land on the proper site. Old
+// WordPress paths get a home too. (`run_worker_first: true` in wrangler.jsonc
+// makes sure page requests pass through here as well, not just /api/*.)
+const CANONICAL_HOST = 'dirtygringonny.com';
+const ALIAS_HOSTS = new Set([
+  'www.dirtygringonny.com',
+  'new.dirtygringonny.com',
+  'la-gringas.the-dirty-gringo.workers.dev',
+]);
+const LEGACY_PATHS = [
+  [/^\/wp\/menu(?:\/|$)/i, '/menu'],
+  [/^\/wp\/wp-content\/uploads\/.*\.pdf$/i, '/menu'],
+  [/^\/wp(?:\/|$)/i, '/'],
+];
+
+function isAliasHost(host) {
+  if (host === CANONICAL_HOST) return false;
+  return ALIAS_HOSTS.has(host) || host.endsWith('.' + CANONICAL_HOST);
+}
+
+function canonicalRedirect(request, url) {
+  const host = url.hostname.toLowerCase();
+  const alias = isAliasHost(host);
+  const insecure = host === CANONICAL_HOST && url.protocol === 'http:';
+  const legacy = LEGACY_PATHS.find(([re]) => re.test(url.pathname));
+  if (!alias && !insecure && !legacy) return null;
+  // Retired origins keep serving the service worker itself, so an app
+  // installed there can update to the version that unregisters (see sw.js).
+  if (alias && !legacy && url.pathname === '/sw.js') return null;
+  const target = new URL(url);
+  if (alias || insecure) {
+    target.protocol = 'https:';
+    target.hostname = CANONICAL_HOST;
+    target.port = '';
+  }
+  if (legacy) {
+    target.pathname = legacy[1];
+    target.search = '';
+  }
+  const status = request.method === 'GET' || request.method === 'HEAD' ? 301 : 308;
+  return new Response(null, {
+    status,
+    headers: { Location: target.toString(), 'Cache-Control': 'public, max-age=3600' },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const redirect = canonicalRedirect(request, url);
+    if (redirect) return redirect;
     const path = url.pathname.replace(/\/+$/, '') || '/';
 
     if (path === '/api/reward') {

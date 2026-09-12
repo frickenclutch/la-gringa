@@ -2,7 +2,7 @@
 
 Static patio experience for **The Dirty Gringo at the Dobisky** — skillet gate game, hub crossroads, and a 3D “lost manuscript” menu. Served from Cloudflare (Workers + Assets).
 
-Live brand domain: [dirtygringonny.com](https://www.dirtygringonny.com)
+Live brand domain: [dirtygringonny.com](https://dirtygringonny.com)
 
 ## Quick start
 
@@ -23,7 +23,7 @@ The owner claims the board from the site itself; no terminal or deploy secrets n
    ```bash
    TOKEN=$(node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))") \
      && npx wrangler kv key put --binding MENU_BOARD --remote owner-claim-token "$TOKEN" --expiration-ttl 604800 \
-     && echo "https://la-gringas.the-dirty-gringo.workers.dev/owner?claim=$TOKEN"
+     && echo "https://dirtygringonny.com/owner?claim=$TOKEN"
    ```
 
 2. The owner opens the link, chooses a PIN (6+ characters — a short phrase is best), and lands straight in the editor. The PIN is stored as a salted PBKDF2 hash in KV; the token burns on claim.
@@ -76,9 +76,20 @@ To re-skin for another venue: update `data/site.json`, recipes, menu HTML, and b
 npm run deploy
 ```
 
-`deploy` builds CSS, stages a clean `dist/` (no `node_modules`), then runs Wrangler. Point the custom domain in the Cloudflare dashboard when ready. Enable **Web Analytics** (free, cookieless) on the project for traffic without a third-party tag manager.
+`deploy` builds CSS, stages a clean `dist/` (no `node_modules`), then runs Wrangler. Enable **Web Analytics** (free, cookieless) on the zone for traffic without a third-party tag manager.
 
-Note: pushes to `main` also auto-refresh the static mirror at **la-gringa.pages.dev** (legacy Cloudflare Pages project, serves the repo root with no `/api/*` — the skillet game falls back to its counter message and the board reads `data/menu-board.json`). The Worker deploy (`npm run deploy`) is the canonical site; remember it does **not** happen on push.
+### Addresses
+
+| Address | What happens |
+|---------|--------------|
+| `https://dirtygringonny.com` | The site. Bound to the Worker as a custom domain (Cloudflare issues and renews the certificate) and the canonical URL in every page, the sitemap and `robots.txt`. |
+| `http://dirtygringonny.com` | 301 → `https://` (`worker.js`; also switch on **Always Use HTTPS** under SSL/TLS → Edge Certificates). |
+| `www.dirtygringonny.com`, `new.dirtygringonny.com` | 301 → the same path on `dirtygringonny.com` (`worker.js`). `www` only reaches the Worker once it is added as a custom domain on it; any zone-level redirect rule for `www` must keep the path or be removed. |
+| `la-gringas.the-dirty-gringo.workers.dev` | 301 → the same path on `dirtygringonny.com` (`worker.js`), so links shared before domain day keep working. |
+| `la-gringa.pages.dev` | Legacy Cloudflare Pages mirror, rebuilt on every push to `main`. Its `_redirects` 301s every path to the domain and serves only `sw.js` (so an app installed there can retire itself). Pushing never deploys the real site. |
+| `/wp/…` (old WordPress paths) | 301 → `/`; `/wp/menu/…` and the old menu PDF → `/menu`. |
+
+`worker.js` runs in front of every request (`run_worker_first: true` in `wrangler.jsonc`) so those redirects apply to pages as well as `/api/*`; the service worker retires itself on any old origin so stale installs follow the redirect instead of a cached page. `mail.`, `webmail.`, `cpanel.`, `ftp.` and the MX records still point at the old hosting box (DNS-only) and are untouched by the site. The Worker deploy (`npm run deploy`) is the canonical site; it does **not** happen on push.
 
 ## Stack notes
 

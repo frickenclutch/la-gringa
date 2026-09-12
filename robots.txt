@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.dirtygringonny.com/sitemap.xml
+Sitemap: https://dirtygringonny.com/sitemap.xml

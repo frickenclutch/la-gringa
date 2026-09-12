@@ -7,7 +7,7 @@
   { "en": "the DIRTY GRINGO", "key": "menu.cover.brand", "selectorHint": ".cover-page-content .mt-auto h3" },
   { "en": "AT THE DOBISKY", "key": "menu.cover.atDobisky", "selectorHint": ".cover-page-content .mt-auto p:first-of-type" },
   { "en": "Call The Dirty Gringo at 315 713 8151", "key": "menu.cover.callAria", "attr": "aria-label", "selectorHint": "a[href='tel:+13157138151']" },
-  { "en": "Open dirtygringonny.com", "key": "menu.cover.webAria", "attr": "aria-label", "selectorHint": "a[href='https://www.dirtygringonny.com/']" },
+  { "en": "Open dirtygringonny.com", "key": "menu.cover.webAria", "attr": "aria-label", "selectorHint": "a[href='https://dirtygringonny.com/']" },
 
   { "en": "Sides & Salads", "key": "menu.sec.sidesSalads", "selectorHint": "#leaf1 .face.back > h2" },
   { "en": "Sides", "key": "menu.sec.sides", "selectorHint": "#leaf1 .face.back h3:nth-of-type(1)" },

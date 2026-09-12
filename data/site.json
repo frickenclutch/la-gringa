@@ -7,7 +7,7 @@
   "phoneDisplay": "315.713.8151",
   "email": null,
   "domain": "dirtygringonny.com",
-  "canonicalBase": "https://www.dirtygringonny.com",
+  "canonicalBase": "https://dirtygringonny.com",
   "address": {
     "street": "100 Riverside Ave.",
     "city": "Ogdensburg",
@@ -27,6 +27,6 @@
   "mapsQuery": "The Dirty Gringo 100 Riverside Ave Ogdensburg NY 13669",
   "themeColor": "#2e0854",
   "sameAs": [
-    "https://www.dirtygringonny.com"
+    "https://dirtygringonny.com"
   ]
 }

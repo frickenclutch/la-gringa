@@ -110,7 +110,17 @@ ok(read('js/owner-board.js').includes('showMirrorNote'), 'owner UI detects worke
 ok(read('js/menu-edit.js').includes('probe.month'), 'menu editor probe rejects HTML impostor responses');
 ok(read('wrangler.jsonc').includes('"ai"'), 'wrangler binds Workers AI');
 ok(/m2m100/.test(worker) && /autoTranslateMenu/.test(worker) && /_auto/.test(worker), 'menu edits auto-translate with machine-ownership tracking');
-ok(read('_redirects').includes('workers.dev/:splat 301'), 'pages.dev mirror 301s to the canonical site');
+ok(read('_redirects').includes('https://dirtygringonny.com/:splat 301'), 'pages.dev mirror 301s to the canonical domain');
+ok(read('_redirects').includes('/sw.js /sw.js 200'), 'mirror still serves sw.js so stale installs can retire');
+ok(
+  read('worker.js').includes("CANONICAL_HOST = 'dirtygringonny.com'") && read('worker.js').includes('canonicalRedirect('),
+  'worker 301s alias hosts, http:// and /wp paths to the canonical domain'
+);
+ok(read('wrangler.jsonc').includes('"run_worker_first": true'), 'worker runs first so page requests are canonicalised too');
+ok(read('sw.js').includes('registration.unregister()'), 'service worker retires itself on old origins');
+for (const f of ['index.html', 'hub.html', 'menu.html', 'owner.html', 'robots.txt', 'sitemap.xml', 'data/site.json', 'manifest.webmanifest', 'manifest-menu.webmanifest']) {
+  ok(!read(f).includes('www.dirtygringonny.com') && !read(f).includes('workers.dev'), f + ' names only the canonical domain');
+}
 const i18nPacks = JSON.parse(read('data/i18n.json'));
 ok(i18nPacks.fr && Object.keys(i18nPacks.fr).length === Object.keys(i18nPacks.en).length, 'French pack has full key parity');
 ok(i18nPacks.fr['menu.sec.sidesSalads'] === 'Accompagnements et salades', 'French pack is actually French');
@@ -148,7 +158,7 @@ ok(read('menu.html').includes('manifest-menu.webmanifest'), 'menu uses menu-scop
 ok(read('manifest-menu.webmanifest').includes('"/menu"'), 'menu manifest starts at /menu');
 ok(read('menu.html').includes('href="tel:+13157138151"'), 'menu phone opens the preferred dialer');
 ok(
-  read('menu.html').includes('href="https://www.dirtygringonny.com/"'),
+  read('menu.html').includes('href="https://dirtygringonny.com/"'),
   'menu domain links to the restaurant website'
 );
 ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');

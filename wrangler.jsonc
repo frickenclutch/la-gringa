@@ -12,7 +12,10 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    // Every request passes through worker.js first so the alias hosts (www.,
+    // new., workers.dev), plain http:// and old WordPress paths can 301 to
+    // https://dirtygringonny.com before a static page is served.
+    "run_worker_first": true
   },
   "compatibility_flags": [
     "nodejs_compat"
