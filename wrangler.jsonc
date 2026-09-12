@@ -7,6 +7,23 @@
   "observability": {
     "enabled": true
   },
+  // Custom domains bound to this Worker. This list is the COMPLETE set:
+  // wrangler deploy attaches what is here and detaches any custom domain
+  // that is not (the record it created goes with it). The apex is the
+  // canonical address; every other host here is 301'd to it by worker.js.
+  // TODO once the plain `www` DNS record is deleted in the dashboard, add
+  //   { "pattern": "www.dirtygringonny.com", "custom_domain": true }
+  // and deploy: wrangler refuses to bind a hostname that still has its own
+  // A/CNAME record (error 100117).
+  "routes": [
+    { "pattern": "dirtygringonny.com", "custom_domain": true },
+    { "pattern": "new.dirtygringonny.com", "custom_domain": true }
+  ],
+  // Declaring routes flips wrangler's default for workers.dev to OFF, which
+  // would 404 every old la-gringas.the-dirty-gringo.workers.dev link instead
+  // of letting worker.js 301 it to the domain. Keep both on explicitly.
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

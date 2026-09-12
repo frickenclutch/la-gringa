@@ -117,6 +117,14 @@ ok(
   'worker 301s alias hosts, http:// and /wp paths to the canonical domain'
 );
 ok(read('wrangler.jsonc').includes('"run_worker_first": true'), 'worker runs first so page requests are canonicalised too');
+ok(
+  read('wrangler.jsonc').includes('{ "pattern": "dirtygringonny.com", "custom_domain": true }'),
+  'apex is declared as a custom domain on the worker'
+);
+ok(
+  read('wrangler.jsonc').includes('"workers_dev": true') && read('wrangler.jsonc').includes('"preview_urls": true'),
+  'workers.dev stays on so old links can 301 to the domain (routes would switch it off by default)'
+);
 ok(read('sw.js').includes('registration.unregister()'), 'service worker retires itself on old origins');
 for (const f of ['index.html', 'hub.html', 'menu.html', 'owner.html', 'robots.txt', 'sitemap.xml', 'data/site.json', 'manifest.webmanifest', 'manifest-menu.webmanifest']) {
   ok(!read(f).includes('www.dirtygringonny.com') && !read(f).includes('workers.dev'), f + ' names only the canonical domain');
