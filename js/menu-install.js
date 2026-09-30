@@ -2,6 +2,8 @@
  * Adaptive "Install Menu" / Get the Menu App.
  * - Chromium: uses beforeinstallprompt
  * - iOS Safari: coach mark → Share → Add to Home Screen
+ * - In-app browsers (Facebook, Messenger, Instagram): coach mark → open in
+ *   the real browser first, since the in-app view cannot install anything
  * - Other browsers: coach mark with browser-agnostic tips
  * - Already installed / standalone: hide the control
  */
@@ -32,6 +34,16 @@
     return iOS || iPadOS;
   }
 
+  // Meta's in-app browsers tag their user agent: FBAN/FBAV/FBIOS on iPhone,
+  // FB_IAB/FB4A on Android, "Instagram" for Instagram. They have no Share →
+  // Add to Home Screen and never fire beforeinstallprompt.
+  function inAppBrowser() {
+    const ua = window.navigator.userAgent || '';
+    if (/Instagram/.test(ua)) return 'Instagram';
+    if (/FBAN|FBAV|FBIOS|FB_IAB|FB4A/.test(ua)) return /Messenger/.test(ua) ? 'Messenger' : 'Facebook';
+    return null;
+  }
+
   function showBtn() {
     btn.hidden = false;
     btn.setAttribute('aria-hidden', 'false');
@@ -48,7 +60,17 @@
 
   function fillCoach() {
     if (!coachBody) return;
-    if (isIos()) {
+    const inApp = inAppBrowser();
+    if (inApp) {
+      const browser = isIos() ? 'Safari' : 'Chrome';
+      coachBody.innerHTML =
+        '<p>You’re reading this inside ' + inApp + '. To keep the menu on your phone, open it in ' + browser + ' first.</p>' +
+        '<ol class="install-coach-steps">' +
+        '<li><span class="step-num">1</span><span>Tap <strong>⋯</strong> (or <strong>⋮</strong>) in the top corner</span></li>' +
+        '<li><span class="step-num">2</span><span>Choose <strong>Open in ' + browser + '</strong> or <strong>Open in external browser</strong></span></li>' +
+        '<li><span class="step-num">3</span><span>Tap <strong>Get the Menu App</strong> again there</span></li>' +
+        '</ol>';
+    } else if (isIos()) {
       coachBody.innerHTML =
         '<p>Install the Dirty Gringo manuscript like an app — opens straight to the menu, even on weak patio signal.</p>' +
         '<ol class="install-coach-steps">' +

@@ -417,3 +417,36 @@ test('the riverfront scene inlines and the boat ties up at its dock', async ({ p
   if (state.lite) expect(state.boatX).toBeNull();
   else expect(Math.abs(state.boatX - state.dockX)).toBeLessThan(1);
 });
+
+test('inside Facebook the menu-app coach says to open the real browser', async ({ page }, testInfo) => {
+  const inFacebook = testInfo.project.name.startsWith('facebook-');
+  test.skip(testInfo.project.name === 'desktop-chromium');
+  await openMenu(page);
+  await page.evaluate(() => {
+    const btn = document.getElementById('menu-install-btn');
+    btn.hidden = false;
+    btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+  });
+  const coach = page.locator('#install-coach-body');
+  await expect(page.locator('#install-coach')).toBeVisible();
+  if (inFacebook) {
+    const browser = testInfo.project.name === 'facebook-ios' ? 'Safari' : 'Chrome';
+    await expect(coach).toContainText('inside Facebook');
+    await expect(coach).toContainText('Open in ' + browser);
+    await expect(coach).not.toContainText('Add to Home Screen');
+  } else {
+    await expect(coach).not.toContainText('inside Facebook');
+  }
+});
+
+test('the whole gate → hub → menu path works without a service worker', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  await page.goto('/index.html');
+  await page.waitForSelector('#ui-welcome');
+  await page.goto('/hub.html');
+  await page.waitForSelector('.nav-grid');
+  await openMenu(page);
+  await expect(page.locator('.menu-item-title').first()).toBeAttached();
+  expect(errors).toEqual([]);
+});
