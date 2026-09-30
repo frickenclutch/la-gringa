@@ -92,8 +92,17 @@ function json(body, status = 200, extraHeaders = {}) {
   });
 }
 
+// Specials start and end on the restaurant's calendar day, not UTC's (which
+// rolls over around 8 pm in Ogdensburg). en-CA formats as YYYY-MM-DD.
+const RESTAURANT_DAY = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/New_York',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
 function todayISO(date = new Date()) {
-  return date.toISOString().slice(0, 10);
+  return RESTAURANT_DAY.format(date);
 }
 
 function isSpecialActive(special, today = todayISO()) {

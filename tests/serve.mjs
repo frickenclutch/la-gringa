@@ -18,7 +18,9 @@ const types = {
 createServer((request, response) => {
   const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
   const relative = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
-  const file = normalize(join(root, relative));
+  let file = normalize(join(root, relative));
+  // Clean URLs like production (Workers assets): /hub serves hub.html.
+  if (!extname(file) && existsSync(file + '.html')) file += '.html';
 
   if (!file.startsWith(root) || !existsSync(file) || statSync(file).isDirectory()) {
     response.writeHead(404);

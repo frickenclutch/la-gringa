@@ -58,37 +58,49 @@
     btn.setAttribute('aria-hidden', 'true');
   }
 
+  function t(key, vars) {
+    const lang = window.DGLang;
+    let text = lang && lang.t ? lang.t(key) : key;
+    Object.keys(vars || {}).forEach(function (name) {
+      text = text.split('{' + name + '}').join(vars[name]);
+    });
+    return text;
+  }
+
+  function steps(keys, vars) {
+    return (
+      '<ol class="install-coach-steps">' +
+      keys
+        .map(function (key, i) {
+          return '<li><span class="step-num">' + (i + 1) + '</span><span>' + t(key, vars) + '</span></li>';
+        })
+        .join('') +
+      '</ol>'
+    );
+  }
+
+  // Coach copy comes from data/i18n.json (menu.install*) so it follows the
+  // reader's EN/ES/FR choice; {button} is the translated install label.
   function fillCoach() {
     if (!coachBody) return;
+    const vars = { button: t('menu.installFull') };
     const inApp = inAppBrowser();
     if (inApp) {
-      const browser = isIos() ? 'Safari' : 'Chrome';
+      vars.app = inApp;
+      vars.browser = isIos() ? 'Safari' : 'Chrome';
       coachBody.innerHTML =
-        '<p>You’re reading this inside ' + inApp + '. To keep the menu on your phone, open it in ' + browser + ' first.</p>' +
-        '<ol class="install-coach-steps">' +
-        '<li><span class="step-num">1</span><span>Tap <strong>⋯</strong> (or <strong>⋮</strong>) in the top corner</span></li>' +
-        '<li><span class="step-num">2</span><span>Choose <strong>Open in ' + browser + '</strong> or <strong>Open in external browser</strong></span></li>' +
-        '<li><span class="step-num">3</span><span>Tap <strong>Get the Menu App</strong> again there</span></li>' +
-        '</ol>';
+        '<p>' + t('menu.installInApp', vars) + '</p>' +
+        steps(['menu.installInApp1', 'menu.installInApp2', 'menu.installInApp3'], vars);
     } else if (isIos()) {
       coachBody.innerHTML =
-        '<p>Install the Dirty Gringo manuscript like an app — opens straight to the menu, even on weak patio signal.</p>' +
-        '<ol class="install-coach-steps">' +
-        '<li><span class="step-num">1</span><span>Tap <strong>Share</strong> in Safari’s toolbar</span></li>' +
-        '<li><span class="step-num">2</span><span>Choose <strong>Add to Home Screen</strong></span></li>' +
-        '<li><span class="step-num">3</span><span>Confirm — look for <strong>DG Menu</strong></span></li>' +
-        '</ol>';
+        '<p>' + t('menu.installBody') + '</p>' +
+        steps(['menu.installIos1', 'menu.installIos2', 'menu.installIos3'], vars);
     } else if (deferredPrompt) {
-      coachBody.innerHTML =
-        '<p>Your browser can install this menu as an app. Tap <strong>Get the Menu App</strong> again and confirm the install prompt.</p>';
+      coachBody.innerHTML = '<p>' + t('menu.installPrompt', vars) + '</p>';
     } else {
       coachBody.innerHTML =
-        '<p>Install from your browser menu:</p>' +
-        '<ol class="install-coach-steps">' +
-        '<li><span class="step-num">1</span><span>Open the browser <strong>menu</strong> (⋮ or ⋯)</span></li>' +
-        '<li><span class="step-num">2</span><span>Choose <strong>Install app</strong> / <strong>Add to Home screen</strong></span></li>' +
-        '<li><span class="step-num">3</span><span>Open <strong>DG Menu</strong> anytime — starts on the manuscript</span></li>' +
-        '</ol>';
+        '<p>' + t('menu.installOther') + '</p>' +
+        steps(['menu.installOther1', 'menu.installOther2', 'menu.installOther3'], vars);
     }
   }
 
@@ -157,6 +169,9 @@
       if (e.target === coach) closeCoach();
     });
   }
+  document.addEventListener('dg:lang', function () {
+    if (coach && !coach.hidden) fillCoach();
+  });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && coach && !coach.hidden) closeCoach();
   });

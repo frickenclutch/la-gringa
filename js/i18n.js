@@ -267,7 +267,7 @@
       (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
     if (stamp) {
-      stamp.textContent = lang === 'es' ? 'ES' : 'EN';
+      stamp.textContent = lang.toUpperCase();
       stamp.classList.remove('is-stamping');
       void stamp.offsetWidth;
       stamp.classList.add('is-stamping');
@@ -294,7 +294,7 @@
       if (!res.ok) throw new Error('i18n');
       dict = await res.json();
     } catch (e) {
-      dict = { en: Object.assign({}, FALLBACK.en), es: Object.assign({}, FALLBACK.es) };
+      dict = { en: Object.assign({}, FALLBACK.en), es: Object.assign({}, FALLBACK.es), fr: Object.assign({}, FALLBACK.fr) };
     }
   }
 

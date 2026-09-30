@@ -450,3 +450,47 @@ test('the whole gate → hub → menu path works without a service worker', asyn
   await expect(page.locator('.menu-item-title').first()).toBeAttached();
   expect(errors).toEqual([]);
 });
+
+test('the menu-app coach speaks the reader’s language', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'desktop-chromium');
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('dg-lang', 'es');
+    } catch {}
+  });
+  await page.goto('/menu.html');
+  await page.waitForFunction(() => Boolean(window.DGMenu) && window.DGLang && window.DGLang.ready());
+  await page.evaluate(() => {
+    const btn = document.getElementById('menu-install-btn');
+    btn.hidden = false;
+    btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+  });
+  const coach = page.locator('#install-coach-body');
+  await expect(coach.locator('li')).not.toHaveCount(0);
+  await expect(coach).not.toContainText(/\{\w+\}|menu\.install/);
+  await expect(coach).toContainText(/Toca|Elige|Abre|Instálalo|Tu navegador/);
+  if (testInfo.project.name.startsWith('facebook-')) await expect(coach).toContainText('dentro de Facebook');
+
+  // Switching language with the coach open re-renders it.
+  await page.evaluate(() => window.DGLang.set('fr'));
+  await expect(coach).toContainText(/Touchez|Choisissez|Ouvrez|Installez|Votre navigateur/);
+});
+
+test('the passport stamp reads FR when French is chosen', async ({ page }) => {
+  await page.goto('/menu.html');
+  const fr = page.locator('#lang-passport .lang-skillet[data-lang="fr"]');
+  await fr.waitFor();
+  await fr.dispatchEvent('click');
+  await expect(page.locator('#lang-stamp')).toHaveText('FR');
+});
+
+test('page links use the clean paths the offline cache stores', async ({ page }) => {
+  for (const path of ['/index.html', '/hub.html', '/menu.html']) {
+    await page.goto(path);
+    const hrefs = await page.$$eval('a[href]', (as) => as.map((a) => a.getAttribute('href')));
+    expect(hrefs.filter((h) => /^(index|hub|menu)\.html/.test(h))).toEqual([]);
+  }
+  const res = await page.goto('/hub');
+  expect(res.status()).toBe(200);
+  await page.waitForSelector('.nav-grid');
+});
