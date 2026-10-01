@@ -1,6 +1,6 @@
 {
   "month": {
-    "label": "August 2026",
+    "label": "",
     "year": 2026,
     "additions": [
       "Street corn elote cup",
@@ -11,26 +11,8 @@
     ],
     "notes": "Patio season — specials change with the river wind."
   },
-  "specials": [
-    {
-      "id": "sp-birria-friday",
-      "name": "Birria Quesatacos",
-      "price": "14.00",
-      "note": "Consommé, onions, cilantro — while it lasts",
-      "startsOn": null,
-      "endsOn": null,
-      "active": true
-    },
-    {
-      "id": "sp-river-fish",
-      "name": "River Fish Taco Plate",
-      "price": "13.50",
-      "note": "Catch of the day, chipotle crema",
-      "startsOn": null,
-      "endsOn": null,
-      "active": true
-    }
-  ],
+  "specials": [],
   "updatedAt": "2026-08-01T12:00:00.000Z",
-  "updatedBy": "seed"
+  "updatedBy": "seed",
+  "translations": {}
 }

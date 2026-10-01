@@ -494,3 +494,53 @@ test('page links use the clean paths the offline cache stores', async ({ page })
   expect(res.status()).toBe(200);
   await page.waitForSelector('.nav-grid');
 });
+
+test('the board prints this month and owner text in the reader’s language', async ({ page }) => {
+  await page.route('**/api/menu-board', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        month: { key: '2026-10', label: '', additions: ['Street corn elote cup'], takeaways: [], notes: 'Try the desserts' },
+        specials: [{ id: 'sp-1', name: 'Birria Quesatacos', price: '14.00', note: 'While it lasts' }],
+        translations: {
+          'Street corn elote cup': { es: 'Vaso de elote', fr: 'Coupe de maïs' },
+          'Try the desserts': { es: 'Prueba los postres', fr: 'Goûtez les desserts' },
+          'While it lasts': { es: 'Hasta agotar', fr: 'Jusqu’à épuisement' },
+        },
+      }),
+    })
+  );
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('dg-lang', 'es');
+    } catch {}
+  });
+  await page.goto('/menu.html');
+  await page.waitForFunction(() => Boolean(window.DGMenu));
+  await expect(page.locator('#cover-month')).toHaveText('octubre de 2026');
+  await expect(page.locator('#month-adds li').first()).toHaveText('Vaso de elote');
+  await expect(page.locator('#month-takes li').first()).toHaveText('Nada por ahora');
+  await expect(page.locator('#month-notes')).toHaveText('Prueba los postres');
+  await expect(page.locator('#street-board-list .street-board-note').first()).toHaveText('Hasta agotar');
+
+  await page.evaluate(() => window.DGLang.set('fr'));
+  await expect(page.locator('#cover-month')).toHaveText('octobre 2026');
+  await expect(page.locator('#month-notes')).toHaveText('Goûtez les desserts');
+});
+
+test('the skillet game speaks the reader’s language and holds the code', async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('dg-lang', 'es');
+    } catch {}
+  });
+  await page.goto('/index.html');
+  await page.waitForFunction(() => window.DGLang && window.DGLang.ready());
+  await page.evaluate(() => {
+    const btn = [...document.querySelectorAll('button, [onclick]')].find((b) => /queso/i.test(b.getAttribute('onclick') || b.dataset.recipe || ''));
+    if (btn) btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
+  await expect(page.locator('#hud-title')).toHaveText('Queso y totopos');
+  await expect(page.locator('#hud-checklist')).toContainText('Totopos');
+  await expect(page.locator('#hud-checklist')).not.toContainText('Tortilla Chips');
+});

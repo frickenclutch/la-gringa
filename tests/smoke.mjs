@@ -140,8 +140,8 @@ ok(/MENU_BOARD/.test(worker), 'MENU_BOARD KV usage');
 
 console.log('\nmenu-board seed');
 const boardSeed = JSON.parse(read('data/menu-board.json'));
-ok(!!boardSeed.month?.label && Array.isArray(boardSeed.month.additions), 'month label + additions');
-ok(Array.isArray(boardSeed.specials) && boardSeed.specials.length >= 1, 'seed specials present');
+ok(boardSeed.month?.label === '' && Array.isArray(boardSeed.month.additions), 'offline month label is blank (the page prints the current month)');
+ok(Array.isArray(boardSeed.specials) && boardSeed.specials.length === 0, 'offline copy invents no specials');
 ok(boardSeed.specials.every((s) => s.id && s.name), 'specials have id + name');
 
 console.log('\nHTML hygiene');
@@ -160,14 +160,28 @@ ok(read('menu.html').includes('js/haptics.js'), 'menu loads haptics before book'
 ok(read('menu.html').includes('js/menu-install.js'), 'menu loads menu-install.js');
 ok(read('menu.html').includes('js/menu-board-ui.js'), 'menu loads menu-board-ui.js');
 ok(read('menu.html').includes('id="cover-month"'), 'cover month is data-driven');
+ok(!/>\s*August 2026\s*</.test(read('menu.html')), 'cover carries no hard-coded month');
+ok(/translateBoard\(env, board, previous\)/.test(read('worker.js')), 'owner board saves translate ES/FR');
+ok(/REWARDS_LIVE = false/.test(read('js/gate-game.js')), 'reward codes stay hidden until redeemable');
+{
+  const i18n = JSON.parse(read('data/i18n.json'));
+  const recipes = JSON.parse(read('data/recipes.json'));
+  const names = new Set(Object.values(recipes).flatMap((r) => r.reqs));
+  const junk = read('js/gate-game.js').match(/const JUNK = \[([^\]]+)\]/)[1].match(/'([^']+)'/g).map((x) => x.slice(1, -1));
+  junk.forEach((n) => names.add(n));
+  for (const lang of ['en', 'es', 'fr']) {
+    ok([...names].every((n) => i18n[lang]['game.item.' + n]), lang + ': every game ingredient has a label');
+    ok(Object.keys(recipes).every((id) => i18n[lang]['gate.' + id + 'Title']), lang + ': every dish has a title');
+  }
+}
 ok(read('menu.html').includes('id="specials-board-btn"'), 'specials street-board control');
 ok(read('menu.html').includes('id="street-board"'), 'street-board overlay markup');
 ok(read('menu.html').includes('manifest-menu.webmanifest'), 'menu uses menu-scoped manifest');
 ok(read('manifest-menu.webmanifest').includes('"/menu"'), 'menu manifest starts at /menu');
 ok(read('menu.html').includes('href="tel:+13157138151"'), 'menu phone opens the preferred dialer');
 ok(
-  read('menu.html').includes('href="https://dirtygringonny.com/"'),
-  'menu domain links to the restaurant website'
+  /class="menu-contact-link" href="\/hub"/.test(read('menu.html')),
+  'menu domain link stays in the same tab (installed app / in-app browsers)'
 );
 ok(read('owner.html').includes('js/owner-board.js'), 'owner loads owner-board.js');
 ok(read('owner.html').includes('noindex'), 'owner page is noindex');

@@ -54,6 +54,43 @@
     }
   }
 
+  let board = null; // last board shown, re-rendered when the language flips
+
+  function lang() {
+    return (window.DGLang && window.DGLang.get && window.DGLang.get()) || 'en';
+  }
+
+  function t(key, fallback) {
+    const value = window.DGLang && window.DGLang.t ? window.DGLang.t(key) : key;
+    return value && value !== key ? value : fallback;
+  }
+
+  // Owner text is typed in English; the worker ships ES/FR beside it.
+  function tr(text) {
+    const pack = board && board.translations && board.translations[text];
+    return (pack && pack[lang()]) || text;
+  }
+
+  // "YYYY-MM" → "October 2026" / "octubre de 2026" / "octobre 2026". With no
+  // key (offline fallback) the device's clock in restaurant time decides.
+  function monthName(key) {
+    let date;
+    if (/^\d{4}-\d{2}$/.test(key || '')) {
+      date = new Date(Date.UTC(Number(key.slice(0, 4)), Number(key.slice(5, 7)) - 1, 15, 12));
+    } else {
+      date = new Date();
+    }
+    try {
+      return new Intl.DateTimeFormat(lang(), {
+        month: 'long',
+        year: 'numeric',
+        timeZone: key ? 'UTC' : 'America/New_York',
+      }).format(date);
+    } catch {
+      return date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    }
+  }
+
   function renderSpecials(specials) {
     const items = Array.isArray(specials) ? specials : [];
     listEl.innerHTML = '';
@@ -68,21 +105,21 @@
       li.innerHTML =
         '<div class="street-board-item-title">' +
         '<span class="street-board-chalk">' +
-        escapeHtml(item.name) +
+        escapeHtml(tr(item.name)) +
         '</span>' +
         (item.price
           ? '<span class="street-board-price street-board-chalk">' + escapeHtml(item.price) + '</span>'
           : '') +
         '</div>' +
-        (item.note ? '<p class="street-board-note">' + escapeHtml(item.note) + '</p>' : '');
+        (item.note ? '<p class="street-board-note">' + escapeHtml(tr(item.note)) + '</p>' : '');
       listEl.appendChild(li);
     }
   }
 
   function renderMonth(month) {
     if (!month) return;
-    if (monthEl && month.label) {
-      monthEl.textContent = month.label;
+    if (monthEl) {
+      monthEl.textContent = month.label ? tr(month.label) : monthName(month.key);
     }
     if (!monthStrip) return;
 
@@ -96,24 +133,22 @@
     }
 
     monthStrip.hidden = false;
+    const none = '<li class="muted">' + escapeHtml(t('menu.boardNone', 'None listed')) + '</li>';
     if (monthAdds) {
-      monthAdds.innerHTML = adds.length
-        ? adds.map((a) => '<li>' + escapeHtml(a) + '</li>').join('')
-        : '<li class="muted">None listed</li>';
+      monthAdds.innerHTML = adds.length ? adds.map((a) => '<li>' + escapeHtml(tr(a)) + '</li>').join('') : none;
     }
     if (monthTakes) {
-      monthTakes.innerHTML = takes.length
-        ? takes.map((t) => '<li>' + escapeHtml(t) + '</li>').join('')
-        : '<li class="muted">None listed</li>';
+      monthTakes.innerHTML = takes.length ? takes.map((x) => '<li>' + escapeHtml(tr(x)) + '</li>').join('') : none;
     }
     if (monthNotes) {
-      monthNotes.textContent = month.notes || '';
+      monthNotes.textContent = month.notes ? tr(month.notes) : '';
       monthNotes.hidden = !month.notes;
     }
   }
 
-  function applyBoard(board) {
-    if (!board) return;
+  function applyBoard(next) {
+    if (!next) return;
+    board = next;
     renderMonth(board.month);
     renderSpecials(board.specials);
   }
@@ -177,6 +212,7 @@
   // Refresh chrome strings if language flips after board render.
   document.addEventListener('dg:lang', function () {
     if (window.DGLang && typeof window.DGLang.apply === 'function') window.DGLang.apply();
+    if (board) applyBoard(board);
   });
 
   // ---- Owner's secret door ----
@@ -208,12 +244,12 @@
     });
   }
 
+  // Print this month on the cover straight away; the board refines it.
+  if (monthEl) monthEl.textContent = monthName(null);
+
   loadBoard()
     .then(applyBoard)
     .catch(() => {
-      applyBoard({
-        month: { label: monthEl?.textContent || 'This month', additions: [], takeaways: [], notes: '' },
-        specials: [],
-      });
+      applyBoard({ month: { label: '', additions: [], takeaways: [], notes: '' }, specials: [] });
     });
 })();

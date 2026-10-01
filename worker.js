@@ -45,7 +45,7 @@ const MIN_PIN_LENGTH = 6;
 
 const SEED_BOARD = {
   month: {
-    label: 'August 2026',
+    label: '',
     year: 2026,
     additions: ['Street corn elote cup', 'Mango chile agua fresca'],
     takeaways: ['Winter pozole'],
@@ -105,6 +105,24 @@ function todayISO(date = new Date()) {
   return RESTAURANT_DAY.format(date);
 }
 
+function monthKey(date = new Date()) {
+  return todayISO(date).slice(0, 7); // YYYY-MM on the restaurant's calendar
+}
+
+const MONTH_NAMES = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
+];
+
+// "September 2026" / "SEPT 2026" style labels only name a month, so the guest
+// page can print the month itself (in the reader's language). Anything else
+// ("Patio Season") is the owner's own wording and is kept for that month.
+function isPlainMonthLabel(label) {
+  const words = String(label || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  return words.every((w) => /^\d{4}$/.test(w) || MONTH_NAMES.some((m) => m.startsWith(w) && w.length >= 3));
+}
+
 function isSpecialActive(special, today = todayISO()) {
   if (!special || special.active === false) return false;
   if (special.startsOn && today < special.startsOn) return false;
@@ -122,8 +140,10 @@ function sanitizeBoard(input, { touch = true } = {}) {
   const specialsIn = Array.isArray(src.specials) ? src.specials : [];
 
   const month = {
-    label: String(monthSrc.label || '').trim() || SEED_BOARD.month.label,
+    label: String(monthSrc.label || '').trim(),
     year: Number.isFinite(Number(monthSrc.year)) ? Number(monthSrc.year) : SEED_BOARD.month.year,
+    // The month this board was saved for; a save always means "current".
+    key: touch ? monthKey() : /^\d{4}-\d{2}$/.test(monthSrc.key || '') ? monthSrc.key : null,
     additions: Array.isArray(monthSrc.additions)
       ? monthSrc.additions.map((x) => String(x || '').trim()).filter(Boolean)
       : [],
@@ -151,19 +171,38 @@ function sanitizeBoard(input, { touch = true } = {}) {
     })
     .filter(Boolean);
 
+  const translations = {};
+  if (src.translations && typeof src.translations === 'object') {
+    for (const [text, pack] of Object.entries(src.translations)) {
+      if (!pack || typeof pack !== 'object') continue;
+      const clean = {};
+      for (const lang of BOARD_LANGS) {
+        if (typeof pack[lang] === 'string' && pack[lang].trim()) clean[lang] = pack[lang].trim().slice(0, 500);
+      }
+      if (Object.keys(clean).length) translations[String(text).slice(0, 500)] = clean;
+    }
+  }
+
   return {
     month,
     specials,
+    translations,
     updatedAt: touch ? new Date().toISOString() : String(src.updatedAt || SEED_BOARD.updatedAt),
     updatedBy: String(src.updatedBy || 'owner').trim() || 'owner',
   };
 }
 
+// The guest month label rolls over by itself on the 1st (restaurant time):
+// `label` survives only when it is the owner's own wording for the current
+// month; otherwise it is empty and the page prints `key` as a month name.
 function publicBoard(board, today = todayISO()) {
   const full = cloneBoard(board);
+  const key = today.slice(0, 7);
+  const custom = full.month.key === key && !isPlainMonthLabel(full.month.label);
   return {
-    month: full.month,
+    month: { ...full.month, key, year: Number(key.slice(0, 4)), label: custom ? full.month.label : '' },
     specials: (full.specials || []).filter((s) => isSpecialActive(s, today)),
+    translations: full.translations || {},
     updatedAt: full.updatedAt,
     updatedBy: full.updatedBy,
   };
@@ -426,8 +465,26 @@ async function handleReward(request) {
   return json({ recipe, code });
 }
 
-async function handleMenuBoardGet(env) {
+let boardTranslationRunning = false; // one backfill per isolate at a time
+
+async function handleMenuBoardGet(env, ctx) {
   const board = await loadBoard(env);
+  // A board saved before translation existed (or while AI was down) gets its
+  // ES/FR filled once in the background; guests see English until then.
+  if (env.AI && env.MENU_BOARD && ctx && !boardTranslationRunning && boardNeedsTranslation(board)) {
+    boardTranslationRunning = true;
+    ctx.waitUntil(
+      (async () => {
+        if (await translateBoard(env, board, board)) {
+          await writeKvJson(env.MENU_BOARD, BOARD_KEY, board);
+        }
+      })()
+        .catch(() => {})
+        .finally(() => {
+          boardTranslationRunning = false;
+        })
+    );
+  }
   return json(publicBoard(board));
 }
 
@@ -548,6 +605,48 @@ async function autoTranslateMenu(env, next, previous) {
     if (auto.size) entry._auto = [...auto];
   }
   return translated;
+}
+
+// Every owner-typed text on the specials board (notes, additions, takeaways,
+// specials, a custom month label). Owners write in English; ES/FR come from
+// the same Workers AI translator as menu edits.
+const BOARD_LANGS = ['es', 'fr'];
+
+function boardTexts(board) {
+  const m = board.month || {};
+  const texts = [m.notes, ...(m.additions || []), ...(m.takeaways || [])];
+  if (!isPlainMonthLabel(m.label)) texts.push(m.label);
+  for (const sp of board.specials || []) texts.push(sp.name, sp.note);
+  return [...new Set(texts.map((t) => String(t || '').trim()).filter(Boolean))];
+}
+
+/** Fill `board.translations` ({ text: { es, fr } }) for texts that lack one,
+ *  reusing earlier translations and dropping ones no longer on the board.
+ *  Returns true when anything changed (so the caller can persist). */
+async function translateBoard(env, board, previous) {
+  const known = { ...((previous && previous.translations) || {}), ...(board.translations || {}) };
+  const next = {};
+  let changed = false;
+  for (const text of boardTexts(board)) {
+    const pack = { ...(known[text] || {}) };
+    for (const lang of BOARD_LANGS) {
+      if (pack[lang]) continue;
+      const t = await translateText(env, text, LANG_NAMES.en, LANG_NAMES[lang]);
+      if (t) {
+        pack[lang] = t;
+        changed = true;
+      }
+    }
+    if (Object.keys(pack).length) next[text] = pack;
+  }
+  if (Object.keys(next).length !== Object.keys(board.translations || {}).length) changed = true;
+  board.translations = next;
+  return changed;
+}
+
+function boardNeedsTranslation(board) {
+  const have = board.translations || {};
+  return boardTexts(board).some((t) => BOARD_LANGS.some((lang) => !(have[t] && have[t][lang])));
 }
 
 async function loadMenuOverrides(env) {
@@ -785,8 +884,9 @@ async function handleOwnerBoardPut(request, env) {
     return json({ error: 'Invalid JSON' }, 400);
   }
 
-  const board = sanitizeBoard({ ...body, updatedBy: body?.updatedBy || 'owner' });
+  const board = sanitizeBoard({ ...body, translations: null, updatedBy: body?.updatedBy || 'owner' });
   const previous = await loadBoard(env);
+  await translateBoard(env, board, previous);
   const history = (await readKvJson(env.MENU_BOARD, HISTORY_KEY)) || [];
   const snapshot = {
     at: board.updatedAt,
@@ -862,7 +962,7 @@ function canonicalRedirect(request, url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const redirect = canonicalRedirect(request, url);
     if (redirect) return redirect;
@@ -876,7 +976,7 @@ export default {
         return new Response(null, { status: 204, headers: CORS });
       }
       if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
-      return handleMenuBoardGet(env);
+      return handleMenuBoardGet(env, ctx);
     }
     if (path === '/api/owner/login') {
       return handleOwnerLogin(request, env);

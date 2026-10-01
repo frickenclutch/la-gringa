@@ -3,8 +3,15 @@
   'use strict';
 
   let actx = null;
+  // Sound is a bonus: where Web Audio is missing or blocked, play silently.
   function initAudio() {
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx) return;
+    try {
+      const Context = window.AudioContext || window.webkitAudioContext;
+      if (Context) actx = new Context();
+    } catch {
+      actx = null;
+    }
   }
 
   function playSfx(type) {
@@ -45,6 +52,25 @@
         o.stop(now + i * 0.1 + 0.3);
       });
     }
+  }
+
+  // Reward codes stay hidden until there is somewhere to redeem them (online
+  // ordering). Flip to true and the win screen shows a live /api/reward code.
+  const REWARDS_LIVE = false;
+
+  // Ingredient and dish names stay English internally (recipes.json, the
+  // emoji map); only what the player reads goes through the language pack.
+  function t(key, fallback) {
+    const value = window.DGLang && window.DGLang.t ? window.DGLang.t(key) : key;
+    return value && value !== key ? value : fallback;
+  }
+
+  function itemLabel(name) {
+    return t('game.item.' + name, name);
+  }
+
+  function dishTitle(recipe) {
+    return t('gate.' + recipe.id + 'Title', recipe.title);
   }
 
   let RECIPES = null;
@@ -132,6 +158,10 @@
 
   async function claimReward(recipeId) {
     const el = document.getElementById('success-promo');
+    if (!REWARDS_LIVE) {
+      el.innerText = t('game.codeSoon', "Code's coming soon");
+      return;
+    }
     el.innerText = '…';
     try {
       const res = await fetch('/api/reward', {
@@ -141,10 +171,10 @@
       });
       if (!res.ok) throw new Error('reward ' + res.status);
       const data = await res.json();
-      el.innerText = data.code || 'Ask the patio';
+      el.innerText = data.code || t('game.rewardAsk', 'Ask the patio');
     } catch {
       // Local file:// or static preview without the worker
-      el.innerText = 'Show this win at the counter';
+      el.innerText = t('game.rewardCounter', 'Show this win at the counter');
     }
   }
 
@@ -164,14 +194,14 @@
         document.getElementById('ui-hud').classList.add('flex');
         document.getElementById('game-container').classList.remove('hidden');
 
-        document.getElementById('hud-title').innerText = activeRecipe.title;
+        document.getElementById('hud-title').innerText = dishTitle(activeRecipe);
         updateHud();
 
         if (animId) cancelAnimationFrame(animId);
         animId = requestAnimationFrame(loop);
       })
       .catch(() => {
-        alert('Could not load recipes. Try refreshing.');
+        alert(t('game.loadError', 'Could not load recipes. Try refreshing.'));
       });
   }
 
@@ -196,7 +226,7 @@
     document.getElementById('game-container').classList.add('hidden');
 
     document.getElementById('success-emoji').innerText = activeRecipe.emoji;
-    document.getElementById('success-dish').innerText = activeRecipe.title;
+    document.getElementById('success-dish').innerText = dishTitle(activeRecipe);
     claimReward(activeRecipe.id || Object.keys(RECIPES).find((k) => RECIPES[k] === activeRecipe));
 
     document.getElementById('ui-success').classList.remove('hidden');
@@ -211,7 +241,7 @@
       el.className = `px-2 py-1 rounded border transition-all ${
         has ? 'bg-amber-500 text-black border-amber-300' : 'bg-slate-800 border-slate-600 opacity-70'
       }`;
-      el.innerText = has ? `✓ ${req}` : `○ ${req}`;
+      el.innerText = has ? `✓ ${itemLabel(req)}` : `○ ${itemLabel(req)}`;
       cont.appendChild(el);
     });
 
@@ -279,7 +309,7 @@
       ctx.textAlign = 'center';
       ctx.shadowColor = 'black';
       ctx.shadowBlur = 4;
-      ctx.fillText(it.name, it.x, it.y + 40);
+      ctx.fillText(it.label, it.x, it.y + 40);
       ctx.shadowBlur = 0;
     }
 
@@ -310,6 +340,7 @@
       x: spawnX,
       y: -50,
       name: name,
+      label: itemLabel(name),
       needed: needed,
       emoji: EMOJI_MAP[name] || '❓',
       speed: 3 + Math.random() * 2,
