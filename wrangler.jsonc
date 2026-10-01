@@ -33,6 +33,11 @@
     // https://dirtygringonny.com before a static page is served.
     "run_worker_first": true
   },
+  // Facebook drafts check: hourly 10:00-15:00 UTC Mon-Fri = 6-10 am in
+  // Ogdensburg year-round (worker.js scheduled() drops the off-hour run).
+  "triggers": {
+    "crons": ["0 10-15 * * 1-5"]
+  },
   "compatibility_flags": [
     "nodejs_compat"
   ],

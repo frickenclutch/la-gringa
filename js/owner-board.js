@@ -243,6 +243,7 @@
       fillForm(data);
       showEditor(true);
       await loadHistory();
+      await loadFacebook();
       setStatus('Loaded live board.');
     } catch (error) {
       showEditor(false);
@@ -298,6 +299,161 @@
   });
 
   refreshHistoryBtn?.addEventListener('click', () => loadHistory());
+
+  // ---- Facebook drafts ----
+  // The worker reads the TDG page on weekday mornings and keeps what it found
+  // as drafts. "Add to board" only fills this form; the owner still saves.
+  const fb = {
+    summary: document.getElementById('fb-summary'),
+    error: document.getElementById('fb-error'),
+    list: document.getElementById('fb-drafts'),
+    connect: document.getElementById('fb-connect'),
+    connected: document.getElementById('fb-connected'),
+    check: document.getElementById('fb-check'),
+    disconnect: document.getElementById('fb-disconnect'),
+    appId: document.getElementById('fb-app-id'),
+    appSecret: document.getElementById('fb-app-secret'),
+    token: document.getElementById('fb-token'),
+  };
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function fbError(message) {
+    if (!fb.error) return;
+    fb.error.textContent = message || '';
+    fb.error.hidden = !message;
+  }
+
+  function addDraftToForm(draft) {
+    for (const s of draft.specials || []) {
+      specialsList?.appendChild(
+        specialRow({ id: uid(), name: s.name, price: s.price, note: s.note, startsOn: s.startsOn, endsOn: s.endsOn, active: true })
+      );
+    }
+    const mergeLines = (field, items) => {
+      if (!field || !items?.length) return;
+      const have = linesToList(field.value);
+      field.value = listToLines(have.concat(items.filter((x) => !have.includes(x))));
+    };
+    mergeLines(fields.additions, draft.additions);
+    mergeLines(fields.takeaways, draft.takeaways);
+    if (draft.notes && fields.notes) fields.notes.value = draft.notes;
+    setStatus('Draft added to the board form above — check it, then press Save board.');
+    saveForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function draftItem(draft) {
+    const li = document.createElement('li');
+    li.className = 'fb-draft';
+    const when = draft.postedAt ? new Date(draft.postedAt).toLocaleString() : '';
+    const parts = [];
+    for (const s of draft.specials || []) {
+      const dates = s.startsOn || s.endsOn ? ' (' + (s.startsOn || '…') + ' → ' + (s.endsOn || '…') + ')' : '';
+      parts.push('<li>Special: <strong>' + escapeHtml(s.name) + '</strong>' + (s.price ? ' — $' + escapeHtml(s.price) : '') + escapeHtml(dates) + (s.note ? ' · ' + escapeHtml(s.note) : '') + '</li>');
+    }
+    for (const a of draft.additions || []) parts.push('<li>New on the menu: ' + escapeHtml(a) + '</li>');
+    for (const t of draft.takeaways || []) parts.push('<li>Gone from the menu: ' + escapeHtml(t) + '</li>');
+    if (draft.notes) parts.push('<li>Note: ' + escapeHtml(draft.notes) + '</li>');
+    li.innerHTML =
+      '<blockquote>' + escapeHtml(draft.excerpt) + '</blockquote>' +
+      '<ul>' + parts.join('') + '</ul>' +
+      '<div class="meta">Posted ' + escapeHtml(when) + ' · <a href="' + escapeHtml(draft.link) + '" target="_blank" rel="noopener">see the post</a></div>' +
+      '<div class="actions"><button type="button" class="fb-use">Add to board</button>' +
+      '<button type="button" class="secondary fb-dismiss">Dismiss</button></div>';
+    const decide = async (status) => {
+      try {
+        renderFacebook(await api('/api/owner/facebook/draft', { method: 'POST', body: JSON.stringify({ id: draft.id, status }) }));
+      } catch (error) {
+        fbError(error.message);
+      }
+    };
+    li.querySelector('.fb-use').addEventListener('click', () => {
+      addDraftToForm(draft);
+      decide('used');
+    });
+    li.querySelector('.fb-dismiss').addEventListener('click', () => decide('dismissed'));
+    return li;
+  }
+
+  function renderFacebook(status) {
+    if (!status) return;
+    if (fb.connect) fb.connect.hidden = status.connected;
+    if (fb.connected) fb.connected.hidden = !status.connected;
+    if (fb.check) fb.check.hidden = !status.connected;
+    if (fb.summary && status.connected) {
+      const last = status.lastCheck ? new Date(status.lastCheck).toLocaleString() : 'not yet';
+      fb.summary.textContent =
+        'Connected to ' + (status.pageName || 'Facebook') + '. Checked weekday mornings 6–10 am · last check: ' + last + '.';
+    }
+    fbError(status.lastError ? 'Last check failed: ' + status.lastError + ' — if this keeps happening, disconnect and connect again.' : '');
+    if (fb.list) {
+      fb.list.innerHTML = '';
+      const drafts = status.drafts || [];
+      if (status.connected && !drafts.length) {
+        fb.list.innerHTML = '<li class="muted">No new drafts — nothing on Facebook that looks like a special or menu change.</li>';
+      }
+      for (const d of drafts) fb.list.appendChild(draftItem(d));
+    }
+  }
+
+  async function loadFacebook() {
+    try {
+      renderFacebook(await api('/api/owner/facebook'));
+    } catch (error) {
+      if (error.status !== 401) fbError(error.message);
+    }
+  }
+
+  fb.connect?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    fbError('');
+    const button = fb.connect.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
+    try {
+      const status = await api('/api/owner/facebook', {
+        method: 'PUT',
+        body: JSON.stringify({
+          appId: fb.appId?.value.trim(),
+          appSecret: fb.appSecret?.value.trim(),
+          token: fb.token?.value.trim(),
+          page: 'tdg.ogdensburg',
+        }),
+      });
+      for (const input of [fb.appId, fb.appSecret, fb.token]) if (input) input.value = '';
+      renderFacebook(status);
+    } catch (error) {
+      fbError(error.message);
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+
+  fb.check?.addEventListener('click', async () => {
+    fb.check.disabled = true;
+    try {
+      renderFacebook(await api('/api/owner/facebook/check', { method: 'POST' }));
+    } catch (error) {
+      fbError(error.message);
+    } finally {
+      fb.check.disabled = false;
+    }
+  });
+
+  fb.disconnect?.addEventListener('click', async () => {
+    if (!window.confirm('Stop reading the Facebook page? Pending drafts stay until you dismiss them.')) return;
+    try {
+      renderFacebook(await api('/api/owner/facebook', { method: 'DELETE' }));
+    } catch (error) {
+      fbError(error.message);
+    }
+  });
+
 
   logoutBtn?.addEventListener('click', async () => {
     // The session cookie is HttpOnly — only the worker can actually clear it.

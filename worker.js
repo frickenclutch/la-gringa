@@ -77,7 +77,7 @@ const SEED_BOARD = {
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
@@ -961,6 +961,291 @@ function canonicalRedirect(request, url) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Facebook drafts: the TDG Facebook page is read on a schedule (Mon–Fri,
+// hourly 6–10 am Ogdensburg time) and posts that announce specials or monthly
+// changes become DRAFTS in the owner's editor. Nothing reaches guests until
+// the owner adds a draft to the board and saves it.
+//
+// The owner connects once from /owner with a Facebook app id + secret and a
+// user token from Graph API Explorer; the worker swaps those for a page token
+// that does not expire and keeps only that (never the app secret).
+// ---------------------------------------------------------------------------
+const FB_GRAPH = 'https://graph.facebook.com/v23.0';
+const FB_CONFIG_KEY = 'fb-config';
+const FB_STATE_KEY = 'fb-state';
+const FB_DRAFTS_KEY = 'fb-drafts';
+const FB_DRAFTS_LIMIT = 20;
+const FB_SEEN_LIMIT = 60;
+const FB_FIRST_LOOKBACK_DAYS = 7;
+const FB_CHECK_HOURS = [6, 7, 8, 9, 10]; // restaurant time, Mon–Fri
+const FB_EXTRACT_SYSTEM =
+  'You read Facebook posts from The Dirty Gringo, a Mexican restaurant in Ogdensburg, NY, and pull out ' +
+  'anything that belongs on its in-restaurant specials board. Reply with ONLY a JSON object, no prose:\n' +
+  '{"relevant": boolean, "specials": [{"name": string, "price": string, "note": string, "startsOn": "YYYY-MM-DD"|null, "endsOn": "YYYY-MM-DD"|null}], ' +
+  '"additions": [string], "takeaways": [string], "notes": string}\n' +
+  'specials = dishes or deals offered for a day or a limited time (price digits only, e.g. "14.00", or ""). ' +
+  'additions = items newly added to the regular menu; takeaways = items removed. notes = one short line ' +
+  'worth showing guests (holiday hours, closures), else "". Resolve words like "today" or "this Friday" ' +
+  'against the post date given. Posts that are not about food, prices, hours or menu changes ' +
+  '(memes, thank-yous, hiring) are {"relevant": false}. Never invent dishes or prices.';
+
+function restaurantClock(date = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short',
+      hour: 'numeric',
+      hourCycle: 'h23',
+    })
+      .formatToParts(date)
+      .map((p) => [p.type, p.value])
+  );
+  return { weekday: parts.weekday, hour: Number(parts.hour) };
+}
+
+function inFacebookWindow(date = new Date()) {
+  const { weekday, hour } = restaurantClock(date);
+  return !['Sat', 'Sun'].includes(weekday) && FB_CHECK_HOURS.includes(hour);
+}
+
+async function graph(path, params = {}) {
+  const url = new URL(FB_GRAPH + path);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  let data = null;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
+  if (!res.ok || !data || data.error) {
+    const msg = (data && data.error && data.error.message) || 'Facebook answered HTTP ' + res.status;
+    const err = new Error(msg);
+    err.code = data && data.error && data.error.code;
+    throw err;
+  }
+  return data;
+}
+
+/** user token (+ app id/secret) → never-expiring page token for the page. */
+async function connectFacebook({ appId, appSecret, token, page }) {
+  let userToken = token;
+  if (appId && appSecret) {
+    const long = await graph('/oauth/access_token', {
+      grant_type: 'fb_exchange_token',
+      client_id: appId,
+      client_secret: appSecret,
+      fb_exchange_token: token,
+    });
+    userToken = long.access_token || token;
+  }
+  let pages = [];
+  try {
+    const accounts = await graph('/me/accounts', { fields: 'id,name,username,access_token', access_token: userToken });
+    pages = accounts.data || [];
+  } catch {
+    pages = []; // a page token has no /me/accounts — fall through and use it as-is
+  }
+  const want = String(page || '')
+    .trim()
+    .toLowerCase()
+    .replace(/^.*facebook\.com\//, '')
+    .replace(/[/?#].*$/, '');
+  const match =
+    pages.find((p) => want && (p.id === want || String(p.username || '').toLowerCase() === want)) ||
+    (pages.length === 1 ? pages[0] : null);
+  if (pages.length && !match) {
+    throw new Error(
+      'That Facebook login manages ' + pages.map((p) => p.name).join(', ') + ' — none matched "' + page + '".'
+    );
+  }
+  const pageToken = match ? match.access_token : userToken;
+  const me = await graph(match ? '/' + match.id : '/me', { fields: 'id,name', access_token: pageToken });
+  return { pageId: me.id, pageName: me.name, token: pageToken, connectedAt: new Date().toISOString() };
+}
+
+function parseJsonLoose(raw) {
+  if (raw && typeof raw === 'object') return raw; // Workers AI may pre-parse JSON
+  const text = String(raw || '');
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start < 0 || end <= start) return null;
+  try {
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+function cleanDraft(found) {
+  if (!found || found.relevant === false) return null;
+  const str = (v, n = 160) => String(v == null ? '' : v).trim().slice(0, n);
+  const day = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : null);
+  const list = (v) => (Array.isArray(v) ? v.map((x) => str(x)).filter(Boolean).slice(0, 12) : []);
+  const specials = (Array.isArray(found.specials) ? found.specials : [])
+    .map((s) => ({
+      name: str(s && s.name),
+      price: str(s && s.price, 12).replace(/^\$/, ''),
+      note: str(s && s.note),
+      startsOn: day(s && s.startsOn),
+      endsOn: day(s && s.endsOn),
+    }))
+    .filter((s) => s.name)
+    .slice(0, 8);
+  const draft = {
+    specials,
+    additions: list(found.additions),
+    takeaways: list(found.takeaways),
+    notes: str(found.notes, 240),
+  };
+  return draft.specials.length || draft.additions.length || draft.takeaways.length || draft.notes ? draft : null;
+}
+
+async function extractFromPost(env, post) {
+  if (!env.AI) return undefined;
+  const postDay = todayISO(new Date(post.created_time));
+  try {
+    const out = await env.AI.run(TRANSLATE_MODEL, {
+      messages: [
+        { role: 'system', content: FB_EXTRACT_SYSTEM },
+        { role: 'user', content: 'Post date: ' + postDay + '\nPost:\n' + String(post.message).slice(0, 3000) },
+      ],
+      max_tokens: 700,
+      temperature: 0,
+    });
+    const raw = out && out.response != null ? out.response : out?.choices?.[0]?.message?.content;
+    const parsed = parseJsonLoose(raw);
+    if (!parsed) return undefined; // unreadable answer: retry on the next check
+    return cleanDraft(parsed);
+  } catch {
+    return undefined; // AI hiccup: leave the post unseen so the next check retries it
+  }
+}
+
+async function checkFacebook(env, { now = new Date() } = {}) {
+  const kv = env.MENU_BOARD;
+  const config = await readKvJson(kv, FB_CONFIG_KEY);
+  if (!config || !config.token) return { skipped: 'not connected' };
+  const state = (await readKvJson(kv, FB_STATE_KEY)) || { seen: [] };
+  const seen = new Set(state.seen || []);
+  state.lastCheck = now.toISOString();
+  let added = 0;
+  try {
+    const feed = await graph('/' + config.pageId + '/posts', {
+      fields: 'id,message,created_time,permalink_url',
+      limit: '15',
+      access_token: config.token,
+    });
+    const since = state.firstCheckDone ? 0 : now.getTime() - FB_FIRST_LOOKBACK_DAYS * 864e5;
+    const drafts = (await readKvJson(kv, FB_DRAFTS_KEY)) || [];
+    for (const post of (feed.data || []).slice().reverse()) {
+      if (!post.id || seen.has(post.id)) continue;
+      if (!post.message || new Date(post.created_time).getTime() < since) {
+        seen.add(post.id);
+        continue;
+      }
+      const draft = await extractFromPost(env, post);
+      if (draft === undefined) continue;
+      seen.add(post.id);
+      if (!draft) continue;
+      drafts.unshift({
+        id: 'fb-' + post.id,
+        postId: post.id,
+        postedAt: post.created_time,
+        link: post.permalink_url || 'https://www.facebook.com/' + post.id,
+        excerpt: String(post.message).slice(0, 280),
+        status: 'pending',
+        ...draft,
+      });
+      added += 1;
+    }
+    while (drafts.length > FB_DRAFTS_LIMIT) drafts.pop();
+    if (added) await writeKvJson(kv, FB_DRAFTS_KEY, drafts);
+    state.firstCheckDone = true;
+    state.lastError = null;
+  } catch (error) {
+    state.lastError = String(error.message || error).slice(0, 300);
+  }
+  state.seen = [...seen].slice(-FB_SEEN_LIMIT);
+  state.lastAdded = added;
+  await writeKvJson(kv, FB_STATE_KEY, state);
+  return { added, error: state.lastError };
+}
+
+async function facebookStatus(env) {
+  const config = await readKvJson(env.MENU_BOARD, FB_CONFIG_KEY);
+  const state = (await readKvJson(env.MENU_BOARD, FB_STATE_KEY)) || {};
+  const drafts = (await readKvJson(env.MENU_BOARD, FB_DRAFTS_KEY)) || [];
+  return {
+    connected: Boolean(config && config.token),
+    pageName: (config && config.pageName) || null,
+    connectedAt: (config && config.connectedAt) || null,
+    lastCheck: state.lastCheck || null,
+    lastError: state.lastError || null,
+    drafts: drafts.filter((d) => d.status === 'pending'),
+  };
+}
+
+async function handleOwnerFacebook(request, env, path) {
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+  if (!(await isAuthed(request, env))) return json({ error: 'Unauthorized' }, 401);
+  if (!env.MENU_BOARD) return json({ error: 'MENU_BOARD KV binding is not configured' }, 503);
+  const kv = env.MENU_BOARD;
+  let body = {};
+  if (request.method === 'POST' || request.method === 'PUT') {
+    const text = await request.text();
+    try {
+      body = text.trim() ? JSON.parse(text) || {} : {};
+    } catch {
+      return json({ error: 'Invalid JSON' }, 400);
+    }
+  }
+
+  if (path === '/api/owner/facebook' && request.method === 'GET') {
+    return json(await facebookStatus(env));
+  }
+  if (path === '/api/owner/facebook' && request.method === 'PUT') {
+    const token = String(body.token || '').trim();
+    if (!token) return json({ error: 'Paste the access token from Graph API Explorer.' }, 400);
+    try {
+      const config = await connectFacebook({
+        appId: String(body.appId || '').trim(),
+        appSecret: String(body.appSecret || '').trim(),
+        token,
+        page: body.page || 'tdg.ogdensburg',
+      });
+      await writeKvJson(kv, FB_CONFIG_KEY, config);
+      await kv.delete(FB_STATE_KEY);
+      await checkFacebook(env);
+      return json(await facebookStatus(env));
+    } catch (error) {
+      return json({ error: 'Facebook did not accept that: ' + (error.message || error) }, 400);
+    }
+  }
+  if (path === '/api/owner/facebook' && request.method === 'DELETE') {
+    await kv.delete(FB_CONFIG_KEY);
+    await kv.delete(FB_STATE_KEY);
+    return json(await facebookStatus(env));
+  }
+  if (path === '/api/owner/facebook/check' && request.method === 'POST') {
+    await checkFacebook(env);
+    return json(await facebookStatus(env));
+  }
+  if (path === '/api/owner/facebook/draft' && request.method === 'POST') {
+    const status = body.status === 'used' ? 'used' : body.status === 'dismissed' ? 'dismissed' : null;
+    if (!status) return json({ error: 'status must be used or dismissed' }, 400);
+    const drafts = (await readKvJson(kv, FB_DRAFTS_KEY)) || [];
+    const draft = drafts.find((d) => d.id === body.id);
+    if (!draft) return json({ error: 'No such draft' }, 404);
+    draft.status = status;
+    draft.decidedAt = new Date().toISOString();
+    await writeKvJson(kv, FB_DRAFTS_KEY, drafts);
+    return json(await facebookStatus(env));
+  }
+  return json({ error: 'Method not allowed' }, 405);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -1018,6 +1303,9 @@ export default {
       }
       return json({ error: 'Method not allowed' }, 405);
     }
+    if (path === '/api/owner/facebook' || path.startsWith('/api/owner/facebook/')) {
+      return handleOwnerFacebook(request, env, path);
+    }
     if (path === '/api/owner/history') {
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: CORS });
@@ -1027,5 +1315,13 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+
+  // Cron fires hourly 10:00-15:00 UTC on weekdays (wrangler.jsonc), which
+  // covers 6-10 am in Ogdensburg in both EDT and EST; the clock check keeps
+  // exactly the five local-morning runs.
+  async scheduled(event, env, ctx) {
+    if (!env.MENU_BOARD || !inFacebookWindow(new Date(event.scheduledTime))) return;
+    ctx.waitUntil(checkFacebook(env));
   },
 };

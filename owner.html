@@ -24,6 +24,7 @@
       --danger: #7a1f1f;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body {
       margin: 0;
       min-height: 100dvh;
@@ -53,6 +54,13 @@
       letter-spacing: 0.04em;
     }
     .sub { margin: 0; opacity: 0.75; font-size: 0.95rem; }
+    .fb-drafts { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+    .fb-draft { border: 1px dashed var(--line); border-radius: 0.8rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.4); }
+    .fb-draft blockquote { margin: 0 0 0.5rem; font-style: italic; opacity: 0.85; white-space: pre-line; }
+    .fb-draft ul { margin: 0.25rem 0 0.5rem 1.1rem; padding: 0; }
+    .fb-draft .meta { font-size: 0.85rem; opacity: 0.75; }
+    .fb-steps { padding-left: 1.2rem; display: grid; gap: 0.45rem; }
+    details summary { cursor: pointer; font-family: "Cinzel", serif; font-weight: 700; font-size: 0.85rem; }
     .panel {
       background: color-mix(in srgb, var(--paper) 92%, white);
       border: 1px solid var(--line);
@@ -255,9 +263,9 @@
       <form id="owner-board-form" class="stack">
         <div class="panel stack">
           <h2 style="margin-top:0">This month</h2>
-          <p class="hint">One label for the cover, then what’s new and what’s gone.</p>
+          <p class="hint">The cover shows the current month by itself. Only type a label if you want your own wording (like “Patio Season”) for this month.</p>
           <div class="grid-2">
-            <label>Month label<input id="month-label" name="label" type="text" required placeholder="August 2026" /></label>
+            <label>Month label (optional)<input id="month-label" name="label" type="text" placeholder="Blank = the current month, automatically" /></label>
             <label>Year<input id="month-year" name="year" type="number" min="2024" max="2100" required /></label>
           </div>
           <label>Notes<textarea id="month-notes" name="notes" placeholder="Short patio note for the cycle"></textarea></label>
@@ -278,6 +286,40 @@
           <p id="owner-status" role="status"></p>
         </div>
       </form>
+
+      <div class="panel" style="margin-top:1rem" id="fb-panel">
+        <div class="actions" style="justify-content:space-between; align-items:center; margin:0 0 0.5rem">
+          <h2 style="margin:0">Facebook drafts</h2>
+          <button type="button" class="secondary" id="fb-check" hidden>Check now</button>
+        </div>
+        <p class="hint" id="fb-summary">Weekday mornings (6–10 am, every hour) the site reads the TDG Facebook page. Posts about specials or menu changes show up here as drafts — nothing reaches guests until you add one to the board and save.</p>
+        <p class="error" id="fb-error" role="status" hidden></p>
+        <ul id="fb-drafts" class="fb-drafts"></ul>
+
+        <form id="fb-connect" class="stack" hidden>
+          <details>
+            <summary>How to connect (one time, about 10 minutes, on a computer)</summary>
+            <ol class="fb-steps">
+              <li>Go to <strong>developers.facebook.com</strong> and log in with the Facebook account that manages the TDG page. Click <strong>My Apps → Create App</strong>. If it asks what the app is for, choose <strong>Other</strong>, then <strong>Business</strong>. Name it “TDG Website”.</li>
+              <li>In the new app open <strong>App settings → Basic</strong>. Copy the <strong>App ID</strong>, then click <strong>Show</strong> next to <strong>App secret</strong> and copy that too.</li>
+              <li>Open <strong>Tools → Graph API Explorer</strong>. On the right, pick the “TDG Website” app, then under <strong>Permissions</strong> add <strong>pages_show_list</strong> and <strong>pages_read_engagement</strong>.</li>
+              <li>Click <strong>Generate Access Token</strong>, approve, and tick the <strong>TDG</strong> page when asked. Copy the long token that appears.</li>
+              <li>Paste all three below and press <strong>Connect</strong>. The site trades them for a page key that does not expire and forgets the secret.</li>
+            </ol>
+          </details>
+          <div class="grid-2">
+            <label>App ID<input id="fb-app-id" type="text" autocomplete="off" inputmode="numeric" /></label>
+            <label>App secret<input id="fb-app-secret" type="password" autocomplete="off" /></label>
+          </div>
+          <label>Access token<input id="fb-token" type="password" autocomplete="off" required /></label>
+          <div class="actions">
+            <button type="submit">Connect Facebook</button>
+          </div>
+        </form>
+        <div class="actions" id="fb-connected" hidden>
+          <button type="button" class="danger" id="fb-disconnect">Disconnect Facebook</button>
+        </div>
+      </div>
 
       <div class="panel" style="margin-top:1rem">
         <div class="actions" style="justify-content:space-between; align-items:center; margin:0 0 0.75rem">
