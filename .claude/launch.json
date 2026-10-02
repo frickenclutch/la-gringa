@@ -1,0 +1,60 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "-l",
+        "5050"
+      ],
+      "port": 5050
+    },
+    {
+      "name": "worker",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "worker-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "dev",
+        "--var",
+        "OWNER_PIN:TACO-8321"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "worker-claim",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "dev",
+        "--var",
+        "OWNER_CLAIM_TOKEN:demo-claim-abc123"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "worker-shots",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "dev",
+        "--var",
+        "OWNER_PIN:TACO-8321",
+        "--host",
+        "localhost"
+      ],
+      "port": 8787
+    }
+  ]
+}

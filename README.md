@@ -14,6 +14,8 @@ npm run test:mobile  # Playwright: iPhone/WebKit, Galaxy, Fold, desktop
 npm run dev          # local preview with worker APIs
 ```
 
+New machine: also run `npx playwright install chromium webkit`, `npx wrangler login`, and `cp .dev.vars.example .dev.vars`. See `CLAUDE.md` for gotchas.
+
 ### Owner board — self-service setup
 
 The owner claims the board from the site itself; no terminal or deploy secrets needed:
@@ -84,7 +86,7 @@ npm run deploy
 |---------|--------------|
 | `https://dirtygringonny.com` | The site. Bound to the Worker as a custom domain (Cloudflare issues and renews the certificate) and the canonical URL in every page, the sitemap and `robots.txt`. |
 | `http://dirtygringonny.com` | 301 → `https://` (`worker.js`; also switch on **Always Use HTTPS** under SSL/TLS → Edge Certificates). |
-| `www.dirtygringonny.com`, `new.dirtygringonny.com` | 301 → the same path on `dirtygringonny.com` (`worker.js`). `www` only reaches the Worker once it is added as a custom domain on it; any zone-level redirect rule for `www` must keep the path or be removed. |
+| `www.dirtygringonny.com`, `new.dirtygringonny.com` | Custom domains on the Worker; 301 → the same path on `dirtygringonny.com` (`worker.js`). |
 | `la-gringas.the-dirty-gringo.workers.dev` | 301 → the same path on `dirtygringonny.com` (`worker.js`), so links shared before domain day keep working. |
 | `la-gringa.pages.dev` | Legacy Cloudflare Pages mirror, rebuilt on every push to `main`. Its `_redirects` 301s every path to the domain and serves only `sw.js` (so an app installed there can retire itself). Pushing never deploys the real site. |
 | `/wp/…` (old WordPress paths) | 301 → `/`; `/wp/menu/…` and the old menu PDF → `/menu`. |

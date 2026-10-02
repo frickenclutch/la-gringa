@@ -1,0 +1,3 @@
+# Local-only secrets for `wrangler dev` (copy to .dev.vars, which is gitignored).
+# Throwaway test PIN for local previews and docs/src/shots.mjs - never the real owner PIN.
+OWNER_PIN=TACO-8321

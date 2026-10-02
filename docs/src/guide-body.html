@@ -1,0 +1,1174 @@
+<title>Dirty Gringo Owner’s Manual</title>
+<style>
+@font-face { font-family: "Cinzel"; font-weight: 600; font-style: normal; font-display: swap; src: url("{{FONT_CINZEL}}") format("woff2"); }
+@font-face { font-family: "IM Fell English"; font-weight: 400; font-style: normal; font-display: swap; src: url("{{FONT_FELL}}") format("woff2"); }
+
+:root {
+  --paper: #f6ecd4;
+  --panel: #fbf5e8;
+  --paper-deep: #e6d3a8;
+  --ink: #1f160f;
+  --ink-soft: #4a3a2a;
+  --muted: #6f5d47;
+  --wax: #8f1d1d;
+  --ember: #c45c2a;
+  --board: #1c2a22;
+  --chalk: #f4f1e6;
+  --river: #0f6b5c;
+  --gold: #b8892d;
+  --line: rgba(31, 22, 15, 0.18);
+  --line-strong: rgba(31, 22, 15, 0.38);
+  --font-display: "Cinzel", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-voice: "IM Fell English", Georgia, "Times New Roman", serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: Consolas, "Cascadia Mono", ui-monospace, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 4.5rem; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(196, 92, 42, 0.14), transparent 45%),
+    radial-gradient(ellipse at 90% 100%, rgba(28, 42, 34, 0.16), transparent 50%),
+    linear-gradient(170deg, #f8efd9 0%, var(--paper) 40%, #e9d7ad 100%);
+  background-attachment: fixed;
+  font: 17px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+a { color: var(--wax); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--ember); }
+p, ul, ol, dl { margin: 0 0 1rem; }
+li { margin: 0.3rem 0; }
+strong { font-weight: 650; }
+code, kbd {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(31, 22, 15, 0.07);
+  border-radius: 0.3em;
+  padding: 0.08em 0.38em;
+  white-space: nowrap;
+}
+kbd { border: 1px solid var(--line-strong); box-shadow: 0 1px 0 var(--line-strong); }
+pre.cmd {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: var(--board);
+  color: var(--chalk);
+  padding: 0.85rem 1rem;
+  border-radius: 0.55rem;
+  overflow-x: auto;
+  margin: 0.6rem 0 1rem;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
+pre.cmd code { background: none; padding: 0; color: inherit; white-space: pre; }
+.frame { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px) 4rem; }
+
+/* ---------- cover ---------- */
+.cover { padding: clamp(2rem, 5vw, 3.5rem) 0 1.5rem; border-bottom: 3px double var(--line-strong); margin-bottom: 1.5rem; }
+.cover .eyebrow { margin-bottom: 0.4rem; }
+.cover h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.8rem;
+  text-wrap: balance;
+}
+.cover .deck { margin-bottom: 1.2rem; }
+.meta { font-size: 0.9rem; color: var(--muted); margin: 0 0 1.4rem; }
+.glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.9rem 1.4rem; margin: 0; }
+.glance div { border-top: 1px solid var(--line-strong); padding-top: 0.55rem; }
+.glance dt { font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.glance dd { margin: 0.2rem 0 0; font-size: 0.97rem; overflow-wrap: anywhere; }
+
+/* ---------- layout ---------- */
+.layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; }
+main { max-width: 74ch; min-width: 0; }
+.rail { position: sticky; top: 1rem; }
+.rail .k { font-family: var(--font-display); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.4rem 0.6rem; }
+.rail ol { list-style: none; margin: 0 0 1.2rem; padding: 0; }
+.rail li { margin: 0; }
+.rail a {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  padding: 0.42rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+.rail a .num { font-family: var(--font-display); font-size: 0.7rem; color: var(--muted); min-width: 1.1rem; }
+.rail a:hover { color: var(--ink); background: rgba(31, 22, 15, 0.05); }
+.rail a.is-active { color: var(--wax); border-left-color: var(--wax); }
+.rail a.is-active .num { color: var(--wax); }
+.rail .who { font-size: 0.82rem; color: var(--muted); margin: 0 0.6rem; line-height: 1.4; }
+.rail .who b { color: var(--ink-soft); font-weight: 600; }
+@media (max-width: 959px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .rail {
+    min-width: 0;
+    max-width: 100vw;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--paper);
+    margin: 0 calc(-1 * clamp(16px, 4vw, 40px));
+    padding: 0.4rem clamp(16px, 4vw, 40px);
+    border-bottom: 1px solid var(--line);
+  }
+  .rail .k, .rail .who { display: none; }
+  .rail ol { display: flex; gap: 0.2rem; overflow-x: auto; margin: 0; padding-bottom: 0.2rem; scrollbar-width: thin; }
+  .rail a { border-left: 0; border-bottom: 2px solid transparent; white-space: nowrap; padding: 0.4rem 0.5rem; font-size: 0.84rem; }
+  .rail a.is-active { border-bottom-color: var(--wax); }
+}
+
+/* ---------- type ---------- */
+.eyebrow { font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--wax); }
+.eyebrow.dev { color: var(--river); }
+.chapter { padding-top: 2.4rem; margin-top: 2.6rem; border-top: 3px double var(--line-strong); }
+.chapter:first-of-type { border-top: 0; margin-top: 0; padding-top: 0.5rem; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.45rem, 3vw, 1.95rem); line-height: 1.15; margin: 0.35rem 0 0.7rem; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; letter-spacing: 0.03em; margin: 2rem 0 0.6rem; text-wrap: balance; }
+h4 { font-family: var(--font-display); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.7rem; color: var(--ink-soft); }
+.deck { font-family: var(--font-voice); font-size: 1.3rem; line-height: 1.42; color: var(--ink-soft); max-width: 58ch; margin-bottom: 1.3rem; }
+.hint { font-size: 0.9rem; color: var(--muted); }
+
+/* ---------- callouts ---------- */
+.note {
+  border-left: 3px solid var(--wax);
+  background: rgba(196, 92, 42, 0.09);
+  padding: 0.85rem 1.1rem;
+  margin: 1.2rem 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.note.dev { border-left-color: var(--river); background: rgba(15, 107, 92, 0.09); }
+.note > :last-child { margin-bottom: 0; }
+.note .k { font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--wax); display: block; margin-bottom: 0.25rem; }
+.note.dev .k { color: var(--river); }
+.chalk {
+  background: var(--board);
+  color: var(--chalk);
+  padding: 1rem 1.15rem;
+  border-radius: 0.6rem;
+  margin: 1.2rem 0;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
+.chalk .k { font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: #cdb98a; display: block; margin-bottom: 0.35rem; }
+.chalk code { background: rgba(255, 255, 255, 0.12); color: inherit; }
+.chalk a { color: #ffd27a; }
+.start { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin: 1.2rem 0 0.4rem; }
+.start a {
+  display: block;
+  padding: 0.85rem 0.95rem;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 0.6rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+.start a:hover { border-color: var(--wax); }
+.start .k { font-family: var(--font-display); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--wax); display: block; margin-bottom: 0.2rem; }
+.start span:not(.k) { font-size: 0.95rem; }
+
+/* ---------- tables ---------- */
+.scroll { overflow-x: auto; margin: 0.8rem 0 1.2rem; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+.tbl th { text-align: left; font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0 0.6rem 0.4rem; border-bottom: 1px solid var(--line-strong); font-weight: 600; }
+.tbl td { padding: 0.55rem 0.6rem; border-top: 1px solid var(--line); vertical-align: top; }
+.tbl td:first-child { white-space: nowrap; }
+.tbl td.wrap { white-space: normal; }
+.tbl code { white-space: nowrap; }
+
+/* ---------- figures ---------- */
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1.1rem 1.2rem; margin: 1.4rem 0 1.6rem; align-items: start; }
+.fig { margin: 0; }
+.fig img { display: block; width: 100%; height: auto; border: 1px solid var(--line-strong); border-radius: 0.55rem; background: #1b1410; }
+.fig-phone { max-width: 250px; }
+.fig-wide { grid-column: 1 / -1; max-width: none; }
+figcaption { font-family: var(--font-voice); font-size: 0.98rem; color: var(--ink-soft); margin-top: 0.5rem; line-height: 1.35; }
+
+/* ---------- journey map ---------- */
+.map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin: 1.4rem 0 0.5rem; }
+.station {
+  appearance: none;
+  position: relative;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--panel);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 0.6rem;
+  padding: 0.75rem 0.7rem 0.7rem;
+  display: grid;
+  gap: 0.1rem;
+}
+.station .k { font-family: var(--font-display); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.station .n { font-family: var(--font-display); font-size: 0.98rem; line-height: 1.2; }
+.station .u { font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-soft); }
+.station:not(:last-child)::after { content: ""; position: absolute; right: -0.6rem; top: 50%; width: 0.6rem; border-top: 2px solid var(--line-strong); }
+.station:hover { border-color: var(--ember); }
+.station[aria-selected="true"] { border-color: var(--wax); box-shadow: 0 0 0 3px rgba(143, 29, 29, 0.14); }
+.station[aria-selected="true"] .k { color: var(--wax); }
+.side-door { display: flex; gap: 0.6rem; align-items: center; margin: 0.4rem 0 0 0; }
+.side-door .dots { flex: 0 0 auto; width: 3.2rem; border-top: 2px dashed var(--line-strong); }
+.side-door .station { border-style: dashed; flex: 0 1 260px; }
+.side-door .station::after { display: none; }
+@media (max-width: 640px) {
+  .map { grid-template-columns: 1fr 1fr; }
+  .station:nth-child(2)::after { display: none; }
+}
+.panel { background: var(--panel); border: 1px solid var(--line-strong); border-radius: 0.7rem; padding: 1.1rem 1.2rem; margin: 1rem 0 1.4rem; }
+.panel > :last-child { margin-bottom: 0; }
+.panel .figs { margin-top: 1rem; margin-bottom: 0.4rem; }
+[role="tabpanel"][hidden] { display: none; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; padding-bottom: 0.7rem; margin: 1.2rem 0 0.4rem; border-bottom: 1px solid var(--line-strong); }
+.tab {
+  appearance: none;
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.85rem;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.tab:hover { border-color: var(--ink); }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ---------- steps, checklists, symptoms ---------- */
+ol.steps { list-style: none; padding: 0; counter-reset: step; margin: 0.6rem 0 1.2rem; }
+ol.steps li { position: relative; padding-left: 2.5rem; margin: 0.6rem 0; }
+ol.steps li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--wax);
+  color: var(--chalk);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  display: grid;
+  place-items: center;
+}
+.check { list-style: none; padding: 0; margin: 0.4rem 0 0.6rem; }
+.check li { margin: 0; }
+.check label { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.5rem 0.2rem; border-top: 1px solid var(--line); cursor: pointer; }
+.check input { margin: 0.32rem 0 0; accent-color: var(--wax); flex: 0 0 auto; width: 1.05rem; height: 1.05rem; }
+.check label.done { color: var(--muted); text-decoration: line-through; }
+.check-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.88rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 0.5rem; margin-bottom: 1.4rem; }
+.btn {
+  appearance: none;
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.95rem;
+  border: 1.5px solid #3a2a14;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #f0d38a, #b8892d);
+  color: var(--ink);
+  cursor: pointer;
+}
+.btn.ghost { background: transparent; border-color: var(--line-strong); }
+.btn:hover { filter: brightness(1.04); }
+.sym-search { width: 100%; font: inherit; padding: 0.75rem 0.9rem; border: 1.5px solid var(--line-strong); border-radius: 0.6rem; background: rgba(255, 255, 255, 0.55); color: inherit; margin: 0.6rem 0 0.4rem; }
+details.sym { border-top: 1px solid var(--line); }
+details.sym:last-of-type { border-bottom: 1px solid var(--line); }
+details.sym summary { cursor: pointer; padding: 0.7rem 0.2rem; font-weight: 600; list-style: none; position: relative; padding-right: 1.6rem; }
+details.sym summary::-webkit-details-marker { display: none; }
+details.sym summary::after { content: "+"; position: absolute; right: 0.3rem; top: 0.55rem; font-family: var(--font-display); color: var(--wax); }
+details.sym[open] summary::after { content: "−"; }
+details.sym .body { padding: 0 0.2rem 0.9rem; }
+details.sym .body > :last-child { margin-bottom: 0; }
+.sym-none { display: none; color: var(--muted); padding: 0.8rem 0; }
+
+/* ---------- widgets ---------- */
+.widget { background: var(--panel); border: 1px solid var(--line-strong); border-radius: 0.8rem; padding: 1.1rem 1.2rem; margin: 1.4rem 0; }
+.widget label { display: grid; gap: 0.3rem; font-family: var(--font-display); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.widget label.row { grid-template-columns: auto 1fr; align-items: center; gap: 0.5rem; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-size: 0.95rem; }
+.widget input[type="text"], .widget input[type="date"], .widget input[type="datetime-local"] {
+  font: inherit;
+  font-size: 0.98rem;
+  color: inherit;
+  width: 100%;
+  border: 1.5px solid rgba(31, 22, 15, 0.28);
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.5rem 0.65rem;
+}
+.widget input[type="checkbox"] { accent-color: var(--wax); width: 1.05rem; height: 1.05rem; }
+.widget .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.9rem 0 0.6rem; }
+.widget .log { font-family: var(--font-voice); font-size: 1rem; color: var(--ink-soft); margin: 0.4rem 0 0; min-height: 1.4rem; }
+.now-grid { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 1rem 1.2rem; align-items: start; }
+.now-grid svg { width: 84px; height: 84px; display: block; }
+.now-line { font-size: 1.05rem; margin-bottom: 0.4rem; }
+.now-line strong { text-transform: capitalize; }
+.now-grid label { margin-top: 0.6rem; max-width: 300px; }
+.sim-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.2rem; }
+.sim-form { display: grid; gap: 0.7rem; grid-template-columns: 1fr 1fr; }
+.sim-form .span { grid-column: 1 / -1; }
+.sim-out { margin: 0; align-self: start; font-family: var(--font-voice); }
+.sim-out .title { display: flex; justify-content: space-between; gap: 1rem; font-size: 1.35rem; line-height: 1.2; }
+.sim-out .price { white-space: nowrap; }
+.sim-out .note-line { font-style: italic; opacity: 0.85; margin: 0.35rem 0 0.8rem; font-size: 1rem; }
+.sim-out .verdict { font-family: var(--font-body); font-size: 0.9rem; padding-top: 0.6rem; border-top: 1px dashed rgba(244, 241, 230, 0.3); margin: 0; }
+.sim-out .verdict.on { color: #9fe3c7; }
+.sim-out .verdict.off { color: #ffb08a; }
+.sim-out.is-hidden { opacity: 0.55; }
+@media (max-width: 720px) { .sim-grid { grid-template-columns: 1fr; } }
+.tri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+.tri .lang { border: 1.5px solid var(--line-strong); border-radius: 0.6rem; padding: 0.7rem 0.8rem; background: rgba(255, 255, 255, 0.4); display: grid; gap: 0.3rem; align-content: start; }
+.tri .lang .k { font-family: var(--font-display); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.tri .lang .t { font-family: var(--font-voice); font-size: 1.08rem; line-height: 1.3; margin: 0; }
+.tri .lang .o { font-size: 0.78rem; font-family: var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 999px; justify-self: start; }
+.tri .lang[data-owner="printed"] .o { background: rgba(31, 22, 15, 0.1); color: var(--ink-soft); }
+.tri .lang[data-owner="you"] { border-color: var(--wax); }
+.tri .lang[data-owner="you"] .o { background: var(--wax); color: var(--chalk); }
+.tri .lang[data-owner="machine"] .o { background: rgba(15, 107, 92, 0.16); color: var(--river); }
+@media (max-width: 640px) { .tri { grid-template-columns: 1fr; } }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.4rem; }
+@media (max-width: 640px) { .two { grid-template-columns: 1fr; } }
+dl.gloss { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.5rem 1.2rem; }
+dl.gloss dt { font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.04em; padding-top: 0.1rem; }
+dl.gloss dd { margin: 0; font-size: 0.95rem; }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 0.1rem 0; } dl.gloss dd { margin-bottom: 0.7rem; } }
+.foot { margin-top: 3rem; padding-top: 1rem; border-top: 3px double var(--line-strong); font-family: var(--font-voice); color: var(--muted); font-size: 1rem; }
+
+.print-only { display: none; }
+.print-static { margin-top: 0.2rem; }
+.print-static .tbl td { font-size: 0.92rem; }
+.print-toc { margin: 1.2rem 0 0; }
+.print-toc ol { margin: 0.4rem 0 0; padding-left: 1.5rem; columns: 2; column-gap: 2rem; }
+.print-toc li { break-inside: avoid; margin: 0.2rem 0; font-size: 0.98rem; }
+.print-toc li em { color: var(--muted); font-style: normal; font-size: 0.85rem; }
+
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html { scroll-behavior: auto; }
+  body { background: var(--paper); font-size: 10.5pt; line-height: 1.5; }
+  .frame { max-width: none; padding: 0; }
+  .cover { padding-top: 0.2rem; margin-bottom: 0; }
+  .rail, .tabs, .check-foot, .sym-search, .sym-none, .widget .actions, .widget .log,
+  #now .now-grid, #sim .sim-grid, .screen-only { display: none !important; }
+  p.print-only, div.print-only, nav.print-only, ol.print-only, table.print-only { display: block; }
+  span.print-only { display: inline; }
+  .layout { display: block; }
+  main { max-width: none; }
+  [role="tabpanel"][hidden] { display: block; }
+  .chapter { break-before: page; border-top: 0; margin-top: 0; padding-top: 0.2rem; }
+  .deck { font-size: 1.15rem; }
+  h2, h3, h4 { break-after: avoid; }
+  .fig, .note, .chalk, tr, .station, .start a, .glance div, ol.steps li, .check li, .map, details.sym summary { break-inside: avoid; }
+  details.sym summary, .widget h4, .panel h4 { break-after: avoid; }
+  .figs { gap: 0.8rem; }
+  .fig-phone { max-width: 215px; }
+  .fig img { border-radius: 0.35rem; }
+  a { color: inherit; text-decoration: none; }
+  .start a, .station, .panel, .widget { box-shadow: none; }
+  details.sym summary::after { display: none; }
+  details.sym summary { padding-right: 0; }
+  input[type="checkbox"] { width: 0.8rem; height: 0.8rem; }
+}
+</style>
+
+<div class="frame">
+  <header class="cover">
+    <p class="eyebrow">The Dirty Gringo at the Dobisky · dirtygringonny.com</p>
+    <h1>Owner’s Manual for the Website</h1>
+    <p class="deck">What guests see, how to run the Patio Board from your phone, and what to do when something looks off. No technical background needed for chapters 1 to 4; chapters 5 and 6 are for whoever looks after the hosting.</p>
+    <p class="meta">Written against the code as it stands on 11 September 2026 (site version dg-v21). <span class="screen-only">Nothing on this page is live: every button here is a demonstration, and nothing you type is saved anywhere but this device.</span><span class="print-only">This is the printable edition. The interactive version, with try-it widgets and checklists that remember your ticks, is the .html file or the shared link.</span></p>
+    <dl class="glance">
+      <div><dt>Live address</dt><dd><a href="https://dirtygringonny.com">dirtygringonny.com</a></dd></div>
+      <div><dt>Old addresses</dt><dd>new.dirtygringonny.com, la-gringas.the-dirty-gringo.workers.dev and la-gringa.pages.dev all forward to the live address, page for page. www.dirtygringonny.com still lands on the home page (chapter 6 has the fix), so print the address without the www</dd></div>
+      <div><dt>Your side door</dt><dd><code>/owner</code> on the live address, or five quick taps on the wax seal on the menu cover</dd></div>
+      <div><dt>Languages</dt><dd>English, Español, Français. Guests pick once; the choice sticks to their device.</dd></div>
+      <div><dt>Runs on</dt><dd>Cloudflare, under the account named “The Dirty Gringo”, which also holds the domain. No WordPress, no plugins, nothing to update.</dd></div>
+    </dl>
+    <div class="start">
+      <a href="#ch3"><span class="k">Post today’s special</span><span>Patio Board → Daily specials → Add special → Save board</span></a>
+      <a href="#ch3-menu"><span class="k">Fix a price or a dish name</span><span>Patio Board → Menu Pages → tap the item → Save</span></a>
+      <a href="#ch7"><span class="k">Something looks wrong</span><span>Chapter 7 matches what you see to a fix</span></a>
+    </div>
+  </header>
+  <nav class="print-only print-toc" aria-label="Contents">
+    <p class="eyebrow">Contents</p>
+    <ol>
+      <li>The guest’s path</li>
+      <li>The menu up close</li>
+      <li>The Patio Board <em>owners</em></li>
+      <li>Three languages <em>owners</em></li>
+      <li>Under the hood <em>administrators</em></li>
+      <li>Deploying and checking <em>administrators</em></li>
+      <li>When something looks wrong</li>
+      <li>Glossary and files</li>
+    </ol>
+  </nav>
+
+  <div class="layout">
+    <nav class="rail" aria-label="Contents">
+      <p class="k">Contents</p>
+      <ol>
+        <li><a href="#ch1"><span class="num">1</span>The guest’s path</a></li>
+        <li><a href="#ch2"><span class="num">2</span>The menu up close</a></li>
+        <li><a href="#ch3"><span class="num">3</span>The Patio Board</a></li>
+        <li><a href="#ch4"><span class="num">4</span>Three languages</a></li>
+        <li><a href="#ch5"><span class="num">5</span>Under the hood</a></li>
+        <li><a href="#ch6"><span class="num">6</span>Deploying &amp; checking</a></li>
+        <li><a href="#ch7"><span class="num">7</span>When it looks wrong</a></li>
+        <li><a href="#ch8"><span class="num">8</span>Glossary &amp; files</a></li>
+      </ol>
+      <p class="who"><b>Owners and staff:</b> chapters 1 to 4 and 7.<br><b>Whoever administers Cloudflare:</b> chapters 5, 6 and 8.</p>
+    </nav>
+
+    <main>
+      <!-- ======================================================= 1 -->
+      <section class="chapter" id="ch1">
+        <p class="eyebrow">Chapter 1 · Guests</p>
+        <h2>The guest’s path</h2>
+        <p class="deck">Every guest walks the same short road: choose a language, pass the patio gate, pick a direction at the hub, open the manuscript. The Patio Board is a side door only you use. <span class="screen-only">Tap a station to see what happens there.</span><span class="print-only">Each station is described in turn below.</span></p>
+
+        <div class="map" role="tablist" aria-label="Guest journey" data-tabs>
+          <button class="station" role="tab" aria-controls="st-passport" aria-selected="true"><span class="k">First visit</span><span class="n">The Passport</span><span class="u">any page</span></button>
+          <button class="station" role="tab" aria-controls="st-gate"><span class="k">Front door</span><span class="n">The Gate &amp; the game</span><span class="u">/</span></button>
+          <button class="station" role="tab" aria-controls="st-hub"><span class="k">Crossroads</span><span class="n">The Hub</span><span class="u">/hub</span></button>
+          <button class="station" role="tab" aria-controls="st-menu"><span class="k">The main event</span><span class="n">The Manuscript</span><span class="u">/menu</span></button>
+        </div>
+        <div class="side-door">
+          <span class="dots" aria-hidden="true"></span>
+          <a class="station" href="#ch3" style="text-decoration:none"><span class="k">Your side door</span><span class="n">The Patio Board</span><span class="u">/owner · chapter 3</span></a>
+        </div>
+
+        <div class="panel" role="tabpanel" id="st-passport">
+          <h4>The Passport · first visit on a device</h4>
+          <p>The first time a phone or computer opens any page of the site, a passport slides up with three skillets: <strong>Español</strong>, <strong>English</strong>, <strong>Français</strong>. The choice is stamped into that browser and every page follows it from then on. There is no account and no cookie; the guest can switch at any time with the <strong>EN | ES | FR</strong> chip in the corner of every page.</p>
+          <p><strong>What follows the choice:</strong> the gate text, the hub cards, the menu’s section titles, dish names and descriptions, buttons and hints. <strong>What stays exactly as printed:</strong> prices, the phone number, the address, the hours.</p>
+          <div class="figs">{{FIG passport "First visit: the passport asks Español, English, ou Français." phone}}</div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="st-gate" hidden>
+          <h4>The Gate · the skillet game at /</h4>
+          <p>The front door is the patio gate with the skillet game. <strong>Enter Site</strong> at the top skips the game and goes straight to the hub, so nobody is forced to play. Below it sit three signature dishes: <strong>Queso &amp; Chips</strong>, <strong>Greasy Marino</strong> and <strong>The Marley</strong>, each with a <strong>Craft It</strong> button.</p>
+          <p>A round: ingredients fall from the top; the guest drags the skillet left and right to catch the ones on the checklist. Wrong ingredients buzz but cost nothing. Catching the full list ends the round with <em>Masterpiece Crafted!</em> and a <strong>Secret Promo Code</strong>, then <strong>Enter Restaurant</strong> leads to the hub.</p>
+          <div class="chalk">
+            <span class="k">The three codes the game hands out</span>
+            <p style="margin:0">Queso &amp; Chips → <code>PATIOQUESO20</code> · Greasy Marino → <code>MARINOBRIDGE15</code> · The Marley → <code>RIVERMARLEY10</code></p>
+          </div>
+          <div class="note"><span class="k">Decide what a code is worth</span><p>The site never states an offer. The names hint at 20, 15 and 10 percent, but the actual deal is whatever you tell the counter to honor. Brief the staff before launch, and expect the same three codes to come back again and again: every winner of a dish gets that dish’s code.</p><p>If the game cannot reach the server (a dead spot on the patio, a saved copy of the page) it prints <em>Show this win at the counter</em> instead of a code.</p></div>
+          <div class="figs">
+            {{FIG gate "The patio gate. Enter Site skips the game." phone}}
+            {{FIG game "A round in progress: drag the skillet, catch the checklist." phone}}
+          </div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="st-hub" hidden>
+          <h4>The Hub · the crossroads at /hub</h4>
+          <p>Four cards and a hours panel:</p>
+          <ul>
+            <li><strong>The Menu</strong> opens the manuscript.</li>
+            <li><strong>Call to Order</strong> dials 315.713.8151 on a phone.</li>
+            <li><strong>Find the Patio</strong> opens Google Maps at 100 Riverside Ave.</li>
+            <li><strong>Play the Skillet Game</strong> goes back to the gate.</li>
+            <li><strong>Patio Hours</strong> reads Tue – Fri 11am – 7pm, Saturday 11am – 3pm, Sun &amp; Mon closed, with a line telling guests to call ahead or check Facebook for holiday hours.</li>
+          </ul>
+          <p>Hours, phone and address are printed into the site rather than edited on the board. When they change, your developer updates three places in one sitting (chapter 8 lists them).</p>
+          <div class="figs">{{FIG hub "The hub: menu, call, directions, game, hours." phone}}</div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="st-menu" hidden>
+          <h4>The Manuscript · /menu</h4>
+          <p>A leather-and-parchment book sitting on the Dobisky waterfront. It opens on the cover: the wax seal top right (your secret door), the month label from your board, the phone number and the web address. Guests turn pages to read the menu, open the chalk <strong>Street Board</strong> for today’s specials, and can install the menu as an app on their phone. Chapter 2 covers all of it.</p>
+          <div class="figs">{{FIG menu-cover "The cover: wax seal top right, month label from the board." phone}}</div>
+        </div>
+      </section>
+
+      <!-- ======================================================= 2 -->
+      <section class="chapter" id="ch2">
+        <p class="eyebrow">Chapter 2 · Guests</p>
+        <h2>The menu up close</h2>
+        <p class="deck">The manuscript is three things layered together: the printed menu, the live layer you edit from the board, and the atmosphere that changes with the time of day.</p>
+
+        <h3>Turning pages</h3>
+        <p>Guests tap or click near the left or right edge of the screen, swipe, use the ‹ › arrows, or press the keyboard arrow keys. Phones show one page at a time; tablets and computers show two-page spreads. The brass <strong>+</strong> button in the bottom corner opens four shortcuts: <em>Cover</em>, <em>Mains</em>, <em>Call</em> and <em>Home</em> (the hub). The pages, in order: the cover · Sides &amp; Salads with Extra Meat, Extras and House Sauces · Shareable Snacks · Signature Burritos &amp; Bowls with Build Your Own · Quesadillas and Signature Quesadillas · Tacos · Enchiladas · Dessert, the cilantro and salsa page, and Beverages.</p>
+        <div class="figs">
+          {{FIG menu-desktop "On a wide screen the book opens as a spread over the riverfront painting (shown by day)." wide}}
+          {{FIG menu-page "A phone shows one page at a time." phone}}
+        </div>
+
+        <h3>The Street Board</h3>
+        <p>A red <strong>Specials</strong> button sits in the corner of every page of the book. It opens the Street Board: the specials you marked active for today, each with its price and note, and a <strong>This month</strong> strip with what’s new, what’s gone and your note for the cycle. With no active specials it reads <em>No specials posted right now — ask the patio</em>. If the month’s additions, takeaways and note are all empty, the strip hides itself.</p>
+        <p>The board loads fresh on every visit, straight from the server, so a special you save on your phone is on the next guest’s screen the moment they open the menu.</p>
+        <div class="figs">{{FIG street-board "The Street Board: today's specials and This month." phone}}</div>
+
+        <h3>Get the Menu App</h3>
+        <p>A <strong>Get the Menu App</strong> button appears a moment after the menu loads. On Android and in Chrome it triggers the phone’s own install prompt. On an iPhone it opens a short coach card: Share, then <em>Add to Home Screen</em>. The installed app opens straight to the manuscript, keeps a copy of the pages for weak patio signal, and hides the button once it is installed.</p>
+        <div class="figs">{{FIG install-coach "Get the Menu App on an iPhone: Share, then Add to Home Screen." phone}}</div>
+
+        <h3>The riverfront and the atmosphere</h3>
+        <p>Behind the book is a painting of the Dobisky waterfront seen from the river, worked up from photographs of the site: the long low building with its silver roof, deep overhang and white rafter tails, full-height glass over a stacked-stone wall and the porch with its red picnic tables; the two-tier gazebo on the concrete pier at the right; the marina’s grey floating docks with a pontoon boat and a blue powerboat in front; green lantern lamps and benches along the promenade, the apartment tower behind the trees and the bridge far off to the left. It recolours with the guest’s own clock: <strong>day</strong> from 6 am to 5 pm, <strong>dusk</strong> from 5 to 8 pm, <strong>night</strong> after that. The moon in the sky is drawn in tonight’s real shape. The excursion boat ties up at the dock and makes trips out and back; papel picado hangs across the top; fireflies and a moth come out after dark.</p>
+        <p>A few dates change the weather: marigold petals fall for Día de los Muertos (Oct 25 – Nov 3), snow from December through February, confetti for Cinco de Mayo (May 1 – 6) and Independencia (Sep 15 – 16). Hovering or tapping a dish name raises a wisp of steam, and page turns make a quiet paper sound that the speaker button beside the language chip mutes. Phones run a lighter version: the painting, the palette, the moon and the sound stay; the moving pieces are switched off so the pages turn smoothly.</p>
+
+        <div class="widget" id="now">
+          <h4><span class="screen-only">What a guest sees right now</span><span class="print-only">What a guest sees, by the clock</span></h4>
+          <div class="print-only print-static">
+            <p>The menu picks its look from the guest’s own clock: <strong>day</strong> from 6 am to 5 pm, <strong>dusk</strong> from 5 to 8 pm, <strong>night</strong> otherwise. Marigold petals fall Oct 25 – Nov 3, snow from December through February, confetti May 1 – 6 and Sep 15 – 16, and the moon is drawn in its real phase every night.</p>
+            <p>To preview any look on the live site, add the settings to the menu address, for example <code>dirtygringonny.com/menu?daypart=dusk&amp;season=snow&amp;moon=0.5</code>. Daypart: day, dusk or night. Season: marigold, snow, confetti or none. Moon: 0 new, 0.25 first quarter, 0.5 full, 0.75 last quarter.</p>
+          </div>
+          <div class="now-grid">
+            <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="27" fill="#2b2418"/><path id="now-moon-lit" fill="#f1e2b6" d=""/><circle cx="32" cy="32" r="27" fill="none" stroke="rgba(31,22,15,.5)" stroke-width="1"/></svg>
+            <div>
+              <p class="now-line"><strong id="now-daypart">…</strong> palette · <span id="now-season">…</span> · <span id="now-moon">…</span></p>
+              <p class="hint" id="now-note">Computed with the same rules the menu uses, from this device’s clock and calendar.</p>
+              <label>Preview another moment <input type="datetime-local" id="now-when"></label>
+              <p class="hint" id="now-link" style="margin-top:.5rem"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================= 3 -->
+      <section class="chapter" id="ch3">
+        <p class="eyebrow">Chapter 3 · Owners</p>
+        <h2>The Patio Board</h2>
+        <p class="deck">One private page runs everything that changes week to week: the month label on the cover, what’s new and gone, today’s specials, prices and wording on the printed pages, and your PIN.</p>
+
+        <h3>Getting in</h3>
+        <ol class="steps">
+          <li>Open <code>dirtygringonny.com/owner</code>, or open the menu and tap the wax seal on the cover <strong>five times quickly</strong> (within about two and a half seconds). The seal singes and the PIN gate appears.</li>
+          <li>Type your PIN and press <strong>Unlock board</strong>. You stay signed in on that device for <strong>12 hours</strong>; after that the gate comes back.</li>
+          <li>When you are done on a shared device, press <strong>Sign out</strong> at the top. <strong>Back to the site</strong> returns to the hub.</li>
+        </ol>
+        <div class="note"><span class="k">Five wrong tries and the board rests</span><p>After five wrong PINs from the same connection the board refuses everything for <strong>10 minutes</strong>, including the correct PIN. The counter is shared between the PIN gate, the setup screen and the Change PIN panel. If it happens without you trying five times, someone on the same Wi-Fi is guessing; change the PIN once you are in.</p></div>
+        <div class="figs">
+          {{FIG owner-pin "The PIN gate at /owner." phone}}
+          {{FIG owner-editor "The Patio Board unlocked (demo data)." phone}}
+        </div>
+
+        <h3>The panels, one by one</h3>
+        <div class="tabs" role="tablist" aria-label="Patio Board panels" data-tabs>
+          <button class="tab" role="tab" aria-controls="pb-month" aria-selected="true">This month</button>
+          <button class="tab" role="tab" aria-controls="pb-specials">Daily specials</button>
+          <button class="tab" role="tab" aria-controls="pb-history">History</button>
+          <button class="tab" role="tab" aria-controls="pb-pages">Menu Pages</button>
+          <button class="tab" role="tab" aria-controls="pb-pin">Change PIN</button>
+        </div>
+
+        <div class="panel" role="tabpanel" id="pb-month">
+          <h4>This month</h4>
+          <div class="scroll"><table class="tbl">
+            <thead><tr><th>Field</th><th>Where guests see it</th></tr></thead>
+            <tbody>
+              <tr><td>Month label</td><td class="wrap">Printed on the manuscript cover under the seal, in place of the built-in “August 2026”. Write it the way you want it to read: <em>September 2026</em>, <em>Harvest 2026</em>, <em>Patio Season</em>.</td></tr>
+              <tr><td>Year</td><td class="wrap">Kept with the label for the record; not shown to guests on its own.</td></tr>
+              <tr><td>Notes</td><td class="wrap">A short line under <em>This month</em> in the Street Board. Leave it empty to show nothing.</td></tr>
+              <tr><td>Additions</td><td class="wrap">One dish per line. Listed as what’s new in the Street Board.</td></tr>
+              <tr><td>Takeaways</td><td class="wrap">One dish per line. Listed as what’s gone for the cycle.</td></tr>
+            </tbody>
+          </table></div>
+          <p>Nothing changes for guests until you press <strong>Save board</strong> at the bottom of the specials panel; the status line then reads <em>Saved.</em> A good rhythm: on the first of the month, change the label and refresh the two lists; the rest of the month, only the specials.</p>
+        </div>
+
+        <div class="panel" role="tabpanel" id="pb-specials" hidden>
+          <h4>Daily specials</h4>
+          <p><strong>Add special</strong> adds a row. Each row has a <strong>Name</strong> (required), a <strong>Price</strong> typed the way you want it to read (the board prints exactly what you type: <em>14.00</em> or <em>$14</em>), a <strong>Note</strong> (the chalk line under the name), <strong>Starts</strong> and <strong>Ends</strong> dates, an <strong>Active</strong> box and a <strong>Remove</strong> button.</p>
+          <ul>
+            <li><strong>Active unchecked</strong> hides the special without deleting it. Handy for a Friday-only item you bring back every week.</li>
+            <li><strong>Dates are inclusive</strong> and either may be blank. Blank on both sides means always on while Active is checked.</li>
+            <li><strong>Remove</strong> only takes effect once you Save board. So does everything else on the page.</li>
+            <li>The server checks dates against the <strong>UTC calendar</strong>. In practice a special with an Ends date disappears around <strong>8 pm Eastern</strong> that evening (7 pm in winter), and one with a Starts date shows up around 8 pm the evening before. You close at 7, so this rarely matters; if you post a late-night special, give it an extra day.</li>
+          </ul>
+          <div class="widget" id="sim">
+            <h4><span class="screen-only">Try a special (nothing is saved)</span><span class="print-only">How the date rules play out</span></h4>
+            <div class="print-only print-static">
+              <table class="tbl">
+                <thead><tr><th>Special as saved</th><th>What guests see</th></tr></thead>
+                <tbody>
+                  <tr><td class="wrap">Birria Quesatacos · 14.00 · Active ticked · no dates</td><td class="wrap">On the Street Board every day until you untick or remove it.</td></tr>
+                  <tr><td class="wrap">Same, with Starts set to 19 September</td><td class="wrap">Hidden until the 19th. It appears around 8 pm Eastern on the 18th, when the server’s date turns over.</td></tr>
+                  <tr><td class="wrap">Same, with Ends set to 21 September</td><td class="wrap">Shown through the 21st and gone around 8 pm Eastern that evening.</td></tr>
+                  <tr><td class="wrap">Same, with Active unticked</td><td class="wrap">Hidden whatever the dates say. Untick to pause a special, tick to bring it back.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sim-grid">
+              <div class="sim-form">
+                <label class="span">Name <input type="text" id="sim-name" value="Birria Quesatacos"></label>
+                <label>Price <input type="text" id="sim-price" value="14.00"></label>
+                <label>Pretend today is <input type="date" id="sim-today"></label>
+                <label class="span">Note <input type="text" id="sim-note" value="Consommé, onions, cilantro — while it lasts"></label>
+                <label>Starts <input type="date" id="sim-start"></label>
+                <label>Ends <input type="date" id="sim-end"></label>
+                <label class="row span"><input type="checkbox" id="sim-active" checked> Active</label>
+              </div>
+              <div class="chalk sim-out" id="sim-out">
+                <span class="k">Street Board preview</span>
+                <div class="title"><span id="sim-out-name"></span><span class="price" id="sim-out-price"></span></div>
+                <p class="note-line" id="sim-out-note"></p>
+                <p class="verdict" id="sim-verdict"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="pb-history" hidden>
+          <h4>History</h4>
+          <p>Every Save board adds a line: the month label, when it was saved, and how many additions, takeaways and specials it carried. The site keeps the last <strong>40</strong> saves. It is a record, not an undo button: to go back to an earlier board, re-enter the values and save again. <strong>Refresh</strong> reloads the list if you have the board open on two devices. Your developer can restore any of the 40 snapshots in full from storage if something is ever lost.</p>
+        </div>
+
+        <div class="panel" role="tabpanel" id="pb-pages" hidden>
+          <h4 id="ch3-menu">Menu Pages · editing the printed menu itself</h4>
+          <p><strong>Edit the menu manuscript</strong> opens the menu with the address <code>/menu?edit=1</code>. Every editable dish, price and description glows. Tap one and a parchment sheet slides up from the bottom:</p>
+          <ul>
+            <li><strong>Name</strong> and <strong>Description</strong> in the language the chip is set to (500 characters at most each).</li>
+            <li>The price fields for that item: usually one <strong>Price</strong>; <strong>Regular</strong> and <strong>Loaded</strong> for quesadillas; <strong>First column</strong> and <strong>Second column</strong> for the salsa sizes.</li>
+            <li><strong>Save — goes live</strong> applies the change for every guest from their next load. <strong>Reset to original</strong> removes your change and the printed text comes back. <strong>Cancel</strong> closes the sheet.</li>
+            <li>What you just changed bleeds in like fresh ink for a moment so you can see it landed. <strong>Done</strong> in the top bar returns you to the board.</li>
+          </ul>
+          <p>Your edits sit as a layer over the printed menu rather than replacing it, which is why Reset always works and why the printed menu is what guests see if the server is unreachable. Prices are shared by all three languages; names and descriptions are per language, and switching the <strong>EN | ES | FR</strong> chip while editing lets you write the Spanish or French side yourself (chapter 4 explains what the site translates for you).</p>
+          <div class="figs">
+            {{FIG menu-edit-glow "Menu Pages: editable items glow." phone}}
+            {{FIG menu-edit-sheet "Tap an item to edit its name, description and price." phone}}
+          </div>
+          <div class="note"><span class="k">Bounced back to the board?</span><p>The editor checks that you are signed in before it opens. If your 12 hours ran out, it sends you to the PIN gate; unlock and press the Menu Pages button again.</p></div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="pb-pin" hidden>
+          <h4>Change PIN</h4>
+          <p>Enter the current PIN and a new one of at least six characters, then <strong>Update PIN</strong>. A short phrase beats a number: <em>river-tacos-7</em> is far harder to guess than <em>123456</em> and just as easy to remember. Changing the PIN signs out every other device that was using the old one.</p>
+          <p><strong>Lost the PIN?</strong> There is no reset link, on purpose. Your developer clears the stored PIN and sends you a fresh one-time setup link, valid for seven days. Open it, choose a new PIN, and you are back in. Nothing on the board is lost in the process.</p>
+          <div class="note"><span class="k">The PIN is the only lock</span><p>The site’s code is public and the five-tap seal is a convenience, not a secret. Treat the PIN like the key to the register: don’t paste it in group chats, and sign out on devices that aren’t yours.</p></div>
+        </div>
+
+        <h3>What the board cannot change</h3>
+        <p>These need a code change from your developer, and typically a same-day turnaround:</p>
+        <div class="two">
+          <div>
+            <p><strong>You, from the board</strong></p>
+            <ul>
+              <li>The month label, notes, additions and takeaways</li>
+              <li>Specials, their prices, notes and dates</li>
+              <li>Any printed price, dish name or description, in three languages</li>
+              <li>Your PIN</li>
+            </ul>
+          </div>
+          <div>
+            <p><strong>Your developer, in the code</strong></p>
+            <ul>
+              <li>Hours, phone number, address</li>
+              <li>Adding or removing whole dishes or sections</li>
+              <li>The game’s three dishes and promo codes</li>
+              <li>The painting, fonts, colours, photos and the cover art</li>
+              <li>The web address itself and where it points</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================= 4 -->
+      <section class="chapter" id="ch4">
+        <p class="eyebrow">Chapter 4 · Owners</p>
+        <h2>Three languages</h2>
+        <p class="deck">The site speaks English, Spanish and Canadian French. The printed menu was translated once, by hand. Your edits are translated for you, with one firm rule: the machine never overwrites what a person typed.</p>
+
+        <h3>How guests get their language</h3>
+        <p>The passport on the first visit sets it; the <strong>EN | ES | FR</strong> chip changes it. Around two hundred pieces of interface text exist in each language, from the gate’s welcome to the install card. Everything a guest reads follows the choice except the figures: prices, the phone number, the address and the hours are the same in every language.</p>
+
+        <h3>How your menu edits get translated</h3>
+        <p>When you save a name or description in one language, the site asks Cloudflare’s translation model for the other two, using an instruction tuned for a Mexican menu. The toast reads <em>Saved — other languages translated automatically</em> when that worked, or <em>Saved — guests see it now</em> when the translator was unavailable and only your language changed. Prices never go through translation.</p>
+        <p>The ownership rule decides what gets translated. Each language of each item is either <strong>printed</strong> (nothing changed yet), <strong>yours</strong> (a person typed it in the editor) or <strong>machine</strong> (filled from your text in another language). When you save a fresh edit, every sibling language that is printed or machine-owned is retranslated from your new text; a sibling that is yours is left alone. To fix a translation you don’t like, switch the chip to that language, tap the item and rewrite it: it becomes yours and stays put.</p>
+
+        <div class="widget" id="tri">
+          <h4><span class="screen-only">Who owns each language (try it)</span><span class="print-only">Who owns each language: a walk-through</span></h4>
+          <ol class="print-only print-static">
+            <li>You save an English edit: Spanish and French are translated from it by the machine, because they were printed or machine text.</li>
+            <li>You then rewrite the Spanish yourself: Spanish becomes yours.</li>
+            <li>You edit the English again: French is refreshed from your new English; your Spanish stays exactly as you typed it.</li>
+            <li>Reset to original: the printed text is back in all three languages.</li>
+          </ol>
+          <div class="tri">
+            <div class="lang" data-lang="en" data-owner="printed"><span class="k">English</span><p class="t"></p><span class="o"></span></div>
+            <div class="lang" data-lang="es" data-owner="printed"><span class="k">Español</span><p class="t"></p><span class="o"></span></div>
+            <div class="lang" data-lang="fr" data-owner="printed"><span class="k">Français</span><p class="t"></p><span class="o"></span></div>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button" data-edit="en">You save an English edit</button>
+            <button class="btn" type="button" data-edit="es">You save a Spanish edit</button>
+            <button class="btn" type="button" data-edit="fr">You save a French edit</button>
+            <button class="btn ghost" type="button" data-reset>Reset to original</button>
+          </div>
+          <p class="log" id="tri-log">Nothing edited yet: guests see the printed menu in all three languages.</p>
+        </div>
+
+        <div class="note dev"><span class="k">Cost, for the administrator</span><p>Translation runs on the Cloudflare account’s Workers AI allowance. A save that changes a name and a description makes up to four short translations; the free daily allowance covers well over a hundred such saves a day before anything is billed.</p></div>
+      </section>
+
+      <!-- ======================================================= 5 -->
+      <section class="chapter" id="ch5">
+        <p class="eyebrow dev">Chapter 5 · Administrators</p>
+        <h2>Under the hood</h2>
+        <p class="deck">The whole site is one Cloudflare Worker with a folder of static files behind it. There is no database server, no CMS and nothing that needs patching; the moving parts are listed here so nothing is a mystery on the day someone has to look.</p>
+
+        <h3>Where it runs</h3>
+        <p>The Worker is named <code>la-gringas</code> and lives in the Cloudflare account called <strong>The Dirty Gringo</strong>. The pages, scripts, fonts and the riverfront painting are uploaded with it as static assets and served from Cloudflare’s edge. A small program runs in front of every request: it sends the old addresses and old WordPress links to the right page on dirtygringonny.com, answers every address that starts with <code>/api/</code> (promo codes for the game, the public board, the owner’s tools), and passes everything else through to the static files.</p>
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Address</th><th>Role today</th></tr></thead>
+          <tbody>
+            <tr><td><code>dirtygringonny.com</code></td><td class="wrap">The live site since 11 September 2026, bound to the Worker as a custom domain with a certificate Cloudflare renews itself. The only address where the Patio Board, the promo codes and the live specials work, and the one to print.</td></tr>
+            <tr><td><code>la-gringas.the-dirty-gringo.workers.dev</code></td><td class="wrap">The Worker’s own address, and the live site from August until domain day. It now forwards every page to the domain, so links shared before then, and an app installed from there, still arrive.</td></tr>
+            <tr><td><code>www.dirtygringonny.com</code> · <code>new.dirtygringonny.com</code></td><td class="wrap">Other spellings of the domain. The Worker answers them with a permanent redirect to the same page on the live address; <code>www</code> needs its own custom-domain binding on the Worker for that to apply; until then it lands on the home page over https and fails over plain http (chapter 6).</td></tr>
+            <tr><td><code>la-gringa.pages.dev</code></td><td class="wrap">The original Cloudflare Pages mirror. It now only forwards every path to the live address. It rebuilds itself on each push to GitHub, which is why pushing never deploys the real site.</td></tr>
+            <tr><td><code>dirtygringonny.com/wp/…</code></td><td class="wrap">Old WordPress links, including the old menu PDF, land on the menu or the home page instead of a dead page.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>What is stored, and where</h3>
+        <p>Everything the owner changes lives in one Cloudflare KV namespace bound as <code>MENU_BOARD</code>. Each key is a small JSON document:</p>
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Key</th><th>Holds</th></tr></thead>
+          <tbody>
+            <tr><td><code>current</code></td><td class="wrap">The board: month label, year, notes, additions, takeaways, specials.</td></tr>
+            <tr><td><code>history</code></td><td class="wrap">The last 40 board snapshots, newest first.</td></tr>
+            <tr><td><code>menu-overrides</code></td><td class="wrap">The live layer over the printed menu: per item, any of price, regular, loaded, p1, p2, name and description in en/es/fr, plus a server-derived list of which fields are machine-translated.</td></tr>
+            <tr><td><code>menu-history</code></td><td class="wrap">The last 20 override documents, for restoring an edit.</td></tr>
+            <tr><td><code>owner-auth</code></td><td class="wrap">The owner’s PIN as a salted PBKDF2 hash and the secret that signs sessions. Delete this key to reset the PIN.</td></tr>
+            <tr><td><code>owner-claim-token</code></td><td class="wrap">The one-time setup token, present only while a setup link is outstanding (7-day expiry).</td></tr>
+            <tr><td><code>login-fails:&lt;ip&gt;</code></td><td class="wrap">The per-connection failure counter behind the 10-minute lockout.</td></tr>
+          </tbody>
+        </table></div>
+        <p>If KV is unreachable the public board falls back to the seed in <code>data/menu-board.json</code>, and the printed menu shows with no overrides. Guests never see an error, only older content.</p>
+
+        <h3>Translation</h3>
+        <p>The Worker has a Workers AI binding. Saves go to <code>@cf/meta/llama-3.3-70b-instruct-fp8-fast</code> with a menu-specific system prompt; if that model fails, <code>@cf/meta/m2m100-1.2b</code> is tried; if both fail, the save still succeeds untranslated. Ownership of each field is derived on the server by comparing the new document with the stored one, so nothing a browser sends can mark human text as machine text.</p>
+
+        <h3>What guests do and don’t leave behind</h3>
+        <ul>
+          <li>No accounts, no cookies, no analytics tag and no third-party scripts on any guest page.</li>
+          <li>Three preferences stay on the guest’s own device: the language (<code>dg-lang</code>), the page-turn sound (<code>dg-sound</code>) and whether the page-corner hint has played (<code>dg-flip-hint</code>).</li>
+          <li>The owner gets one HttpOnly, same-site cookie (<code>dg_owner</code>) that expires after 12 hours and is cleared by Sign out.</li>
+          <li>Traffic numbers, if wanted, come from Cloudflare’s cookieless Web Analytics, switched on in the dashboard rather than in the code.</li>
+        </ul>
+
+        <h3>The offline cache</h3>
+        <p>A service worker (<code>sw.js</code>, version <code>dg-v21</code>) makes the installed app work on weak signal. Pages are fetched network-first, so a guest online always gets fresh HTML and the cache is only a fallback. Scripts, styles, fonts and data are served from cache while a fresh copy downloads in the background, so a code deploy can take a second visit to show on a device that already had the menu open. The board and menu APIs are never cached: owner edits are always live on the next load. Bumping the version string forces every device onto a clean cache at its next visit. A copy of the worker installed from one of the old addresses retires itself, so an app added to the home screen from the workers.dev address simply lands on the domain; adding it again from dirtygringonny.com gives it the proper address.</p>
+
+        <h3>Security posture, in short</h3>
+        <ul>
+          <li>The PIN is stored hashed; sessions are signed with a secret that rotates when the PIN changes, which is what signs out other devices.</li>
+          <li>Login, setup and PIN change share a five-failure, ten-minute lockout per connection. A Cloudflare WAF rate rule on <code>/api/owner/*</code> is a cheap extra belt if the board ever draws attention.</li>
+          <li>Owner writes are sanitised against a field whitelist with size caps (400 items, 500 characters per field) and the promo codes exist only in the Worker, never in the browser code.</li>
+          <li>The repository on GitHub (<code>frickenclutch/la-gringa</code>) is public. No PIN, token or account secret is in it, and none should ever be committed.</li>
+        </ul>
+      </section>
+
+      <!-- ======================================================= 6 -->
+      <section class="chapter" id="ch6">
+        <p class="eyebrow dev">Chapter 6 · Administrators</p>
+        <h2>Deploying and checking</h2>
+        <p class="deck">Deploys are deliberate and manual. Pushing to GitHub refreshes the old mirror’s redirect and nothing else; the live site changes only when someone runs the deploy command from a machine signed in to the Cloudflare account.</p>
+
+        <h3>The commands</h3>
+        <pre class="cmd"><code>npm install          # once per machine
+npm test             # repo smoke tests: structure, languages, service worker, no leaked codes
+npm run test:mobile  # Playwright on iPhone, Galaxy, Fold and desktop profiles
+npm run dev          # local preview with the real APIs at http://localhost:8787
+npm run deploy       # build CSS, stage dist/, upload the Worker and its assets</code></pre>
+        <p>Local development reads <code>.dev.vars</code> for a throwaway <code>OWNER_PIN</code>; production has no PIN secret at all, because the owner set theirs through the site.</p>
+
+        <h3>Deploy-day checklist</h3>
+        <p class="hint screen-only">Ticks are remembered on this device only.</p>
+        <ul class="check" data-check="deploy">
+          <li><label><input type="checkbox" data-key="d1"> <span><code>npm test</code> and <code>npm run test:mobile</code> are green on the commit being shipped.</span></label></li>
+          <li><label><input type="checkbox" data-key="d2"> <span>If styles or scripts changed in a way guests must see at once, the version in <code>sw.js</code> was bumped.</span></label></li>
+          <li><label><input type="checkbox" data-key="d3"> <span><code>_redirects</code> is <em>not</em> in <code>dist/</code> (the staging script excludes it; the smoke test guards it).</span></label></li>
+          <li><label><input type="checkbox" data-key="d4"> <span><code>npm run deploy</code> finished and printed the Worker address.</span></label></li>
+          <li><label><input type="checkbox" data-key="d5"> <span>On a phone: the passport shows on a fresh browser, the gate, the hub and the menu load, and the language chip flips all three.</span></label></li>
+          <li><label><input type="checkbox" data-key="d6"> <span>One round of the game ends with a promo code, not <em>Show this win at the counter</em>.</span></label></li>
+          <li><label><input type="checkbox" data-key="d7"> <span>The Street Board shows the current specials and the cover shows the current month label.</span></label></li>
+          <li><label><input type="checkbox" data-key="d8"> <span><code>/owner</code> accepts the PIN, Menu Pages opens in edit mode, and Sign out works.</span></label></li>
+          <li><label><input type="checkbox" data-key="d9"> <span>Get the Menu App appears on the menu; an install on one phone opens straight to the manuscript.</span></label></li>
+          <li><label><input type="checkbox" data-key="d10"> <span>The owner has this manual and knows the three promo codes and what each is worth.</span></label></li>
+        </ul>
+        <div class="check-foot"><span data-progress="deploy"></span><button class="btn ghost" type="button" data-clear="deploy">Clear ticks</button></div>
+
+        <h3>Domain day: dirtygringonny.com is on the site (done 11 September 2026)</h3>
+        <p>The zone moved into the Dirty Gringo Cloudflare account, the bare domain was bound to the Worker and Cloudflare issued the certificate; the WordPress host and its expired certificate are out of the picture. What is left to tidy, and what to check:</p>
+        <ul class="check" data-check="domain">
+          <li><label><input type="checkbox" data-key="m1"> <span>Add <code>www.dirtygringonny.com</code> as a custom domain on the Worker (Workers &amp; Pages → la-gringas → Settings → Domains &amp; Routes), replacing the <code>www</code> record imported with the zone. The Worker then redirects <code>www</code> to the domain page for page.</span></label></li>
+          <li><label><input type="checkbox" data-key="m2"> <span>Remove any zone-level rule that sends <code>www</code> to the bare domain (Rules → Redirect Rules, and Page Rules): the one created on domain day dropped the path, so <code>www.dirtygringonny.com/menu</code> landed on the home page and only worked over https.</span></label></li>
+          <li><label><input type="checkbox" data-key="m3"> <span>SSL/TLS → Edge Certificates: switch on <strong>Always Use HTTPS</strong> (the Worker upgrades plain http:// as well, so this is belt and braces).</span></label></li>
+          <li><label><input type="checkbox" data-key="m4"> <span>Remove the <code>new.dirtygringonny.com</code> custom domain from the Worker once nothing links to it (it forwards to the domain either way).</span></label></li>
+          <li><label><input type="checkbox" data-key="m5"> <span>Re-check on the domain: the PIN login, Menu Pages, a fresh app install, and the promo code at the end of a game.</span></label></li>
+          <li><label><input type="checkbox" data-key="m6"> <span>Tell the owner the old menu PDF and the old site are gone, that <code>dirtygringonny.com</code> is the address to print on anything, and that an app installed from the workers.dev address can be added again from the domain.</span></label></li>
+          <li><label><input type="checkbox" data-key="m7"> <span>Email: the MX records and <code>mail.</code>, <code>webmail.</code>, <code>cpanel.</code> still point at the old hosting box. Keep that hosting until every @dirtygringonny.com mailbox is moved or confirmed unused, then retire it and those records together.</span></label></li>
+        </ul>
+        <div class="check-foot"><span data-progress="domain"></span><button class="btn ghost" type="button" data-clear="domain">Clear ticks</button></div>
+
+        <h3>Resetting a lost PIN</h3>
+        <ol class="steps">
+          <li>Delete the <code>owner-auth</code> key from the <code>MENU_BOARD</code> namespace (dashboard, or <code>npx wrangler kv key delete --binding MENU_BOARD --remote owner-auth</code>).</li>
+          <li>Seed a fresh one-time token and send the owner the link it prints. The README carries the exact command; it stores <code>owner-claim-token</code> with a seven-day expiry and echoes <code>/owner?claim=…</code> on the live address.</li>
+          <li>The owner opens the link, chooses a new PIN, and lands in the editor. The token burns on use. Board content and menu edits are untouched throughout.</li>
+        </ol>
+        <div class="note dev"><span class="k">Machine quirk worth knowing</span><p>A stale <code>CLOUDFLARE_API_TOKEN</code> in a Windows user environment overrides the dashboard login and makes every Wrangler command fail with an auth error. Remove the variable, or prefix commands with <code>env -u CLOUDFLARE_API_TOKEN</code> in a bash shell.</p></div>
+      </section>
+
+      <!-- ======================================================= 7 -->
+      <section class="chapter" id="ch7">
+        <p class="eyebrow">Chapter 7 · Everyone</p>
+        <h2>When something looks wrong</h2>
+        <p class="deck">Start from what you see. Most of these fix themselves in a minute; the rest tell you exactly who to call and what to say.</p>
+        <input class="sym-search" type="search" id="sym-q" placeholder="Type what you see: PIN, special, code, Spanish, slow, install…" aria-label="Filter symptoms">
+        <div id="sym-list">
+          <details class="sym"><summary>The PIN page says “Owner tools don’t run on this address” or shows a “read-only copy” panel</summary><div class="body"><p>Old bookmarks to la-gringa.pages.dev or the workers.dev address now forward to the domain on their own, so this should no longer happen. If it does, you are looking at a saved or offline copy of the page: press <strong>Open the real Patio Board</strong> or type <code>dirtygringonny.com/owner</code>, and replace the bookmark.</p></div></details>
+          <details class="sym"><summary>“Too many attempts — the board is resting”</summary><div class="body"><p>Five wrong PINs from your connection. Wait ten minutes; the correct PIN is refused too until then. If you did not make those attempts, someone on the same network did: change the PIN once you are in, and tell your developer if it keeps happening.</p></div></details>
+          <details class="sym"><summary>I forgot the PIN</summary><div class="body"><p>There is no reset link. Ask your developer for a fresh setup link (chapter 6 has the procedure). It arrives as a private address ending in <code>/owner?claim=…</code>, works once, and expires after seven days. Choose a phrase you will remember this time and note it somewhere safe.</p></div></details>
+          <details class="sym"><summary>My phone only offers a number keypad in the PIN box</summary><div class="body"><p>The login box currently asks phones for a numeric keypad. A PIN made of digits types fine; a PIN with letters cannot be entered on an iPhone until your developer makes the one-line fix in the login form. Until then use a computer, or a phone keyboard that lets you switch to letters.</p></div></details>
+          <details class="sym"><summary>I saved a special but I don’t see it on the menu</summary><div class="body"><p>Check three things on the board: the <strong>Active</strong> box is ticked, the <strong>Starts</strong> date is today or earlier (or blank), the <strong>Ends</strong> date is today or later (or blank). Then reload the menu: pull down in the browser, or close and reopen the installed app. The Street Board fetches the live board every time the menu opens.</p></div></details>
+          <details class="sym"><summary>The cover shows an old month, or “August 2026”</summary><div class="body"><p>The cover shows the <strong>Month label</strong> from the board. If you changed it and saved, reload the menu. “August 2026” is the built-in fallback: if the board says something else but the cover still shows August, the menu could not reach the server. tell your developer, and mention whether the Street Board also shows the built-in specials (Birria Quesatacos and River Fish Taco Plate).</p></div></details>
+          <details class="sym"><summary>The game says “Show this win at the counter” instead of a code</summary><div class="body"><p>The game could not reach the server for a code: the guest is on the old mirror address, offline, or the site is down. Honor the win at your discretion and ask them to try the live address. If it happens on the live address with a good connection, the Worker is not answering; contact your developer.</p></div></details>
+          <details class="sym"><summary>A Spanish or French dish name reads wrong</summary><div class="body"><p>Open Menu Pages, switch the <strong>EN | ES | FR</strong> chip to that language, tap the item and rewrite it. From then on that text is yours and the translator leaves it alone (chapter 4).</p></div></details>
+          <details class="sym"><summary>I changed the English name and the Spanish one didn’t follow</summary><div class="body"><p>Someone typed that Spanish text by hand earlier, so it is protected from the machine. Edit it directly in Spanish, or, to hand it back to the translator, tell your developer to clear that field.</p></div></details>
+          <details class="sym"><summary>“Saved” appeared but guests still see the old price</summary><div class="body"><p>The change is live on the server. A menu that was already open keeps its page until it reloads; the installed app should be fully closed and reopened. If a fresh load on a different phone still shows the old price, tell your developer which item.</p></div></details>
+          <details class="sym"><summary>Menu Pages bounces me back to the board</summary><div class="body"><p>Your 12-hour session ended or you were never signed in on this device. Unlock the board again, then press <strong>Edit the menu manuscript</strong>.</p></div></details>
+          <details class="sym"><summary>www.dirtygringonny.com shows the home page instead of the menu, or a “522” error</summary><div class="body"><p>The bare domain has been on the new site since 11 September 2026 with a certificate Cloudflare renews itself. The <code>www</code> spelling is not on the site yet: over https it lands on the home page whatever page was asked for, and over plain http it fails with a 522 error. Until the fix in chapter 6 (Domain day) is done, share and print <code>dirtygringonny.com</code> without the www.</p></div></details>
+          <details class="sym"><summary>The menu feels slow or stutters on a phone</summary><div class="body"><p>Phones already get the lighter version with the moving effects off. Close other tabs and apps, and try a fresh load. If it is still sluggish, note the phone model and browser and tell your developer; the remaining effects can be dialled down further.</p></div></details>
+          <details class="sym"><summary>“Get the Menu App” never shows up</summary><div class="body"><p>It hides once the app is installed. On an iPhone it only works in Safari, so a link opened inside Facebook, Instagram or Chrome will not offer it: ask the guest to open the address in Safari. Some desktop browsers cannot install web apps at all.</p></div></details>
+          <details class="sym"><summary>The Street Board says “No specials posted right now”</summary><div class="body"><p>Nothing is active for today: every special is unticked, has not started, or has ended. Fix the dates or tick Active and save. If you are sure something is active, see “The cover shows an old month” above.</p></div></details>
+          <details class="sym"><summary>No page-turn sound</summary><div class="body"><p>The speaker button beside the language chip is off (the choice is remembered per device), or the phone’s silent switch is on. Sound only plays on real page turns, not while the book is loading.</p></div></details>
+          <details class="sym"><summary>Can I undo a save on the board?</summary><div class="body"><p>Not from the board: History is a record. Re-enter the earlier values and save. Your developer can restore any of the last 40 board snapshots or the last 20 menu-edit snapshots from storage.</p></div></details>
+          <details class="sym"><summary>The passport shows every single time I open the site</summary><div class="body"><p>The browser is refusing to remember anything: a private window, or site data being cleared on close. Open the site in a normal window. Guests who see this are in the same situation and lose nothing but the one tap.</p></div></details>
+          <p class="sym-none" id="sym-none">Nothing matches that. Try one word, or read the list without a filter.</p>
+        </div>
+      </section>
+
+      <!-- ======================================================= 8 -->
+      <section class="chapter" id="ch8">
+        <p class="eyebrow dev">Chapter 8 · Reference</p>
+        <h2>Glossary and files</h2>
+        <p class="deck">The words this manual uses, and where each part of the site lives in the code for whoever opens the repository.</p>
+
+        <h3>Words</h3>
+        <dl class="gloss">
+          <dt>Passport</dt><dd>The language question a device sees on its first visit.</dd>
+          <dt>Gate</dt><dd>The front page with the skillet game.</dd>
+          <dt>Hub</dt><dd>The crossroads page with the four cards and the hours.</dd>
+          <dt>Manuscript</dt><dd>The menu, presented as a book.</dd>
+          <dt>Street Board</dt><dd>The chalk overlay on the menu with today’s specials and This month.</dd>
+          <dt>Patio Board</dt><dd>The owner’s private page at <code>/owner</code>.</dd>
+          <dt>Menu Pages</dt><dd>Edit mode on the manuscript itself, at <code>/menu?edit=1</code>.</dd>
+          <dt>Override</dt><dd>One of your edits, stored as a layer over the printed menu.</dd>
+          <dt>Session</dt><dd>The 12 hours a device stays unlocked after a correct PIN.</dd>
+          <dt>Lockout</dt><dd>The 10-minute rest after five wrong PINs from one connection.</dd>
+          <dt>Setup link</dt><dd>The one-time <code>/owner?claim=…</code> address used to choose a PIN.</dd>
+          <dt>Worker</dt><dd>Cloudflare’s name for the small program that runs the site at the edge.</dd>
+          <dt>KV</dt><dd>Cloudflare’s key-value storage, where the board and your edits live.</dd>
+          <dt>Workers AI</dt><dd>Cloudflare’s hosted models, used here only for translating your edits.</dd>
+          <dt>Mirror</dt><dd>The old la-gringa.pages.dev address, now just a forwarder.</dd>
+          <dt>Lite mode</dt><dd>The lighter menu that phones and reduced-motion devices get.</dd>
+        </dl>
+
+        <h3>Files</h3>
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Path</th><th>What it is</th></tr></thead>
+          <tbody>
+            <tr><td><code>index.html</code> · <code>js/gate-game.js</code></td><td class="wrap">The gate and the skillet game. Recipes come from <code>data/recipes.json</code>; the promo codes live only in <code>worker.js</code>.</td></tr>
+            <tr><td><code>hub.html</code></td><td class="wrap">The hub. Its hours text comes from <code>data/i18n.json</code> (the <code>hub.hours…</code> strings) and its search-engine data is inline.</td></tr>
+            <tr><td><code>menu.html</code></td><td class="wrap">The printed menu and the book’s styling. Scripts: <code>menu-book.js</code> (page turns), <code>menu-board-ui.js</code> (Street Board, cover month, the five-tap seal), <code>menu-live.js</code> (applies overrides), <code>menu-edit.js</code> (edit mode), <code>menu-ambience.js</code> (riverfront, seasons, moon, sound), <code>menu-install.js</code> (Get the Menu App).</td></tr>
+            <tr><td><code>owner.html</code> · <code>js/owner-board.js</code></td><td class="wrap">The Patio Board, including the setup screen and Change PIN.</td></tr>
+            <tr><td><code>js/i18n.js</code> · <code>data/i18n.json</code></td><td class="wrap">The passport, the chip and all interface strings in three languages. <code>tools/build-i18n-fr.mjs</code> regenerates missing French strings.</td></tr>
+            <tr><td><code>data/site.json</code></td><td class="wrap">Venue facts for search engines and the app manifest: address, phone, hours, map query. Hours therefore live here, in <code>i18n.json</code> and in <code>hub.html</code>; change all three together.</td></tr>
+            <tr><td><code>data/menu-board.json</code></td><td class="wrap">The fallback board shown when the server cannot be reached.</td></tr>
+            <tr><td><code>worker.js</code> · <code>wrangler.jsonc</code></td><td class="wrap">Every <code>/api/</code> route, the sanitisers, translation and auth, plus the redirects that send old addresses and old WordPress links to the domain; and the Cloudflare configuration (Worker name, the complete list of custom domains, KV binding, AI binding).</td></tr>
+            <tr><td><code>_redirects</code></td><td class="wrap">Instructions for the old Pages mirror only: forward everything to the domain, and keep serving the service worker so old installs can retire themselves. Never copied into <code>dist/</code>.</td></tr>
+            <tr><td><code>sw.js</code></td><td class="wrap">The offline cache. Bump <code>VERSION</code> to flush every device.</td></tr>
+            <tr><td><code>art/riverfront.svg</code></td><td class="wrap">The waterfront painting; colours are variables set per time of day in <code>menu.html</code>.</td></tr>
+            <tr><td><code>tests/</code> · <code>tools/</code></td><td class="wrap">The smoke test, the Playwright suite and its static server; build scripts for fonts, icons and staging.</td></tr>
+            <tr><td><code>docs/how-the-site-works.html</code></td><td class="wrap">This manual. It is not part of the deployed site; share the file directly. Its source, the screenshot script and the captured images live in <code>docs/src/</code>; after editing <code>guide-body.html</code> there, run <code>node docs/src/build-guide.mjs</code> from the repository root to rebuild this file.</td></tr>
+            <tr><td><code>docs/how-the-site-works.pdf</code></td><td class="wrap">A print of this manual for sharing on messengers and phones; the try-it widgets become worked examples. Regenerate with <code>node docs/src/build-pdf.mjs</code> after rebuilding the HTML.</td></tr>
+          </tbody>
+        </table></div>
+        <p class="foot">Written for The Dirty Gringo at the Dobisky, 100 Riverside Ave., Ogdensburg, NY. When the code changes, this manual should change with it; the date at the top says when it was last checked.</p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- tabs (journey map + board panels) ---------- */
+  document.querySelectorAll('[data-tabs]').forEach(function (root) {
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+    var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+    function select(i, focus) {
+      tabs.forEach(function (t, j) {
+        var on = i === j;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (panels[j]) panels[j].hidden = !on;
+      });
+      if (focus) tabs[i].focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(i, false); });
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        select((i + d + tabs.length) % tabs.length, true);
+      });
+    });
+    var initial = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+    select(initial < 0 ? 0 : initial, false);
+  });
+
+  /* ---------- contents rail: highlight the chapter in view ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll('.rail a[href^="#"]'));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  function markActive(id) {
+    links.forEach(function (a) { a.classList.toggle('is-active', a.getAttribute('href') === '#' + id); });
+  }
+  if ('IntersectionObserver' in window && sections.length) {
+    var visible = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { visible[en.target.id] = en.isIntersecting; });
+      var first = sections.find(function (s) { return visible[s.id]; });
+      if (first) markActive(first.id);
+    }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+    sections.forEach(function (s) { io.observe(s); });
+    markActive(sections[0].id);
+  }
+
+  /* ---------- what a guest sees right now (same rules as the menu) ---------- */
+  var SYNODIC = 29.530588853;
+  var NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
+  function daypartFor(d) {
+    var h = d.getHours();
+    if (h >= 6 && h < 17) return 'day';
+    if (h >= 17 && h < 20) return 'dusk';
+    return 'night';
+  }
+  function seasonFor(d) {
+    var m = d.getMonth() + 1, day = d.getDate();
+    if ((m === 10 && day >= 25) || (m === 11 && day <= 3)) return 'marigold';
+    if (m === 12 || m === 1 || m === 2) return 'snow';
+    if ((m === 5 && day <= 6) || (m === 9 && (day === 15 || day === 16))) return 'confetti';
+    return 'none';
+  }
+  function moonPhase(d) {
+    var days = (d.getTime() - NEW_MOON) / 86400000;
+    var p = (days / SYNODIC) % 1;
+    return p < 0 ? p + 1 : p;
+  }
+  function moonName(p) {
+    if (p < 0.03 || p > 0.97) return 'new moon';
+    if (p < 0.22) return 'waxing crescent';
+    if (p < 0.28) return 'first quarter';
+    if (p < 0.47) return 'waxing gibbous';
+    if (p < 0.53) return 'full moon';
+    if (p < 0.72) return 'waning gibbous';
+    if (p < 0.78) return 'last quarter';
+    return 'waning crescent';
+  }
+  function moonLitPath(p, cx, cy, r) {
+    var lit = (1 - Math.cos(p * Math.PI * 2)) / 2;
+    if (lit < 0.02) return '';
+    var waxing = p < 0.5;
+    var rx = Math.abs(Math.cos(p * Math.PI * 2)) * r;
+    var crescent = lit < 0.5;
+    var limbSweep = waxing ? 1 : 0;
+    var termSweep = waxing ? (crescent ? 0 : 1) : (crescent ? 1 : 0);
+    return 'M' + cx + ',' + (cy - r) +
+      ' A' + r + ',' + r + ' 0 0 ' + limbSweep + ' ' + cx + ',' + (cy + r) +
+      ' A' + rx.toFixed(2) + ',' + r + ' 0 0 ' + termSweep + ' ' + cx + ',' + (cy - r) + ' Z';
+  }
+  var SEASON_TEXT = {
+    none: 'no seasonal effects',
+    marigold: 'marigold petals (Día de los Muertos)',
+    snow: 'snow (Ogdensburg winter)',
+    confetti: 'confetti (fiesta days)'
+  };
+  var nowWhen = document.getElementById('now-when');
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function localInputValue(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function renderNow(d, isNow) {
+    var dp = daypartFor(d), se = seasonFor(d), ph = moonPhase(d);
+    document.getElementById('now-daypart').textContent = dp;
+    document.getElementById('now-season').textContent = SEASON_TEXT[se];
+    document.getElementById('now-moon').textContent = moonName(ph);
+    document.getElementById('now-moon-lit').setAttribute('d', moonLitPath(ph, 32, 32, 27));
+    document.getElementById('now-note').textContent = isNow
+      ? 'Computed with the same rules the menu uses, from this device’s clock and calendar.'
+      : 'For ' + d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) + ', by that device’s local clock.';
+    var q = '/menu?daypart=' + dp + '&season=' + se + '&moon=' + ph.toFixed(2);
+    var link = document.getElementById('now-link');
+    link.innerHTML = 'Preview this exact look on the live site: <a href="https://dirtygringonny.com' + q + '">' + q + '</a>';
+  }
+  if (nowWhen) {
+    var now = new Date();
+    nowWhen.value = localInputValue(now);
+    renderNow(now, true);
+    nowWhen.addEventListener('input', function () {
+      var d = nowWhen.value ? new Date(nowWhen.value) : new Date();
+      if (isNaN(d.getTime())) d = new Date();
+      renderNow(d, !nowWhen.value);
+    });
+  }
+
+  /* ---------- try a special (mirrors the server's date rule) ---------- */
+  var sim = document.getElementById('sim');
+  if (sim) {
+    var $ = function (id) { return document.getElementById(id); };
+    var todayInput = $('sim-today');
+    todayInput.value = new Date().toISOString().slice(0, 10);
+    function renderSim() {
+      var name = $('sim-name').value.trim() || 'Untitled special';
+      var price = $('sim-price').value.trim();
+      var note = $('sim-note').value.trim();
+      var starts = $('sim-start').value, ends = $('sim-end').value;
+      var active = $('sim-active').checked;
+      var today = todayInput.value || new Date().toISOString().slice(0, 10);
+      $('sim-out-name').textContent = name;
+      $('sim-out-price').textContent = price;
+      $('sim-out-note').textContent = note;
+      $('sim-out-note').hidden = !note;
+      var verdict, on = true;
+      if (!active) { verdict = 'Hidden: Active is unticked.'; on = false; }
+      else if (starts && today < starts) { verdict = 'Hidden until ' + starts + ' (server date ' + today + ').'; on = false; }
+      else if (ends && today > ends) { verdict = 'Hidden: it ended on ' + ends + ' (server date ' + today + ').'; on = false; }
+      else verdict = 'Shown on the Street Board on ' + today + (ends ? ', through ' + ends : '') + '.';
+      var v = $('sim-verdict');
+      v.textContent = verdict;
+      v.className = 'verdict ' + (on ? 'on' : 'off');
+      $('sim-out').classList.toggle('is-hidden', !on);
+    }
+    sim.querySelectorAll('input').forEach(function (el) { el.addEventListener('input', renderSim); });
+    renderSim();
+  }
+
+  /* ---------- who owns each language ---------- */
+  var tri = document.getElementById('tri');
+  if (tri) {
+    var NAMES = { en: 'English', es: 'Spanish', fr: 'French' };
+    var PRINTED = { en: 'Birria Quesatacos', es: 'Quesatacos de birria', fr: 'Quesatacos de birria' };
+    var YOURS = { en: 'Birria Quesatacos, Friday only', es: 'Quesatacos de birria, solo los viernes', fr: 'Quesatacos de birria, le vendredi seulement' };
+    var state = {};
+    function resetState() {
+      ['en', 'es', 'fr'].forEach(function (l) { state[l] = { owner: 'printed', from: null }; });
+    }
+    function textFor(l) {
+      var s = state[l];
+      if (s.owner === 'printed') return PRINTED[l];
+      if (s.owner === 'you') return YOURS[l];
+      return YOURS[l] + ' (translated from ' + NAMES[s.from] + ')';
+    }
+    function render(log) {
+      tri.querySelectorAll('.lang').forEach(function (card) {
+        var l = card.getAttribute('data-lang');
+        card.setAttribute('data-owner', state[l].owner);
+        card.querySelector('.t').textContent = textFor(l);
+        card.querySelector('.o').textContent = state[l].owner === 'printed' ? 'Printed' : state[l].owner === 'you' ? 'Yours' : 'Machine';
+      });
+      document.getElementById('tri-log').textContent = log;
+    }
+    tri.querySelectorAll('[data-edit]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var src = btn.getAttribute('data-edit');
+        state[src] = { owner: 'you', from: null };
+        var refilled = [], kept = [];
+        ['en', 'es', 'fr'].forEach(function (l) {
+          if (l === src) return;
+          if (state[l].owner === 'you') kept.push(NAMES[l]);
+          else { state[l] = { owner: 'machine', from: src }; refilled.push(NAMES[l]); }
+        });
+        var msg = NAMES[src] + ' is now yours.';
+        if (refilled.length) msg += ' ' + refilled.join(' and ') + (refilled.length > 1 ? ' were' : ' was') + ' translated from it because ' + (refilled.length > 1 ? 'they were' : 'it was') + ' printed or machine text.';
+        if (kept.length) msg += ' ' + kept.join(' and ') + ' stayed exactly as you typed ' + (kept.length > 1 ? 'them' : 'it') + '.';
+        render(msg);
+      });
+    });
+    tri.querySelector('[data-reset]').addEventListener('click', function () {
+      resetState();
+      render('Reset to original: the printed text is back in all three languages.');
+    });
+    resetState();
+    render('Nothing edited yet: guests see the printed menu in all three languages.');
+  }
+
+  /* ---------- checklists remembered on this device ---------- */
+  var STORE = 'dg-manual-checks';
+  function loadChecks() { try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { return {}; } }
+  function saveChecks(v) { try { localStorage.setItem(STORE, JSON.stringify(v)); } catch (e) {} }
+  var checks = loadChecks();
+  document.querySelectorAll('.check').forEach(function (list) {
+    var group = list.getAttribute('data-check');
+    var boxes = Array.prototype.slice.call(list.querySelectorAll('input[type="checkbox"]'));
+    var progress = document.querySelector('[data-progress="' + group + '"]');
+    var clear = document.querySelector('[data-clear="' + group + '"]');
+    function paint() {
+      var done = 0;
+      boxes.forEach(function (b) {
+        b.closest('label').classList.toggle('done', b.checked);
+        if (b.checked) done++;
+      });
+      if (progress) progress.textContent = done + ' of ' + boxes.length + ' done';
+    }
+    boxes.forEach(function (b) {
+      var key = group + ':' + b.getAttribute('data-key');
+      b.checked = Boolean(checks[key]);
+      b.addEventListener('change', function () {
+        checks[key] = b.checked;
+        saveChecks(checks);
+        paint();
+      });
+    });
+    if (clear) clear.addEventListener('click', function () {
+      boxes.forEach(function (b) { b.checked = false; delete checks[group + ':' + b.getAttribute('data-key')]; });
+      saveChecks(checks);
+      paint();
+    });
+    paint();
+  });
+
+  /* ---------- symptom filter ---------- */
+  var q = document.getElementById('sym-q');
+  if (q) {
+    var items = Array.prototype.slice.call(document.querySelectorAll('details.sym'));
+    var none = document.getElementById('sym-none');
+    q.addEventListener('input', function () {
+      var term = q.value.trim().toLowerCase();
+      var shown = 0;
+      items.forEach(function (d) {
+        var hit = !term || d.textContent.toLowerCase().indexOf(term) !== -1;
+        d.hidden = !hit;
+        if (hit) shown++;
+        if (term && hit && items.length > 3) d.open = true;
+        if (!term) d.open = false;
+      });
+      none.style.display = shown ? 'none' : 'block';
+    });
+  }
+})();
+</script>

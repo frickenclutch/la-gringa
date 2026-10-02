@@ -1,12 +1,17 @@
-.claude/
+# Claude Code: share preview configs and helper scripts, keep machine settings local
+.claude/*
+!.claude/launch.json
+!.claude/*.mjs
 node_modules/
 dist/
 test-results/
 playwright-report/
 .env
 .env.*
+!.dev.vars.example
 .dev.vars
 .wrangler/
 previews/
 /valuation*.png
 /upgrades to add value now..png
+docs/src/guide-artifact.html
