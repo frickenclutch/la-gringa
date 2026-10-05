@@ -920,42 +920,91 @@
         .share-sheet-choices svg { width: 1.1rem; height: 1.1rem; fill: currentColor; flex-shrink: 0; }
         .install-coach-sheet .share-sheet-status { min-height: 1.2em; margin: 0 0 0.6rem; font-weight: bold; color: #1c361d; text-align: center; }
 
-        /* ---- Print: lay the book flat, pages in reading order, ink-friendly ---- */
+        /* ---- Print: a compact paper menu — masthead, then three newspaper columns.
+           rem-based sizes shrink with the print root size, so spacing tightens too. ---- */
         @media print {
-            @page { margin: 0.5in; }
-            html { font-size: 11pt !important; }
+            @page { size: letter; margin: 0.35in; }
+            html { font-size: 7.1pt !important; }
+            /* French runs longest; a hair smaller keeps it on one sheet */
+            html[lang="fr"] { font-size: 6.8pt !important; }
             body {
                 overflow: visible !important; height: auto !important; min-height: 0 !important;
                 background: #fff !important; color: #000;
             }
             body > *:not(.scene) { display: none !important; }
-            .scene, .book, .leaf, .face {
+            .scene, .book, .face {
                 position: static !important;
                 transform: none !important;
-                width: auto !important; height: auto !important; max-height: none !important;
+                width: auto !important; height: auto !important; max-height: none !important; min-height: 0 !important;
                 margin: 0 !important;
                 perspective: none !important;
                 overflow: visible !important;
                 transition: none !important;
             }
             .scene { display: block !important; padding: 0 !important; }
-            .leaf { display: block !important; }
-            .leaf::before, .leaf::after, .face::before, .face::after { display: none !important; }
+            /* Leaves dissolve so every page face flows straight into the columns */
+            .leaf { display: contents !important; }
+            .book {
+                display: block !important;
+                column-count: 3;
+                column-gap: 0.2in;
+                column-rule: 1px solid #bbb;
+            }
+            .leaf::before, .leaf::after, .face::before, .face::after, .fx-steam { display: none !important; }
             .face {
                 visibility: visible !important;
                 backface-visibility: visible !important; -webkit-backface-visibility: visible !important;
                 background: #fff !important;
                 box-shadow: none !important; border: 0 !important;
-                padding: 0 0 1.25rem !important;
+                padding: 0 0 0.6rem !important;
                 display: block !important;
             }
-            #leaf1 > .face.front { break-after: page; min-height: 9in; }
-            .cover-face .cover-page-content { min-height: 9in !important; box-shadow: none !important; }
-            .menu-grid { grid-template-columns: 1fr 1fr !important; gap: 1.5rem !important; }
-            .text-small { font-size: 0.85rem !important; }
-            .text-h2 { font-size: 1.5rem !important; break-after: avoid; }
-            .text-h3 { font-size: 1.1rem !important; break-after: avoid; }
-            .menu-item, table, tr { break-inside: avoid; }
+
+            /* Cover → one-line masthead across all three columns */
+            .cover-face {
+                column-span: all;
+                display: block !important;
+                padding: 0 0 0.5rem !important;
+                margin-bottom: 0.6rem !important;
+                border-bottom: 2px solid #000 !important;
+                text-align: center;
+            }
+            .cover-face .cover-page-content {
+                border: 0 !important; padding: 0 !important; min-height: 0 !important;
+                box-shadow: none !important; display: block !important;
+            }
+            .cover-face .cover-hero, .cover-face .cover-hero + h2,
+            .cover-face .text-small.italic, .cover-face > div > .absolute { display: none !important; }
+            .cover-seal { position: absolute !important; width: 0.55in !important; height: 0.55in !important; top: 0 !important; left: 0 !important; right: auto !important; }
+            .cover-seal img { width: 100% !important; height: 100% !important; }
+            .cover-face .cover-page-content { position: relative; }
+            #cover-month { margin: 0 !important; font-size: 0.8rem !important; }
+            .cover-face .mt-auto { margin: 0 !important; }
+            .cover-face .mt-auto h3 { font-size: 1.9rem !important; margin: 0 !important; border: 0 !important; padding: 0 !important; }
+            .cover-face .mt-auto p { display: inline !important; margin: 0 0.4rem !important; padding: 0 !important; border: 0 !important; font-size: 0.9rem !important; }
+            .cover-face .mt-auto p.text-body { font-size: 1rem !important; }
+
+            /* Back cover sits in the flow like any other section */
+            .face.back.flex { display: block !important; padding: 0 !important; }
+
+            .menu-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+            .text-body { font-size: 1rem !important; }
+            .text-small { font-size: 0.92rem !important; line-height: 1.18 !important; }
+            .text-h2 { font-size: 1.45rem !important; margin: 0.3rem 0 0.25rem !important; break-after: avoid; }
+            .text-h3 { font-size: 1.15rem !important; margin: 0.45rem 0 0.15rem !important; break-after: avoid; }
+            .menu-item { margin-bottom: 0.3rem !important; break-inside: avoid; }
+            /* Keep a section's heading and intro line with what follows */
+            .text-h2 + p, .text-h3 + p { break-after: avoid; }
+            /* The black ribbon heading keeps its light lettering */
+            .text-h3.bg-black { color: #fff !important; }
+            .menu-item-title { font-size: 1.05rem !important; }
+            .dotted-leader { top: -3px !important; }
+            table, tr, .border-double, .border-2, .border-4 { break-inside: avoid; }
+            .face .flex, .face.back .text-center { break-inside: avoid; }
+            .face .mt-6, .face .mt-4, .face .mt-2, .face .my-4 { margin-top: 0.3rem !important; }
+            .face .mb-6, .face .mb-4, .face .mb-3, .face .my-4 { margin-bottom: 0.3rem !important; }
+            .face td, .face th { padding-top: 0.1rem !important; padding-bottom: 0.1rem !important; }
+            .face .p-3, .face .p-4 { padding: 0.35rem !important; }
             .page-hint { display: none !important; }
             .font-title { text-shadow: none !important; }
             a { color: inherit !important; text-decoration: none !important; }
