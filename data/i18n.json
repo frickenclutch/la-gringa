@@ -235,7 +235,20 @@
     "game.rewardCounter": "Show this win at the counter",
     "game.loadError": "Could not load recipes. Try refreshing.",
     "menu.boardNone": "None listed",
-    "hub.facebook": "Holiday hours & news on Facebook ↗"
+    "hub.facebook": "Holiday hours & news on Facebook ↗",
+    "app.fbTitle": "Open our Facebook page",
+    "app.fbApp": "Open in the Facebook app",
+    "app.fbWeb": "Open in the browser",
+    "app.cancel": "Cancel",
+    "menu.shareBtn": "Share or print the menu",
+    "menu.shareTitle": "Take the menu with you",
+    "menu.shareBody": "Send the menu to a friend, or print a paper copy (or save it as a PDF).",
+    "menu.shareAction": "Share the menu",
+    "menu.printAction": "Print or save as PDF",
+    "menu.shareCopied": "Link copied — paste it anywhere",
+    "menu.shareText": "Fresh Mex on the Ogdensburg riverfront — check out the Dirty Gringo menu.",
+    "menu.shareClose": "Close",
+    "hub.boardMenuLink": "See the full menu →"
   },
   "es": {
     "passport.eyebrow": "Cruzando el río · frontera del San Lorenzo",
@@ -473,7 +486,20 @@
     "game.rewardCounter": "Muestra este triunfo en el mostrador",
     "game.loadError": "No se pudieron cargar las recetas. Intenta recargar.",
     "menu.boardNone": "Nada por ahora",
-    "hub.facebook": "Horarios festivos y noticias en Facebook ↗"
+    "hub.facebook": "Horarios festivos y noticias en Facebook ↗",
+    "app.fbTitle": "Abre nuestra página de Facebook",
+    "app.fbApp": "Abrir en la app de Facebook",
+    "app.fbWeb": "Abrir en el navegador",
+    "app.cancel": "Cancelar",
+    "menu.shareBtn": "Compartir o imprimir el menú",
+    "menu.shareTitle": "Llévate el menú",
+    "menu.shareBody": "Envía el menú a un amigo o imprime una copia en papel (o guárdala como PDF).",
+    "menu.shareAction": "Compartir el menú",
+    "menu.printAction": "Imprimir o guardar como PDF",
+    "menu.shareCopied": "Enlace copiado — pégalo donde quieras",
+    "menu.shareText": "Fresh Mex junto al río en Ogdensburg — mira el menú de The Dirty Gringo.",
+    "menu.shareClose": "Cerrar",
+    "hub.boardMenuLink": "Ver el menú completo →"
   },
   "fr": {
     "passport.eyebrow": "Traversée du fleuve · frontière du Saint-Laurent",
@@ -711,6 +737,19 @@
     "game.rewardCounter": "Montrez cette victoire au comptoir",
     "game.loadError": "Impossible de charger les recettes. Essayez de rafraîchir.",
     "menu.boardNone": "Rien pour l’instant",
-    "hub.facebook": "Heures des fêtes et nouvelles sur Facebook ↗"
+    "hub.facebook": "Heures des fêtes et nouvelles sur Facebook ↗",
+    "app.fbTitle": "Ouvrir notre page Facebook",
+    "app.fbApp": "Ouvrir dans l’app Facebook",
+    "app.fbWeb": "Ouvrir dans le navigateur",
+    "app.cancel": "Annuler",
+    "menu.shareBtn": "Partager ou imprimer le menu",
+    "menu.shareTitle": "Emportez le menu",
+    "menu.shareBody": "Envoyez le menu à un ami, ou imprimez une copie papier (ou enregistrez-la en PDF).",
+    "menu.shareAction": "Partager le menu",
+    "menu.printAction": "Imprimer ou enregistrer en PDF",
+    "menu.shareCopied": "Lien copié — collez-le où vous voulez",
+    "menu.shareText": "Fresh Mex au bord du fleuve à Ogdensburg — découvrez le menu du Dirty Gringo.",
+    "menu.shareClose": "Fermer",
+    "hub.boardMenuLink": "Voir le menu complet →"
   }
 }

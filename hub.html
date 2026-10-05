@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="styles.css">
   <!-- Self-hosted fonts (no third-party CDN) -->
   <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="street-board.css">
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest">
@@ -126,6 +127,65 @@
       .nav-card p { font-size: 0.65rem; }
     }
 
+    /* Specials buoy — the chalk board's button bobbing in the river */
+    @keyframes buoy-bob {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-7px) rotate(2deg); }
+    }
+    @keyframes buoy-ripple {
+      0% { transform: translateX(-50%) scale(0.6); opacity: 0.55; }
+      100% { transform: translateX(-50%) scale(1.5); opacity: 0; }
+    }
+    .specials-buoy {
+      right: max(1rem, env(safe-area-inset-right));
+      bottom: max(1rem, calc(0.6rem + env(safe-area-inset-bottom)));
+      z-index: 20;
+    }
+    .specials-buoy.is-visible {
+      animation:
+        install-rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+        specials-hot-pulse 1.8s ease-in-out 0.5s infinite,
+        buoy-bob 3.6s ease-in-out 0.5s infinite;
+    }
+    .specials-buoy::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -0.7rem;
+      width: 120%;
+      height: 0.9rem;
+      border-radius: 50%;
+      border: 2px solid rgba(147, 197, 253, 0.45);
+      pointer-events: none;
+      animation: buoy-ripple 2.4s ease-out infinite;
+    }
+    @media (min-width: 768px) {
+      /* Wide screens: float in the sun's reflection */
+      .specials-buoy { right: auto; left: 74%; margin-left: -4.5rem; bottom: 7vh; }
+    }
+    body.street-board-open { overflow: hidden; }
+    body.street-board-open .specials-buoy { opacity: 0 !important; pointer-events: none !important; }
+    /* Leave room to scroll the footer clear of the buoy */
+    body > main { padding-bottom: max(5.5rem, calc(4.5rem + env(safe-area-inset-bottom))); }
+    .street-board-menu-link {
+      position: relative;
+      z-index: 2;
+      display: block;
+      margin-top: 1.1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      text-align: center;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffb040;
+    }
+    .street-board-menu-link:hover { color: #ffd38a; }
+    @media (prefers-reduced-motion: reduce) {
+      .specials-buoy.is-visible, .specials-buoy::after { animation: none !important; }
+    }
     @media (prefers-reduced-motion: reduce) {
       .wave-1, .wave-2, .sunset-glow, .nav-card { animation: none !important; }
       * { scroll-behavior: auto !important; }
@@ -227,7 +287,7 @@
           <p class="text-slate-400" data-i18n="hub.hoursClosed">Sun &amp; Mon · Closed</p>
         </div>
         <p class="text-[10px] text-slate-400 italic mt-2" data-i18n="hub.hoursNote">Hours may change — call ahead for holiday hours.</p>
-        <a class="inline-block mt-1 text-xs text-teal-300 underline underline-offset-2 hover:text-teal-200" href="https://www.facebook.com/tdg.ogdensburg" target="_blank" rel="noopener" data-i18n="hub.facebook">Holiday hours &amp; news on Facebook ↗</a>
+        <a class="inline-block mt-1 text-xs text-teal-300 underline underline-offset-2 hover:text-teal-200" href="https://www.facebook.com/tdg.ogdensburg" target="_blank" rel="noopener" data-app-link="facebook" data-i18n="hub.facebook">Holiday hours &amp; news on Facebook ↗</a>
       </div>
 
       <!-- Footer -->
@@ -239,7 +299,51 @@
     </div>
 
   </main>
+
+  <!-- Specials: floats in the river, opens the same chalk board as the menu -->
+  <button type="button" id="specials-board-btn" class="specials-board-btn specials-buoy" hidden aria-hidden="true" aria-haspopup="dialog" aria-controls="street-board" aria-expanded="false" data-i18n="menu.specials">
+    Specials
+  </button>
+
+  <div id="street-board" class="street-board" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="street-board-title">
+    <div class="street-board-panel">
+      <div class="street-board-embers" aria-hidden="true">
+        <span style="--ember-x:12%;--ember-delay:0s;--ember-dur:2.6s;--ember-drift:10px"></span>
+        <span style="--ember-x:28%;--ember-delay:0.4s;--ember-dur:3.1s;--ember-drift:-12px"></span>
+        <span style="--ember-x:46%;--ember-delay:0.9s;--ember-dur:2.4s;--ember-drift:6px"></span>
+        <span style="--ember-x:63%;--ember-delay:1.3s;--ember-dur:3.4s;--ember-drift:-8px"></span>
+        <span style="--ember-x:78%;--ember-delay:0.2s;--ember-dur:2.9s;--ember-drift:14px"></span>
+        <span style="--ember-x:88%;--ember-delay:1.7s;--ember-dur:2.5s;--ember-drift:-6px"></span>
+      </div>
+      <div class="street-board-head">
+        <div>
+          <h2 id="street-board-title" data-i18n="menu.boardTitle">Street Board</h2>
+          <p data-i18n="menu.boardSub">Chalk on black — skillet still singing.</p>
+        </div>
+        <button type="button" class="street-board-close" id="street-board-close" aria-label="Close specials board" data-i18n-aria="menu.closeBoard">&times;</button>
+      </div>
+      <ul id="street-board-list" class="street-board-list"></ul>
+      <p id="street-board-empty" class="street-board-empty" hidden data-i18n="menu.boardEmpty">No specials posted right now — ask the patio.</p>
+      <div id="month-cycle-strip" class="month-cycle-strip" hidden>
+        <h3 data-i18n="menu.thisMonth">This month</h3>
+        <div class="month-cycle-cols">
+          <div>
+            <h4 data-i18n="menu.additions">Additions</h4>
+            <ul id="month-adds"></ul>
+          </div>
+          <div>
+            <h4 data-i18n="menu.takeaways">Takeaways</h4>
+            <ul id="month-takes"></ul>
+          </div>
+        </div>
+        <p id="month-notes" hidden></p>
+      </div>
+      <a class="street-board-menu-link" href="/menu" data-i18n="hub.boardMenuLink">See the full menu →</a>
+    </div>
+  </div>
   <script src="js/i18n.js" defer></script>
+  <script src="js/app-links.js" defer></script>
+  <script src="js/menu-board-ui.js" defer></script>
   <script src="js/sw-register.js" defer></script>
 </body>
 </html>

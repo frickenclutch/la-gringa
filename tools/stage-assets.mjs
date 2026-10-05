@@ -16,6 +16,7 @@ const FILES = [
   'owner.html',
   'styles.css',
   'fonts.css',
+  'street-board.css',
   'sw.js',
   'manifest.webmanifest',
   'manifest-menu.webmanifest',

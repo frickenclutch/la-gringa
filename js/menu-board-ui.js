@@ -1,4 +1,4 @@
-// Guest street board + monthly cycle strip for menu.html
+// Guest street board + monthly cycle strip for menu.html and hub.html
 (function () {
   'use strict';
 
