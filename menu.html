@@ -881,6 +881,7 @@
         }
 
         /* ---- Share / print the menu ---- */
+        .print-stamp { display: none; }
         .menu-share-btn {
             position: fixed;
             left: var(--chrome-x-left);
@@ -983,6 +984,7 @@
             .cover-face .mt-auto h3 { font-size: 1.9rem !important; margin: 0 !important; border: 0 !important; padding: 0 !important; }
             .cover-face .mt-auto p { display: inline !important; margin: 0 0.4rem !important; padding: 0 !important; border: 0 !important; font-size: 0.9rem !important; }
             .cover-face .mt-auto p.text-body { font-size: 1rem !important; }
+            .print-stamp { display: block !important; margin: 0.25rem 0 0 !important; font-size: 0.85rem; font-style: italic; color: #444; }
 
             /* Back cover sits in the flow like any other section */
             .face.back.flex { display: block !important; padding: 0 !important; }
@@ -1155,6 +1157,8 @@
                               <a class="menu-contact-link" href="/hub" aria-label="Open dirtygringonny.com" data-i18n-aria="menu.cover.webAria">DIRTYGRINGONNY.COM</a>
                             </p>
                         </div>
+                        <!-- Paper copies only: when it was printed, and where the live menu is -->
+                        <p class="print-stamp" id="print-stamp" aria-hidden="true"></p>
                     </div>
                 </div>
 

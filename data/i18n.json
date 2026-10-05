@@ -248,7 +248,8 @@
     "menu.shareCopied": "Link copied — paste it anywhere",
     "menu.shareText": "Fresh Mex on the Ogdensburg riverfront — check out the Dirty Gringo menu.",
     "menu.shareClose": "Close",
-    "hub.boardMenuLink": "See the full menu →"
+    "hub.boardMenuLink": "See the full menu →",
+    "menu.printStamp": "Printed {date} · Prices may change — the latest menu is always at dirtygringonny.com/menu"
   },
   "es": {
     "passport.eyebrow": "Cruzando el río · frontera del San Lorenzo",
@@ -499,7 +500,8 @@
     "menu.shareCopied": "Enlace copiado — pégalo donde quieras",
     "menu.shareText": "Fresh Mex junto al río en Ogdensburg — mira el menú de The Dirty Gringo.",
     "menu.shareClose": "Cerrar",
-    "hub.boardMenuLink": "Ver el menú completo →"
+    "hub.boardMenuLink": "Ver el menú completo →",
+    "menu.printStamp": "Impreso el {date} · Los precios pueden cambiar — el menú más reciente siempre está en dirtygringonny.com/menu"
   },
   "fr": {
     "passport.eyebrow": "Traversée du fleuve · frontière du Saint-Laurent",
@@ -750,6 +752,7 @@
     "menu.shareCopied": "Lien copié — collez-le où vous voulez",
     "menu.shareText": "Fresh Mex au bord du fleuve à Ogdensburg — découvrez le menu du Dirty Gringo.",
     "menu.shareClose": "Fermer",
-    "hub.boardMenuLink": "Voir le menu complet →"
+    "hub.boardMenuLink": "Voir le menu complet →",
+    "menu.printStamp": "Imprimé le {date} · Les prix peuvent changer — le menu à jour est toujours sur dirtygringonny.com/menu"
   }
 }

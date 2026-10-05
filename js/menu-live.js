@@ -1,10 +1,13 @@
 // Live menu overrides: owner edits (names, descriptions, prices) stored in KV
 // are patched over the printed manuscript on every load. The static HTML stays
-// the no-JS/offline fallback; this only rewrites text in place.
+// the no-JS fallback; this only rewrites text in place. The last edits seen are
+// kept on the device so an offline visit (or the installed app) still shows,
+// and prints, the owner's current prices instead of the ones in the HTML.
 (function () {
   'use strict';
 
   var API_URL = '/api/menu-overrides';
+  var STORE_KEY = 'dg-menu-overrides';
   var PRICE_FIELDS = ['price', 'regular', 'loaded', 'p1', 'p2'];
 
   var map = {}; // id -> { name: el, desc: el, price: el, regular: el, ... }
@@ -114,21 +117,55 @@
     });
   }
 
-  async function refresh() {
+  function remembered() {
     try {
-      var res = await fetch(API_URL, { credentials: 'same-origin' });
-      if (!res.ok) throw new Error('overrides ' + res.status);
-      var data = await res.json();
-      if (data && typeof data === 'object' && data.items) overrides = data;
-      applyAll();
+      var data = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+      return data && typeof data === 'object' && data.items ? data : null;
     } catch (e) {
-      // Static host or offline: the printed menu stands.
+      return null;
     }
   }
 
+  async function refresh() {
+    try {
+      var res = await fetch(API_URL, { credentials: 'same-origin', cache: 'no-store' });
+      if (!res.ok) throw new Error('overrides ' + res.status);
+      var data = await res.json();
+      if (data && typeof data === 'object' && data.items) {
+        // Undo edits shown so far (e.g. remembered ones since withdrawn) before
+        // laying the fresh set over: prices back to the HTML, words to i18n.
+        var shown = Object.keys((overrides && overrides.items) || {});
+        shown.forEach(function (id) {
+          var m = map[id];
+          if (!m) return;
+          PRICE_FIELDS.forEach(function (f) {
+            if (m[f] && base[id][f] != null) m[f].textContent = base[id][f];
+          });
+        });
+        // (Only once the language pack is in; before that i18n's own first pass does it.)
+        var lang = window.DGLang;
+        if (shown.length && lang && lang.apply && lang.ready && lang.ready()) lang.apply();
+        overrides = data;
+        try {
+          localStorage.setItem(STORE_KEY, JSON.stringify(data));
+        } catch (e) {}
+      }
+      applyAll();
+    } catch (e) {
+      // Static host or offline: the remembered edits (or the printed menu) stand.
+    }
+  }
+
+  var ready = Promise.resolve();
+
   function boot() {
     buildMap();
-    refresh();
+    var saved = remembered();
+    if (saved) {
+      overrides = saved;
+      applyAll();
+    }
+    ready = refresh();
     // i18n rewrites name/desc text on every language pass — always re-apply after.
     document.addEventListener('dg:lang', applyAll);
 
@@ -156,6 +193,10 @@
     },
     applyAll: applyAll,
     refresh: refresh,
+    // Resolves once the first fetch of the owner's edits has settled.
+    ready: function () {
+      return ready;
+    },
     currentLang: currentLang,
     PRICE_FIELDS: PRICE_FIELDS,
   };

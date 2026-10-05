@@ -27,6 +27,7 @@
   const EN = {
     'menu.shareCopied': 'Link copied — paste it anywhere',
     'menu.shareText': 'Fresh Mex on the Ogdensburg riverfront — check out the Dirty Gringo menu.',
+    'menu.printStamp': 'Printed {date} · Prices may change — the latest menu is always at dirtygringonny.com/menu',
   };
 
   function t(key) {
@@ -83,11 +84,40 @@
     copyLink();
   }
 
-  function print() {
+  // Wait (briefly) for the owner's latest prices before the page is captured.
+  function liveEditsReady() {
+    const live = window.DGMenuLive;
+    if (!live || !live.ready) return Promise.resolve();
+    return Promise.race([
+      live.ready(),
+      new Promise(function (resolve) { setTimeout(resolve, 2500); }),
+    ]);
+  }
+
+  async function print() {
     close();
+    await liveEditsReady();
     // Let the sheet disappear before the print preview snapshots the page.
     setTimeout(function () { window.print(); }, 60);
   }
+
+  // Stamp paper and PDF copies with the day they were made, in the reader's
+  // language, so an old printout is easy to spot. Runs for Ctrl+P too.
+  const stamp = document.getElementById('print-stamp');
+  function stampDate() {
+    if (!stamp) return;
+    const lang = (window.DGLang && window.DGLang.get && window.DGLang.get()) || 'en';
+    let date;
+    try {
+      date = new Intl.DateTimeFormat(lang, { dateStyle: 'long', timeZone: 'America/New_York' }).format(new Date());
+    } catch (e) {
+      date = new Date().toLocaleDateString();
+    }
+    stamp.textContent = t('menu.printStamp').split('{date}').join(date);
+  }
+  window.addEventListener('beforeprint', stampDate);
+  document.addEventListener('dg:lang', stampDate);
+  stampDate();
 
   btn.addEventListener('click', function (e) {
     e.preventDefault();
